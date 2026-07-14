@@ -1994,9 +1994,13 @@ function snapshotScroll() {
 }
 function restoreScrollKeepingSnapshot() {
   if (!pwScrollSnapshot) return;
-  const { el, top, win } = pwScrollSnapshot;
+  const { el, top } = pwScrollSnapshot;
   if (el) el.scrollTop = top;
-  window.scrollTo(0, win);
+  // iOS scrolls the page itself to reveal a focused input, which drags the
+  // fixed header out of place; the shell never scrolls, so force it back.
+  window.scrollTo(0, 0);
+  document.body.scrollTop = 0;
+  document.documentElement.scrollTop = 0;
 }
 function restoreScroll() {
   restoreScrollKeepingSnapshot();
@@ -2008,14 +2012,17 @@ function openPwModal() {
   pwError.classList.remove('show');
   snapshotScroll();
   pwOverlay.classList.add('open');
-  pwInput.focus();
+  pwInput.focus({ preventScroll: true });
   // Focusing lets the browser scroll the view to "reveal" the input; undo that.
   requestAnimationFrame(restoreScrollKeepingSnapshot);
+  setTimeout(restoreScrollKeepingSnapshot, 300);
 }
 function closePwModal() {
   pwInput.blur();
   pwOverlay.classList.remove('open');
-  requestAnimationFrame(restoreScroll);
+  requestAnimationFrame(restoreScrollKeepingSnapshot);
+  // The keyboard collapses a beat after blur; settle the layout again then.
+  setTimeout(restoreScroll, 350);
 }
 function submitPw() {
   if (pwInput.value !== PNL_PASSWORD) {
