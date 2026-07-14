@@ -1,0 +1,1426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>투자자별 누적 순매매 동향</title>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
+<style>
+  * { box-sizing: border-box; }
+  html {
+    background: #ffffff;
+    color-scheme: light;
+  }
+  body {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: #ffffff;
+    color: #1a1a1a;
+    margin: 0;
+    padding: 0;
+  }
+  .app-header {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    height: 56px;
+    padding: 0 24px;
+    border-bottom: 1px solid #e5e5e5;
+    background: #fff;
+  }
+  .app-nav {
+    display: flex;
+    gap: 4px;
+  }
+  .app-nav button {
+    background: none;
+    border: none;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+  .app-nav button:hover {
+    background: #f0f0f0;
+  }
+  .app-nav button.active {
+    background: #1a1a1a;
+    color: #fff;
+  }
+  .placeholder-view {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    height: calc(100vh - 57px);
+    height: calc(100dvh - 57px);
+    color: #999;
+    font-size: 14px;
+  }
+  .mytrades-view {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+  .mytrades-layout {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+  .mytrades-col {
+    padding: 32px 28px;
+    overflow-y: auto;
+  }
+  .mytrades-col.philosophy {
+    flex: 1;
+    background: #f5f5f5;
+    border-right: 1px solid #e5e5e5;
+    display: flex;
+    flex-direction: column;
+  }
+  .mytrades-col.journal {
+    flex: 3;
+  }
+  .mytrades-col h2 {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 14px;
+  }
+  .journal-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .journal-title-row h2 {
+    margin: 0;
+  }
+  .lock-btn {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 7px;
+    color: #666;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lock-btn:hover {
+    background: #ececec;
+  }
+  .lock-btn.locked {
+    background: #1a1a1a;
+    border-color: #1a1a1a;
+    color: #fff;
+  }
+  .pnl-hidden .pnl-value,
+  .pnl-hidden #mytradesTotal {
+    opacity: 0;
+    user-select: none;
+  }
+  .mytrades-empty {
+    color: #999;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+  .mytrades-total {
+    margin-top: auto;
+    width: 100%;
+    box-sizing: border-box;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 14px 18px;
+  }
+  .mytrades-total .label {
+    font-size: 12px;
+    color: #666;
+    margin: 0 0 4px;
+  }
+  .mytrades-total .value {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0;
+    color: #1a1a1a;
+  }
+  .mytrades-total .value.pos {
+    color: #c0392b;
+  }
+  .mytrades-total .value.neg {
+    color: #2a78d6;
+  }
+  .half-section {
+    margin-bottom: 20px;
+  }
+  .collapsible-header {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 6px;
+    cursor: default;
+    user-select: none;
+    width: 100%;
+  }
+  .collapsible-header .arrow {
+    display: none;
+  }
+  .month-block {
+    padding: 12px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .month-block:last-child {
+    border-bottom: none;
+  }
+  .month-block h4 {
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 6px;
+  }
+  .month-block .mytrades-empty {
+    font-size: 12px;
+  }
+  .month-entry {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+  }
+  .month-pnl {
+    flex: 0 0 130px;
+  }
+  .month-pnl .pnl-label {
+    font-size: 12px;
+    color: #666;
+    margin: 4px 0 0;
+  }
+  .month-pnl .pnl-value {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .month-pnl .pnl-value.pos {
+    color: #c0392b;
+  }
+  .month-pnl .pnl-value.neg {
+    color: #2a78d6;
+  }
+  .month-note-box {
+    flex: 1;
+    min-width: 0;
+    background: #f5f5f5;
+    border-left: 3px solid #d8d8d8;
+    border-radius: 4px;
+    padding: 14px 18px;
+    font-size: 13.5px;
+    line-height: 1.8;
+    color: #333;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+    cursor: text;
+  }
+  .month-note-box:focus {
+    outline: none;
+  }
+  .layout {
+    display: flex;
+    align-items: flex-start;
+    min-height: calc(100vh - 57px);
+    min-height: calc(100dvh - 57px);
+  }
+  .sidebar {
+    width: 420px;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    border-right: 1px solid #e5e5e5;
+    height: calc(100vh - 57px);
+    height: calc(100dvh - 57px);
+    overflow-y: auto;
+    padding: 20px 16px;
+  }
+  .day-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .day-tab {
+    flex: 1;
+    background: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 6px;
+    padding: 6px 0;
+    font-size: 12px;
+    font-weight: 400;
+    color: #666;
+    cursor: pointer;
+  }
+  .day-tab.active {
+    border-color: #333;
+    color: #1a1a1a;
+    background: #fafafa;
+  }
+  .sidebar h2 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: default;
+    user-select: none;
+  }
+  .sidebar h2 .arrow {
+    display: none;
+  }
+  .collapsible-content {
+    overflow: hidden;
+  }
+  .sidebar-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e5e5;
+  }
+  .sidebar-section:last-child {
+    border-bottom: none;
+  }
+  .year-card {
+    background: #ffffff;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .year-card:hover {
+    border-color: #c9c9c9;
+  }
+  .year-card.active {
+    border-color: #333;
+    background: #fafafa;
+  }
+  .year-card.active .year-label {
+    color: #1a1a1a;
+  }
+  .year-card .year-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    margin: 0 0 6px;
+  }
+  .year-card .row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    padding: 2px 0;
+  }
+  .year-card .row span:first-child { color: #888; }
+  .empty-note {
+    font-size: 12px;
+    color: #999;
+    padding: 10px 4px;
+    line-height: 1.5;
+  }
+  .day-list {
+    max-height: 320px;
+    overflow-y: auto;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fff;
+  }
+  .day-row {
+    display: grid;
+    grid-template-columns: 38px repeat(4, 1fr) 0.85fr;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 11px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: default;
+  }
+  .day-row:last-child { border-bottom: none; }
+  .day-row.header {
+    font-weight: 600;
+    color: #666;
+    background: #fafafa;
+    position: sticky;
+    top: 0;
+  }
+  .day-row span { text-align: right; white-space: nowrap; }
+  .day-row span:first-child { text-align: left; color: #666; }
+  .pos { color: #c0392b; }
+  .neg { color: #2a78d6; }
+  .content {
+    flex: 1;
+    min-width: 0;
+    height: calc(100vh - 57px);
+    height: calc(100dvh - 57px);
+    overflow-y: auto;
+    padding: 32px 24px;
+  }
+  .wrap {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 24px;
+  }
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .card {
+    background: #f5f5f5;
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .card p.label {
+    font-size: 13px;
+    color: #666;
+    margin: 0 0 4px;
+  }
+  .card p.value {
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .value.red { color: #c0392b; }
+  .value.blue { color: #2a78d6; }
+  .value.gray { color: #333; }
+  .legend {
+    display: flex;
+    gap: 20px;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 8px;
+  }
+  .legend span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+  .chart-container {
+    position: relative;
+    width: 100%;
+    height: 420px;
+  }
+  .footer-note {
+    font-size: 12px;
+    color: #999;
+    margin-top: 16px;
+  }
+  .title-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 16px;
+  }
+  .title-block {
+    flex: 1;
+    min-width: 200px;
+  }
+  .period-buttons {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    background: #f5f5f5;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+  }
+  .seg-btn {
+    background: transparent;
+    border: none;
+    border-radius: 7px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .seg-btn:hover {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  .seg-btn.active {
+    background: #fff;
+    color: #1a1a1a;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  }
+  .month-nav {
+    display: flex;
+    align-items: center;
+  }
+  .month-nav .seg-btn {
+    min-width: 108px;
+    text-align: center;
+  }
+  .month-arrow {
+    width: 26px;
+    height: 30px;
+    background: transparent;
+    border: none;
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .month-arrow:hover:not(:disabled) {
+    background: rgba(0, 0, 0, 0.06);
+  }
+  .month-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+  .chevron {
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid #666;
+    border-bottom: 1.5px solid #666;
+    transition: border-color 0.15s ease;
+  }
+  .chevron.left {
+    transform: rotate(135deg);
+    margin-left: 2px;
+  }
+  .chevron.right {
+    transform: rotate(-45deg);
+    margin-right: 2px;
+  }
+  @media (max-width: 768px) {
+    .layout {
+      flex-direction: column;
+      min-height: 0;
+    }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      max-height: 45vh;
+      max-height: 45dvh;
+      border-right: none;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .content {
+      height: auto;
+      overflow-y: visible;
+      padding: 20px 16px;
+    }
+    .title-row {
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .period-buttons {
+      align-self: flex-start;
+    }
+    .cards {
+      grid-template-columns: 1fr;
+    }
+    .placeholder-view {
+      height: auto;
+      min-height: calc(100vh - 57px);
+      min-height: calc(100dvh - 57px);
+    }
+    .mytrades-layout {
+      flex-direction: column;
+    }
+    .mytrades-col.philosophy {
+      border-right: none;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .month-entry {
+      flex-direction: column;
+      gap: 10px;
+    }
+    .month-pnl {
+      flex: 0 0 auto;
+    }
+  }
+</style>
+</head>
+<body>
+<header class="app-header">
+  <nav class="app-nav">
+    <button class="nav-btn active" data-view="domestic">국내 주식</button>
+    <button class="nav-btn" data-view="overseas">해외 주식</button>
+    <button class="nav-btn" data-view="mytrades">나의 매매 기록</button>
+  </nav>
+</header>
+
+<div class="placeholder-view" id="view-overseas">해외 주식 화면은 준비 중입니다.</div>
+<div class="placeholder-view mytrades-view" id="view-mytrades">
+  <div class="mytrades-layout">
+    <div class="mytrades-col philosophy">
+      <h2>투자 철학</h2>
+      <p class="mytrades-empty">아직 작성된 투자 철학이 없습니다.<br>이곳에 나만의 투자 원칙과 기준을 정리해 두면 이 자리에 반영됩니다.</p>
+      <div class="mytrades-total">
+        <p class="label">2026년도 총수익</p>
+        <p class="value" id="mytradesTotal">0원</p>
+      </div>
+    </div>
+    <div class="mytrades-col journal">
+      <div class="journal-title-row">
+        <h2>2026년도 매매 관찰기록지</h2>
+        <button class="lock-btn" id="pnlLockBtn" aria-label="확정손익 가리기">
+          <svg id="lockIcon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="5" y="11" width="14" height="9" rx="2"></rect>
+            <path d="M8 11V7a4 4 0 0 1 7.5-2"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="half-section">
+        <h3 class="collapsible-header" data-target="half-h2">하반기 <span class="arrow"></span></h3>
+        <div class="collapsible-content" id="half-h2">
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-07">7월</h4>
+            <div class="collapsible-content" id="month-07">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value neg">-2,000,000원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-07">현재 7일부터 14일까지 깊은 하락장을 보여주고있음. 특히 국장은 레버리지 상장 이후 아주 급격한 변동을 보여주는데 사이드카, 서킷브레이크가 아주 빈번하게 일어나며 지수의 변동성이 하루 평균 8%를 보여주고 있는 미친 변동성을 보여주고있음. 견디기 힘든 조정장으로 부분 매도 진행 중. 트럼프 정부의 전쟁 장기화 우려도 하락에 영향을 미치고 있음</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="half-section">
+        <h3 class="collapsible-header" data-target="half-h1">상반기 <span class="arrow"></span></h3>
+        <div class="collapsible-content" id="half-h1">
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-06">6월</h4>
+            <div class="collapsible-content" id="month-06">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value pos">+25,610,600원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-06">변동성이 심해지는 장이었지만 결과적으로 하락추세로 이어지지 않고 횡보하는 추세를 보여주며 매수 매도를 진행 결과적으로 좋은 성적을 보여주었음</div>
+              </div>
+            </div>
+          </div>
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-05">5월</h4>
+            <div class="collapsible-content" id="month-05">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value pos">+21,223,385원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-05">아직 기록된 매매 관찰이 없습니다.</div>
+              </div>
+            </div>
+          </div>
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-04">4월</h4>
+            <div class="collapsible-content" id="month-04">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value pos">+11,989,831원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-04">아직 기록된 매매 관찰이 없습니다.</div>
+              </div>
+            </div>
+          </div>
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-03">3월</h4>
+            <div class="collapsible-content" id="month-03">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value neg">-10,543,735원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-03">아직 기록된 매매 관찰이 없습니다.</div>
+              </div>
+            </div>
+          </div>
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-02">2월</h4>
+            <div class="collapsible-content" id="month-02">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value pos">+3,593,292원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-02">아직 기록된 매매 관찰이 없습니다.</div>
+              </div>
+            </div>
+          </div>
+          <div class="month-block">
+            <h4 class="collapsible-header" data-target="month-01">1월</h4>
+            <div class="collapsible-content" id="month-01">
+              <div class="month-entry">
+                <div class="month-pnl">
+                  <p class="pnl-value pos">+18,562,216원</p>
+                  <p class="pnl-label">확정 손익</p>
+                </div>
+                <div class="month-note-box" contenteditable="true" data-key="note-01">아직 기록된 매매 관찰이 없습니다.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="layout" id="view-domestic">
+
+  <aside class="sidebar" id="sidebarPanel">
+    <div class="sidebar-section">
+      <h2 data-target="yearlySummary">년도별 누적데이터 <span class="arrow"></span></h2>
+      <div id="yearlySummary" class="collapsible-content"></div>
+    </div>
+
+    <div class="sidebar-section">
+      <h2 data-target="dayListSection">일별 데이터 <span class="arrow"></span></h2>
+      <div id="dayListSection" class="collapsible-content">
+        <div class="day-tabs">
+          <button class="day-tab" data-year="2025">2025년</button>
+          <button class="day-tab active" data-year="2026">2026년</button>
+        </div>
+        <div class="day-list">
+          <div class="day-row header"><span>날짜</span><span>개인</span><span>외국인</span><span>기관</span><span>코스피</span><span>등락률</span></div>
+          <div id="list2025" style="display:none;"></div>
+          <div id="list2026"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="content">
+    <div class="wrap">
+      <div class="title-row">
+        <div class="title-block">
+          <h1>투자자별 누적 순매매 동향</h1>
+          <p class="subtitle" id="pageSubtitle">2026.01.02 ~ 2026.07.10 (KOSPI, 단위: 조원)</p>
+        </div>
+        <div class="period-buttons" id="periodButtons"></div>
+      </div>
+
+      <div class="cards">
+        <div class="card">
+          <p class="label">개인 순매수</p>
+          <p class="value red" id="totalIndividual">+108.5조원</p>
+        </div>
+        <div class="card">
+          <p class="label">기관 순매수</p>
+          <p class="value gray" id="totalInstitution">+37.6조원</p>
+        </div>
+        <div class="card">
+          <p class="label">외국인 순매도</p>
+          <p class="value blue" id="totalForeign">-160.6조원</p>
+        </div>
+      </div>
+
+      <div class="legend">
+        <span><span class="dot" style="background:#e34948"></span>개인</span>
+        <span><span class="dot" style="background:#2a78d6"></span>외국인</span>
+        <span><span class="dot" style="background:#808080"></span>기관</span>
+        <span><span class="dot" style="background:#008300"></span>코스피</span>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="investorChart" role="img" aria-label="2026년 1월 2일부터 7월 10일까지 개인, 외국인, 기관의 누적 순매수 추이"></canvas>
+      </div>
+
+    </div>
+  </main>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const labels2026 = ['01.02','01.05','01.06','01.07','01.08','01.09','01.12','01.13','01.14','01.15','01.16','01.19','01.20','01.21','01.22','01.23','01.26','01.27','01.28','01.29','01.30','02.02','02.03','02.04','02.05','02.06','02.09','02.10','02.11','02.12','02.13','02.19','02.20','02.23','02.24','02.25','02.26','02.27','03.03','03.04','03.05','03.06','03.09','03.10','03.11','03.12','03.13','03.16','03.17','03.18','03.19','03.20','03.23','03.24','03.25','03.26','03.27','03.30','03.31','04.01','04.02','04.03','04.06','04.07','04.08','04.09','04.10','04.13','04.14','04.15','04.16','04.17','04.20','04.21','04.22','04.23','04.24','04.27','04.28','04.29','04.30','05.04','05.06','05.07','05.08','05.11','05.12','05.13','05.14','05.15','05.18','05.19','05.20','05.21','05.22','05.26','05.27','05.28','05.29','06.01','06.02','06.04','06.05','06.08','06.09','06.10','06.11','06.12','06.15','06.16','06.17','06.18','06.19','06.22','06.23','06.24','06.25','06.26','06.29','06.30','07.01','07.02','07.03','07.06','07.07','07.08','07.09','07.10','07.13','07.14'];
+
+const dailyIndividual2026 = [-4252,-15141,5963,-2944,12540,1339,-1013,-7125,-4377,-18235,-9383,-7513,3524,-9965,1555,-7239,17157,-10197,12131,16173,22979,45874,-29423,-10119,67791,21736,-32947,-8780,-17149,-44547,7141,-8609,-9872,10815,-22861,2307,6498,62496,57974,796,18228,29488,46242,-18340,-5086,22291,24512,7164,-5752,-38717,24116,22338,70029,7270,-13402,30598,22596,8945,24400,-37628,12097,-20952,-10502,-3429,-54161,2950,-12280,7173,-23919,-9400,-18050,14464,-3158,-19204,11984,4514,11832,-19758,-1306,1681,11824,-47936,-5715,59925,39707,28669,66818,18868,18499,72308,22094,56289,17104,-26754,10655,-5745,4064,36146,-14054,3862,63537,50135,42240,17628,-6167,48643,20803,-43174,-15124,-21841,5254,-4156,16478,21506,85910,26312,-24136,81919,45975,8401,17370,62413,-22942,26829,31359,-358,-13278,-7805,38869,-41424];
+
+const dailyForeign2026 = [6309,21726,-6184,12548,-979,-16068,-3512,-2793,-3760,3450,4350,5532,1232,4394,-2432,1438,-1588,8448,4008,-14897,-19729,-25168,7038,-9413,-50108,-33233,4320,1474,8461,29954,-9220,-9396,-7420,-11132,-2013,-13082,-21135,-70528,-51487,2303,-1446,-19418,-31735,10283,-2563,-23831,-14502,-8485,-1740,8802,-18760,-12402,-36751,-19863,-12895,-29370,-34286,-20945,-38386,-6411,-1368,8035,-1596,3704,19089,18476,10641,-4579,8276,4973,4814,-19974,-2338,11565,-6762,-820,-19496,8563,-1843,-6071,-14559,29308,31085,-66987,-52967,-28147,-56090,-37227,-21450,-56040,-36492,-57242,-29310,-2212,-19221,-1321,-2493,-27414,-10421,-28219,-63035,-66663,-27638,-2644,-20064,-27754,-14640,22041,10774,15353,-9952,12776,-3555,-25466,-42047,-46546,-8754,-42906,-77332,-37992,-17028,-43706,-21750,-13144,-29172,3437,1343,-3228,-16705,9523];
+
+const dailyInstitution2026 = [-2477,-7046,-664,-9397,-14014,12046,2101,7881,5887,12905,3083,-256,-6500,3217,-1568,4790,-15414,2474,-14021,-1673,-4241,-22125,21708,17836,-20693,9414,27123,5643,6927,13800,831,16542,16149,-1271,23773,14701,12569,5666,-8859,-5978,-17186,-11142,-15441,9164,7821,775,-10434,911,7341,31093,-6649,-10260,-38173,9683,23230,-2999,7785,8450,10251,40419,-14517,7390,8371,-4001,27268,-25125,-2031,-6698,12545,368,10783,1501,2938,9181,-4046,-2965,8053,11349,3532,4771,2838,20098,-22894,8917,12542,-458,-12138,16876,1927,-17347,13904,1575,11070,29008,7583,8168,-126,-10422,23688,24427,-546,15255,-13809,-17164,25048,-22665,-7561,22870,4462,7076,5957,-7682,-12244,3034,-44760,19095,33244,-41224,29327,29332,-700,-20825,44079,-14618,-3108,-3552,12884,11314,-22338,32159];
+
+// 2025년도 데이터
+const data2025 = [
+{date:'01.02',p:4143,f:-2388,i:-2589},
+{date:'01.03',p:-6985,f:2801,i:3204},
+{date:'01.06',p:-5370,f:3662,i:654},
+{date:'01.07',p:-2049,f:1587,i:-423},
+{date:'01.08',p:-3855,f:2209,i:1096},
+{date:'01.09',p:-3270,f:7482,i:-5056},
+{date:'01.10',p:3381,f:-16,i:-3976},
+{date:'01.13',p:7486,f:-8717,i:260},
+{date:'01.14',p:2992,f:-2946,i:-580},
+{date:'01.15',p:1231,f:561,i:-2590},
+{date:'01.16',p:-5757,f:6244,i:190},
+{date:'01.17',p:2864,f:-2331,i:-1007},
+{date:'01.20',p:2767,f:-4162,i:664},
+{date:'01.21',p:534,f:-1731,i:620},
+{date:'01.22',p:-8232,f:3500,i:4208},
+{date:'01.23',p:7596,f:-6174,i:-2032},
+{date:'01.24',p:-3830,f:2751,i:436},
+{date:'01.31',p:9620,f:-11679,i:2859},
+{date:'02.03',p:11220,f:-8689,i:-3704},
+{date:'02.04',p:-2932,f:799,i:1231},
+{date:'02.05',p:-1929,f:645,i:312},
+{date:'02.06',p:-6060,f:3516,i:1612},
+{date:'02.07',p:3302,f:-2389,i:-2099},
+{date:'02.10',p:-700,f:-2786,i:2626},
+{date:'02.11',p:-4694,f:1402,i:2437},
+{date:'02.12',p:-1982,f:3729,i:-2217},
+{date:'02.13',p:-6096,f:-1138,i:6730},
+{date:'02.14',p:-652,f:-3218,i:3661},
+{date:'02.17',p:-336,f:-2228,i:2431},
+{date:'02.18',p:-1884,f:185,i:1648},
+{date:'02.19',p:-12186,f:3927,i:7767},
+{date:'02.20',p:2907,f:-2904,i:-1079},
+{date:'02.21',p:28,f:-2181,i:1181},
+{date:'02.24',p:1929,f:-2040,i:-925},
+{date:'02.25',p:3121,f:-3190,i:-944},
+{date:'02.26',p:-201,f:-3228,i:2404},
+{date:'02.27',p:4810,f:-1754,i:-3389},
+{date:'02.28',p:20324,f:-15524,i:-6167},
+{date:'03.04',p:2044,f:-1896,i:-1473},
+{date:'03.05',p:911,f:-2233,i:479},
+{date:'03.06',p:-3693,f:1382,i:1561},
+{date:'03.07',p:-1941,f:596,i:279},
+{date:'03.10',p:2097,f:-4242,i:1428},
+{date:'03.11',p:4929,f:-15373,i:-2381},
+{date:'03.12',p:-5050,f:3790,i:319},
+{date:'03.13',p:-737,f:-4804,i:4448},
+{date:'03.14',p:2079,f:-2894,i:-205},
+{date:'03.17',p:-11804,f:6152,i:4947},
+{date:'03.18',p:-6126,f:4408,i:950},
+{date:'03.19',p:-6744,f:3026,i:2873},
+{date:'03.20',p:-7013,f:5487,i:664},
+{date:'03.21',p:-5379,f:8478,i:-4020},
+{date:'03.24',p:-781,f:76,i:-288},
+{date:'03.25',p:-642,f:-787,i:691},
+{date:'03.26',p:-6798,f:3504,i:2603},
+{date:'03.27',p:1196,f:877,i:-3152},
+{date:'03.28',p:5408,f:-6403,i:31},
+{date:'03.31',p:7891,f:-15754,i:6673},
+{date:'04.01',p:866,f:-3901,i:1806},
+{date:'04.02',p:4791,f:-7242,i:1480},
+{date:'04.03',p:8014,f:-13752,i:4610},
+{date:'04.04',p:10770,f:-17869,i:6211},
+{date:'04.07',p:16721,f:-20957,i:2571},
+{date:'04.08',p:6029,f:-6425,i:-898},
+{date:'04.09',p:9389,f:-10007,i:-698},
+{date:'04.10',p:-10693,f:3287,i:6682},
+{date:'04.11',p:4339,f:-6888,i:1378},
+{date:'04.14',p:1939,f:-2420,i:-67},
+{date:'04.15',p:-1468,f:-1177,i:1831},
+{date:'04.16',p:3835,f:-4577,i:-153},
+{date:'04.17',p:-1102,f:-3519,i:3689},
+{date:'04.18',p:-223,f:-1052,i:816},
+{date:'04.21',p:1864,f:-2886,i:234},
+{date:'04.22',p:1667,f:-2430,i:107},
+{date:'04.23',p:-5485,f:-1977,i:6866},
+{date:'04.24',p:1351,f:-77,i:-1987},
+{date:'04.25',p:-7741,f:6126,i:5072},
+{date:'04.28',p:-496,f:-854,i:916},
+{date:'04.29',p:-1591,f:6925,i:-5804},
+{date:'04.30',p:3055,f:-1688,i:-2210},
+{date:'05.02',p:-2349,f:-1702,i:3228},
+{date:'05.07',p:-4646,f:3488,i:869},
+{date:'05.08',p:-13,f:1303,i:-1898},
+{date:'05.09',p:632,f:675,i:-1873},
+{date:'05.12',p:-3907,f:-71,i:3429},
+{date:'05.13',p:-1360,f:1714,i:-893},
+{date:'05.14',p:-10024,f:4704,i:5348},
+{date:'05.15',p:460,f:2723,i:-3681},
+{date:'05.16',p:-2823,f:1694,i:1134},
+{date:'05.19',p:2986,f:-1134,i:-1948},
+{date:'05.20',p:206,f:-1145,i:610},
+{date:'05.21',p:-3315,f:1920,i:1046},
+{date:'05.22',p:6848,f:-2237,i:-4319},
+{date:'05.23',p:1347,f:-585,i:-1026},
+{date:'05.26',p:-5158,f:1015,i:4323},
+{date:'05.27',p:537,f:-781,i:-201},
+{date:'05.28',p:-9907,f:2999,i:7438},
+{date:'05.29',p:-9963,f:2897,i:6842},
+{date:'05.30',p:6051,f:-6070,i:-160},
+{date:'06.02',p:982,f:1250,i:-2415},
+{date:'06.04',p:-12260,f:10507,i:2046},
+{date:'06.05',p:-11892,f:9801,i:2207},
+{date:'06.09',p:-2301,f:9767,i:-7332},
+{date:'06.10',p:-6269,f:6323,i:142},
+{date:'06.11',p:-3663,f:1661,i:2304},
+{date:'06.12',p:-1794,f:4073,i:-2304},
+{date:'06.13',p:4674,f:1210,i:-6461},
+{date:'06.16',p:463,f:-3224,i:2524},
+{date:'06.17',p:2245,f:-953,i:-1006},
+{date:'06.18',p:-4318,f:2870,i:1101},
+{date:'06.19',p:3500,f:-826,i:-3018},
+{date:'06.20',p:-5966,f:5626,i:372},
+{date:'06.23',p:13797,f:-3668,i:-9485},
+{date:'06.24',p:-5676,f:4383,i:2594},
+{date:'06.25',p:7580,f:-1108,i:-5883},
+{date:'06.26',p:8325,f:-5794,i:-4080},
+{date:'06.27',p:4868,f:-8580,i:3434},
+{date:'06.30',p:1892,f:-6489,i:4757},
+{date:'07.01',p:-6405,f:1760,i:4745},
+{date:'07.02',p:2329,f:-3278,i:720},
+{date:'07.03',p:-12330,f:6427,i:5484},
+{date:'07.04',p:2575,f:1624,i:-3822},
+{date:'07.07',p:1558,f:-937,i:-811},
+{date:'07.08',p:-2549,f:2461,i:-326},
+{date:'07.09',p:4310,f:-4105,i:-571},
+{date:'07.10',p:-5869,f:4694,i:447},
+{date:'07.11',p:1250,f:3259,i:-743},
+{date:'07.14',p:-3568,f:3707,i:-947},
+{date:'07.15',p:-3102,f:2123,i:-167},
+{date:'07.16',p:4016,f:555,i:-5525},
+{date:'07.17',p:-3356,f:493,i:1583},
+{date:'07.18',p:-3411,f:1878,i:320},
+{date:'07.21',p:-10578,f:8935,i:994},
+{date:'07.22',p:4780,f:-1288,i:-4128},
+{date:'07.23',p:-6982,f:4228,i:1917},
+{date:'07.24',p:-9513,f:7386,i:1273},
+{date:'07.25',p:-4616,f:2706,i:1100},
+{date:'07.28',p:-9975,f:4753,i:4520},
+{date:'07.29',p:-8259,f:6054,i:1167},
+{date:'07.30',p:-9844,f:5783,i:3307},
+{date:'07.31',p:2235,f:3450,i:-7053},
+{date:'08.01',p:16283,f:-6524,i:-10720},
+{date:'08.04',p:-2996,f:830,i:1316},
+{date:'08.05',p:-4785,f:2919,i:947},
+{date:'08.06',p:474,f:2804,i:-4020},
+{date:'08.07',p:-2048,f:-171,i:1092},
+{date:'08.08',p:1835,f:-1576,i:-1318},
+{date:'08.11',p:-1407,f:2169,i:-2160},
+{date:'08.12',p:634,f:-604,i:-981},
+{date:'08.13',p:-6648,f:6349,i:-809},
+{date:'08.14',p:-534,f:-779,i:197},
+{date:'08.18',p:3570,f:-4881,i:813},
+{date:'08.19',p:904,f:-4544,i:2539},
+{date:'08.20',p:-3929,f:-2185,i:5024},
+{date:'08.21',p:-2591,f:-152,i:1598},
+{date:'08.22',p:-4572,f:1826,i:1556},
+{date:'08.25',p:-3857,f:1224,i:1543},
+{date:'08.26',p:8519,f:-6836,i:-2657},
+{date:'08.27',p:569,f:-2023,i:277},
+{date:'08.28',p:-3939,f:-241,i:3264},
+{date:'08.29',p:2353,f:-3724,i:648},
+{date:'09.01',p:3469,f:-2720,i:-1940},
+{date:'09.02',p:-3474,f:4010,i:-1416},
+{date:'09.03',p:-1563,f:4359,i:-3756},
+{date:'09.04',p:-2847,f:2025,i:-232},
+{date:'09.05',p:-552,f:-1374,i:1124},
+{date:'09.08',p:-3848,f:2301,i:778},
+{date:'09.09',p:-10371,f:6808,i:2806},
+{date:'09.10',p:-22634,f:13817,i:9046},
+{date:'09.11',p:-11493,f:3000,i:8225},
+{date:'09.12',p:-20287,f:14355,i:6119},
+{date:'09.15',p:-1374,f:2667,i:-1376},
+{date:'09.16',p:-17637,f:17927,i:1083},
+{date:'09.17',p:2522,f:-347,i:-3075},
+{date:'09.18',p:-7816,f:2851,i:4294},
+{date:'09.19',p:5332,f:-3080,i:-3357},
+{date:'09.22',p:-7682,f:5653,i:2672},
+{date:'09.23',p:-2462,f:3414,i:-1363},
+{date:'09.24',p:17,f:-2486,i:2124},
+{date:'09.25',p:-5411,f:2196,i:2707},
+{date:'09.26',p:10997,f:-5707,i:-4892},
+{date:'09.29',p:-7480,f:4472,i:3014},
+{date:'09.30',p:-265,f:230,i:-497},
+{date:'10.01',p:-10812,f:8455,i:2208},
+{date:'10.02',p:-30715,f:31265,i:-675},
+{date:'10.10',p:-5022,f:10592,i:-5936},
+{date:'10.13',p:11649,f:-8220,i:-4471},
+{date:'10.14',p:20,f:5581,i:-6299},
+{date:'10.15',p:-9706,f:1631,i:7512},
+{date:'10.16',p:-13936,f:6533,i:7813},
+{date:'10.17',p:-3122,f:4438,i:-1688},
+{date:'10.20',p:-4109,f:-2500,i:6428},
+{date:'10.21',p:-1556,f:-124,i:2116},
+{date:'10.22',p:-769,f:-7033,i:7633},
+{date:'10.23',p:7505,f:-4071,i:-3972},
+{date:'10.24',p:-20005,f:5756,i:14054},
+{date:'10.27',p:-7969,f:6471,i:2343},
+{date:'10.28',p:15728,f:-16379,i:925},
+{date:'10.29',p:-3583,f:-1066,i:5196},
+{date:'10.30',p:9363,f:-1173,i:-8379},
+{date:'10.31',p:-2018,f:13212,i:-11064},
+{date:'11.03',p:6256,f:-7949,i:1841},
+{date:'11.04',p:27009,f:-22282,i:-4989},
+{date:'11.05',p:25538,f:-20695,i:-1877},
+{date:'11.06',p:8840,f:-16950,i:8301},
+{date:'11.07',p:6791,f:-4550,i:-2446},
+{date:'11.10',p:-11607,f:-1510,i:13066},
+{date:'11.11',p:-2830,f:770,i:2247},
+{date:'11.12',p:-4423,f:-4265,i:9093},
+{date:'11.13',p:-2343,f:9989,i:-7179},
+{date:'11.14',p:32346,f:-23575,i:-9005},
+{date:'11.17',p:-5000,f:5189,i:-245},
+{date:'11.18',p:12382,f:-5500,i:-6788},
+{date:'11.19',p:4450,f:-10495,i:6256},
+{date:'11.20',p:-13817,f:7406,i:7566},
+{date:'11.21',p:22695,f:-28229,i:4935},
+{date:'11.24',p:-4619,f:-7993,i:12719},
+{date:'11.25',p:-276,f:49,i:315},
+{date:'11.26',p:-18048,f:5158,i:12280},
+{date:'11.27',p:-6152,f:1546,i:4326},
+{date:'11.28',p:15685,f:-20369,i:4587},
+{date:'12.01',p:528,f:2235,i:-2333},
+{date:'12.02',p:-15763,f:12147,i:3929},
+{date:'12.03',p:-8984,f:2816,i:7364},
+{date:'12.04',p:5585,f:-6960,i:1318},
+{date:'12.05',p:-21156,f:9934,i:11528},
+{date:'12.08',p:-3449,f:3211,i:-308},
+{date:'12.09',p:-133,f:-889,i:494},
+{date:'12.10',p:-889,f:3739,i:-3003},
+{date:'12.11',p:3922,f:3656,i:-7753},
+{date:'12.12',p:-14625,f:414,i:14184},
+{date:'12.15',p:14210,f:-9569,i:-4803},
+{date:'12.16',p:12410,f:-10305,i:-2309},
+{date:'12.17',p:-3374,f:-322,i:3353},
+{date:'12.18',p:4130,f:-3459,i:-1006},
+{date:'12.19',p:-1412,f:-7573,i:8541},
+{date:'12.22',p:-26714,f:11017,i:16055},
+{date:'12.23',p:-12853,f:9551,i:3527},
+{date:'12.24',p:-7171,f:5225,i:2039},
+{date:'12.26',p:-23265,f:17790,i:4435},
+{date:'12.29',p:661,f:3337,i:-3133},
+{date:'12.30',p:8448,f:-4768,i:-3763}
+];
+
+// 2026년도 데이터 구성
+const data2026 = labels2026.map((d, idx) => ({
+  date: d,
+  p: dailyIndividual2026[idx],
+  f: dailyForeign2026[idx],
+  i: dailyInstitution2026[idx]
+}));
+
+// 누적치 계산 (연도별)
+function sumField(arr, key) {
+  return arr.reduce((acc, cur) => acc + cur[key], 0);
+}
+function fmtJo(v) {
+  const jo = v / 10000;
+  return (jo >= 0 ? '+' : '') + jo.toFixed(1) + '조원';
+}
+function fmtEok(v) {
+  return (v >= 0 ? '+' : '') + v.toLocaleString() + '억';
+}
+
+const yearlySummaryEl = document.getElementById('yearlySummary');
+const combinedData = data2025.map(row => ({ date: '25.' + row.date, p: row.p, f: row.f, i: row.i }))
+  .concat(data2026.map(row => ({ date: '26.' + row.date, p: row.p, f: row.f, i: row.i })));
+
+function groupByMonth(dataArr) {
+  const groups = new Map();
+  dataArr.forEach(row => {
+    const m = row.date.split('.')[0];
+    if (!groups.has(m)) groups.set(m, []);
+    groups.get(m).push(row);
+  });
+  return groups;
+}
+
+const MONTH_KEY = 'month-nav';
+const monthGroups2026 = groupByMonth(data2026);
+const monthKeys2026 = Array.from(monthGroups2026.keys());
+
+let currentMonthIdx = monthKeys2026.length - 1;
+
+function monthLabel(idx) {
+  const mm = parseInt(monthKeys2026[idx], 10);
+  const isLatest = idx === monthKeys2026.length - 1;
+  return isLatest ? `이번 달 (${mm}월)` : `2026년 ${mm}월`;
+}
+
+function updateMonthNav() {
+  const monthBtn = document.getElementById('monthBtn');
+  const prevBtn = document.getElementById('monthPrev');
+  const nextBtn = document.getElementById('monthNext');
+  if (!monthBtn) return;
+  const key = monthKeys2026[currentMonthIdx];
+  yearDatasets[MONTH_KEY] = monthGroups2026.get(key);
+  monthBtn.textContent = monthLabel(currentMonthIdx);
+  prevBtn.disabled = currentMonthIdx <= 0;
+  nextBtn.disabled = currentMonthIdx >= monthKeys2026.length - 1;
+}
+
+const yearDatasets = {};
+yearDatasets['2025~2026년 총합'] = combinedData;
+yearDatasets['2026년'] = data2026;
+yearDatasets['2025년'] = data2025;
+if (monthKeys2026.length) yearDatasets[MONTH_KEY] = monthGroups2026.get(monthKeys2026[currentMonthIdx]);
+
+function buildCumulative(dataArr, kospiLookup) {
+  const labels = [];
+  const individual = [];
+  const foreign = [];
+  const institution = [];
+  const kospi = [];
+  let si = 0, sf = 0, sn = 0;
+  dataArr.forEach(row => {
+    si += row.p; sf += row.f; sn += row.i;
+    labels.push(row.date);
+    individual.push(Math.round(si / 1000) / 10);
+    foreign.push(Math.round(sf / 1000) / 10);
+    institution.push(Math.round(sn / 1000) / 10);
+    let kVal;
+    if (typeof kospiLookup === 'function') {
+      kVal = kospiLookup(row.date);
+    } else if (kospiLookup) {
+      kVal = kospiLookup[row.date];
+    }
+    kospi.push(kVal === undefined || kVal === null ? null : kVal);
+  });
+  return { labels, individual, foreign, institution, kospi };
+}
+
+function getKospiLookup(yearLabel) {
+  if (yearLabel === '2025~2026년 총합') {
+    return (dateStr) => {
+      if (dateStr.startsWith('25.')) return kospiIndex2025[dateStr.slice(3)];
+      if (dateStr.startsWith('26.')) return kospiIndex2026[dateStr.slice(3)];
+      return undefined;
+    };
+  }
+  if (yearLabel === '2025년') return kospiIndex2025;
+  return kospiIndex2026;
+}
+
+let activeYearLabel = '2026년';
+let chartInstance = null;
+
+function renderChart(yearLabel, displayLabel) {
+  const dataArr = yearDatasets[yearLabel];
+  if (!dataArr || dataArr.length === 0) return;
+
+  activeYearLabel = yearLabel;
+  const kospiLookup = getKospiLookup(yearLabel);
+  const { labels, individual, foreign, institution, kospi } = buildCumulative(dataArr, kospiLookup);
+  const p = sumField(dataArr, 'p');
+  const f = sumField(dataArr, 'f');
+  const i = sumField(dataArr, 'i');
+
+  document.getElementById('totalIndividual').textContent = fmtJo(p);
+  document.getElementById('totalIndividual').className = 'value ' + (p >= 0 ? 'red' : 'blue');
+  document.getElementById('totalForeign').textContent = fmtJo(f);
+  document.getElementById('totalForeign').className = 'value ' + (f >= 0 ? 'red' : 'blue');
+  document.getElementById('totalInstitution').textContent = fmtJo(i);
+  document.getElementById('totalInstitution').className = 'value ' + (i >= 0 ? 'red' : 'blue');
+  document.getElementById('pageSubtitle').textContent = `${dataArr[0].date} ~ ${dataArr[dataArr.length - 1].date} (${displayLabel || yearLabel}, KOSPI, 단위: 조원)`;
+
+  document.querySelectorAll('.year-card').forEach(card => {
+    card.classList.toggle('active', card.dataset.year === yearLabel);
+  });
+  document.querySelectorAll('.seg-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.year === yearLabel);
+  });
+
+  if (chartInstance) {
+    chartInstance.data.labels = labels;
+    chartInstance.data.datasets[0].data = individual;
+    chartInstance.data.datasets[1].data = foreign;
+    chartInstance.data.datasets[2].data = institution;
+    chartInstance.data.datasets[3].data = kospi;
+    chartInstance.update();
+  } else {
+    const crosshairPlugin = {
+      id: 'crosshair',
+      afterDraw(chart) {
+        const active = chart.tooltip && chart.tooltip._active;
+        if (!active || !active.length) return;
+        const x = active[0].element.x;
+        const { top, bottom } = chart.chartArea;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.beginPath();
+        ctx.setLineDash([4, 4]);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = '#8a8a8a';
+        ctx.moveTo(x, top);
+        ctx.lineTo(x, bottom);
+        ctx.stroke();
+        ctx.restore();
+      }
+    };
+    chartInstance = new Chart(document.getElementById('investorChart'), {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          { label: '개인', data: individual, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
+          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y1', spanGaps: true }
+        ]
+      },
+      plugins: [crosshairPlugin],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'index', intersect: false },
+        hover: { mode: 'index', intersect: false },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            padding: 12,
+            boxPadding: 6,
+            bodySpacing: 8,
+            titleMarginBottom: 10,
+            callbacks: {
+              label: (ctx) => {
+                if (ctx.dataset.label === '코스피') {
+                  return ctx.parsed.y === null ? '코스피: 데이터 없음' : `코스피: ${ctx.parsed.y.toLocaleString(undefined, {minimumFractionDigits:2, maximumFractionDigits:2})}`;
+                }
+                return `${ctx.dataset.label} 누적: ${ctx.parsed.y > 0 ? '+' : ''}${ctx.parsed.y}조원`;
+              },
+              afterBody: (items) => {
+                const idx = items[0].dataIndex;
+                const row = yearDatasets[activeYearLabel][idx];
+                return ['', `[${row.date} 당일]`, `개인 ${fmtEok(row.p)}원`, `외국인 ${fmtEok(row.f)}원`, `기관 ${fmtEok(row.i)}원`];
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            position: 'left',
+            title: { display: true, text: '누적 순매수 (조원)', color: '#8a8a8a', font: { size: 12 } },
+            ticks: { color: '#8a8a8a', font: { size: 11 } },
+            grid: { color: '#e2e2e2' }
+          },
+          y1: {
+            position: 'right',
+            title: { display: true, text: '코스피 지수', color: '#008300', font: { size: 12 } },
+            ticks: { color: '#008300', font: { size: 11 } },
+            grid: { display: false }
+          },
+          x: {
+            ticks: { color: '#8a8a8a', font: { size: 10 }, maxRotation: 60, autoSkip: true, maxTicksLimit: 16 },
+            grid: { display: false }
+          }
+        }
+      }
+    });
+  }
+}
+
+Object.keys(yearDatasets).forEach(label => {
+  if (label === MONTH_KEY) return;
+  const data = yearDatasets[label];
+  const card = document.createElement('div');
+  card.className = 'year-card';
+  card.dataset.year = label;
+  if (data.length === 0) {
+    card.innerHTML = `<p class="year-label">${label}</p><p style="font-size:12px;color:#aaa;margin:0;">데이터 없음</p>`;
+    card.style.cursor = 'default';
+    card.style.opacity = '0.6';
+  } else {
+    const p = sumField(data, 'p');
+    const f = sumField(data, 'f');
+    const i = sumField(data, 'i');
+    card.innerHTML = `
+      <p class="year-label">${label}</p>
+      <div class="row"><span>개인</span><span class="${p>=0?'pos':'neg'}">${fmtJo(p)}</span></div>
+      <div class="row"><span>외국인</span><span class="${f>=0?'pos':'neg'}">${fmtJo(f)}</span></div>
+      <div class="row"><span>기관</span><span class="${i>=0?'pos':'neg'}">${fmtJo(i)}</span></div>
+    `;
+    card.addEventListener('click', () => renderChart(label));
+  }
+  yearlySummaryEl.appendChild(card);
+});
+
+const periodButtonsEl = document.getElementById('periodButtons');
+
+if (monthKeys2026.length) {
+  const monthNav = document.createElement('div');
+  monthNav.className = 'month-nav';
+  monthNav.id = 'monthNav';
+
+  const prevBtn = document.createElement('button');
+  prevBtn.className = 'month-arrow';
+  prevBtn.id = 'monthPrev';
+  prevBtn.setAttribute('aria-label', '이전 달');
+  prevBtn.innerHTML = '<span class="chevron left"></span>';
+
+  const monthBtn = document.createElement('button');
+  monthBtn.className = 'seg-btn';
+  monthBtn.id = 'monthBtn';
+  monthBtn.dataset.year = MONTH_KEY;
+
+  const nextBtn = document.createElement('button');
+  nextBtn.className = 'month-arrow';
+  nextBtn.id = 'monthNext';
+  nextBtn.setAttribute('aria-label', '다음 달');
+  nextBtn.innerHTML = '<span class="chevron right"></span>';
+
+  monthNav.appendChild(prevBtn);
+  monthNav.appendChild(monthBtn);
+  monthNav.appendChild(nextBtn);
+  periodButtonsEl.appendChild(monthNav);
+
+  monthBtn.addEventListener('click', () => renderChart(MONTH_KEY, monthLabel(currentMonthIdx)));
+  prevBtn.addEventListener('click', () => {
+    if (currentMonthIdx <= 0) return;
+    currentMonthIdx--;
+    updateMonthNav();
+    renderChart(MONTH_KEY, monthLabel(currentMonthIdx));
+  });
+  nextBtn.addEventListener('click', () => {
+    if (currentMonthIdx >= monthKeys2026.length - 1) return;
+    currentMonthIdx++;
+    updateMonthNav();
+    renderChart(MONTH_KEY, monthLabel(currentMonthIdx));
+  });
+
+  updateMonthNav();
+}
+
+const kospiIndex2025 = {'01.02':2398.94,'01.03':2441.92,'01.06':2488.64,'01.07':2492.1,'01.08':2521.05,'01.09':2521.9,'01.10':2515.78,'01.13':2489.56,'01.14':2497.4,'01.15':2496.81,'01.16':2527.49,'01.17':2523.55,'01.20':2520.05,'01.21':2518.03,'01.22':2547.06,'01.23':2515.49,'01.24':2536.8,'01.31':2517.37,'02.03':2453.95,'02.04':2481.69,'02.05':2509.27,'02.06':2536.75,'02.07':2521.92,'02.10':2521.27,'02.11':2539.05,'02.12':2548.39,'02.13':2583.17,'02.14':2591.05,'02.17':2610.42,'02.18':2626.81,'02.19':2671.52,'02.20':2654.06,'02.21':2654.58,'02.24':2645.27,'02.25':2630.29,'02.26':2641.09,'02.27':2621.75,'02.28':2532.78,'03.04':2528.92,'03.05':2558.13,'03.06':2576.16,'03.07':2563.48,'03.10':2570.39,'03.11':2537.6,'03.12':2574.82,'03.13':2573.64,'03.14':2566.36,'03.17':2610.69,'03.18':2612.34,'03.19':2628.62,'03.20':2637.1,'03.21':2643.13,'03.24':2632.07,'03.25':2615.81,'03.26':2643.94,'03.27':2607.15,'03.28':2557.98,'03.31':2481.12,'04.01':2521.39,'04.02':2505.86,'04.03':2486.7,'04.04':2465.42,'04.07':2328.2,'04.08':2334.23,'04.09':2293.7,'04.10':2445.06,'04.11':2432.72,'04.14':2455.89,'04.15':2477.41,'04.16':2447.43,'04.17':2470.41,'04.18':2483.42,'04.21':2488.42,'04.22':2486.64,'04.23':2525.56,'04.24':2522.33,'04.25':2546.3,'04.28':2548.86,'04.29':2565.42,'04.30':2556.61,'05.02':2559.79,'05.07':2573.8,'05.08':2579.48,'05.09':2577.27,'05.12':2607.33,'05.13':2608.42,'05.14':2640.57,'05.15':2621.36,'05.16':2626.87,'05.19':2603.42,'05.20':2601.8,'05.21':2625.58,'05.22':2593.67,'05.23':2592.09,'05.26':2644.4,'05.27':2637.22,'05.28':2670.15,'05.29':2720.64,'05.30':2697.67,'06.02':2698.97,'06.04':2770.84,'06.05':2812.05,'06.09':2855.77,'06.10':2871.85,'06.11':2907.04,'06.12':2920.03,'06.13':2894.62,'06.16':2946.66,'06.17':2950.3,'06.18':2972.19,'06.19':2977.74,'06.20':3021.84,'06.23':3014.47,'06.24':3103.64,'06.25':3108.25,'06.26':3079.56,'06.27':3055.94,'06.30':3071.7,'07.01':3089.65,'07.02':3075.06,'07.03':3116.27,'07.04':3054.28,'07.07':3059.47,'07.08':3114.95,'07.09':3133.74,'07.10':3183.23,'07.11':3175.77,'07.14':3202.03,'07.15':3215.28,'07.16':3186.38,'07.17':3192.29,'07.18':3188.07,'07.21':3210.81,'07.22':3169.94,'07.23':3183.77,'07.24':3190.45,'07.25':3196.05,'07.28':3209.52,'07.29':3230.57,'07.30':3254.47,'07.31':3245.44,'08.01':3119.41,'08.04':3147.75,'08.05':3198.0,'08.06':3198.14,'08.07':3227.68,'08.08':3210.01,'08.11':3206.77,'08.12':3189.91,'08.13':3224.37,'08.14':3225.66,'08.18':3177.28,'08.19':3151.56,'08.20':3130.09,'08.21':3141.74,'08.22':3168.73,'08.25':3209.86,'08.26':3179.36,'08.27':3187.16,'08.28':3196.32,'08.29':3186.01,'09.01':3142.93,'09.02':3172.35,'09.03':3184.42,'09.04':3200.83,'09.05':3205.12,'09.08':3219.59,'09.09':3260.05,'09.10':3314.53,'09.11':3344.2,'09.12':3395.54,'09.15':3407.31,'09.16':3449.62,'09.17':3413.4,'09.18':3461.3,'09.19':3445.24,'09.22':3468.65,'09.23':3486.19,'09.24':3472.14,'09.25':3471.11,'09.26':3386.05,'09.29':3431.21,'09.30':3424.6,'10.01':3455.83,'10.02':3549.21,'10.10':3610.6,'10.13':3584.55,'10.14':3561.81,'10.15':3657.28,'10.16':3748.37,'10.17':3748.89,'10.20':3814.69,'10.21':3823.84,'10.22':3883.68,'10.23':3845.56,'10.24':3941.59,'10.27':4042.83,'10.28':4010.41,'10.29':4081.15,'10.30':4086.89,'10.31':4107.5,'11.03':4221.87,'11.04':4121.74,'11.05':4004.42,'11.06':4026.45,'11.07':3953.76,'11.10':4073.24,'11.11':4106.39,'11.12':4150.39,'11.13':4170.63,'11.14':4011.57,'11.17':4089.25,'11.18':3953.62,'11.19':3929.51,'11.20':4004.85,'11.21':3853.26,'11.24':3846.06,'11.25':3857.78,'11.26':3960.87,'11.27':3986.91,'11.28':3926.59,'12.01':3920.37,'12.02':3994.93,'12.03':4036.3,'12.04':4028.51,'12.05':4100.05,'12.08':4154.85,'12.09':4143.55,'12.10':4135.0,'12.11':4110.62,'12.12':4167.16,'12.15':4090.59,'12.16':3999.13,'12.17':4056.41,'12.18':3994.51,'12.19':4020.55,'12.22':4105.93,'12.23':4117.32,'12.24':4108.62,'12.26':4129.68,'12.29':4220.56,'12.30':4214.17};
+const kospiIndex2026 = {'01.02':4309.63,'01.05':4457.52,'01.06':4525.48,'01.07':4551.06,'01.08':4552.37,'01.09':4586.32,'01.12':4624.79,'01.13':4692.64,'01.14':4723.1,'01.15':4797.55,'01.16':4840.74,'01.19':4904.66,'01.20':4885.75,'01.21':4909.93,'01.22':4952.53,'01.23':4990.07,'01.26':4949.59,'01.27':5084.85,'01.28':5170.81,'01.29':5221.25,'01.30':5224.36,'02.02':4949.67,'02.03':5288.08,'02.04':5371.1,'02.05':5163.57,'02.06':5089.14,'02.09':5298.04,'02.10':5301.69,'02.11':5354.49,'02.12':5522.27,'02.13':5507.01,'02.19':5677.25,'02.20':5808.53,'02.23':5846.09,'02.24':5969.64,'02.25':6083.86,'02.26':6307.27,'02.27':6244.13,'03.03':5791.91,'03.04':5093.54,'03.05':5583.9,'03.06':5584.87,'03.09':5251.87,'03.10':5532.59,'03.11':5609.95,'03.12':5583.25,'03.13':5487.24,'03.16':5549.85,'03.17':5640.48,'03.18':5925.03,'03.19':5763.22,'03.20':5781.2,'03.23':5405.75,'03.24':5553.92,'03.25':5642.21,'03.26':5460.46,'03.27':5438.87,'03.30':5277.3,'03.31':5052.46,'04.01':5478.7,'04.02':5234.05,'04.03':5377.3,'04.06':5450.33,'04.07':5494.78,'04.08':5872.34,'04.09':5778.01,'04.10':5858.87,'04.13':5808.62,'04.14':5967.75,'04.15':6091.39,'04.16':6226.05,'04.17':6191.92,'04.20':6219.09,'04.21':6388.47,'04.22':6417.93,'04.23':6475.81,'04.24':6475.63,'04.27':6615.03,'04.28':6641.02,'04.29':6690.9,'04.30':6598.87,'05.04':6936.99,'05.06':7384.56,'05.07':7490.05,'05.08':7498.0,'05.11':7822.24,'05.12':7643.15,'05.13':7844.01,'05.14':7981.41,'05.15':7493.18,'05.18':7516.04,'05.19':7271.66,'05.20':7208.95,'05.21':7815.59,'05.22':7847.71,'05.26':8047.51,'05.27':8228.7,'05.28':8185.29,'05.29':8476.15,'06.01':8788.38,'06.02':8801.49,'06.04':8639.41,'06.05':8160.59,'06.08':7484.41,'06.09':8096.93,'06.10':7730.82,'06.11':7763.95,'06.12':8123.62,'06.15':8545.98,'06.16':8726.6,'06.17':8864.24,'06.18':9063.84,'06.19':9052.42,'06.22':9114.55,'06.23':8203.84,'06.24':8471.02,'06.25':8930.3,'06.26':8411.21,'06.29':8394.65,'06.30':8476.48,'07.01':8303.41,'07.02':7648.09,'07.03':8088.34,'07.06':8051.33,'07.07':7656.31,'07.08':7246.79,'07.09':7291.91,'07.10':7475.94,'07.13':6806.93,'07.14':6856.83};
+function fmtKospi(dateStr, kospiMap) {
+  const v = kospiMap[dateStr];
+  return v === undefined || v === null ? '-' : v.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function kospiPctChange(dataArr, idx, kospiMap) {
+  const cur = kospiMap[dataArr[idx].date];
+  if (cur === undefined || cur === null || idx === 0) return { text: '-', cls: '' };
+  const prev = kospiMap[dataArr[idx - 1].date];
+  if (prev === undefined || prev === null) return { text: '-', cls: '' };
+  const pct = (cur - prev) / prev * 100;
+  return { text: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%', cls: pct >= 0 ? 'pos' : 'neg' };
+}
+
+const list2025El = document.getElementById('list2025');
+if (data2025.length === 0) {
+  list2025El.innerHTML = `<p class="empty-note">2025년 데이터가 아직 없습니다.<br>일자별 순매수 데이터를 추가해 주시면 이 자리에 반영됩니다.</p>`;
+} else {
+  data2025.map((row, idx) => ({ row, pct: kospiPctChange(data2025, idx, kospiIndex2025) })).reverse().forEach(({ row, pct }) => {
+    const div = document.createElement('div');
+    div.className = 'day-row';
+    div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex2025)}</span><span class="${pct.cls}">${pct.text}</span>`;
+    list2025El.appendChild(div);
+  });
+}
+
+const list2026El = document.getElementById('list2026');
+data2026.map((row, idx) => ({ row, pct: kospiPctChange(data2026, idx, kospiIndex2026) })).reverse().forEach(({ row, pct }) => {
+  const div = document.createElement('div');
+  div.className = 'day-row';
+  div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex2026)}</span><span class="${pct.cls}">${pct.text}</span>`;
+  list2026El.appendChild(div);
+});
+
+renderChart('2026년', '2026년 전체');
+
+(function updateMytradesTotal() {
+  const totalEl = document.getElementById('mytradesTotal');
+  if (!totalEl) return;
+  let total = 0;
+  document.querySelectorAll('#view-mytrades .month-pnl .pnl-value').forEach(el => {
+    const num = parseInt(el.textContent.replace(/[^0-9-]/g, ''), 10);
+    if (!isNaN(num)) total += num;
+  });
+  totalEl.textContent = (total >= 0 ? '+' : '') + total.toLocaleString() + '원';
+  totalEl.className = 'value ' + (total >= 0 ? 'pos' : 'neg');
+})();
+
+document.querySelectorAll('.month-note-box[data-key]').forEach(box => {
+  const storageKey = 'mystock-' + box.dataset.key;
+  const saved = localStorage.getItem(storageKey);
+  if (saved !== null) box.textContent = saved;
+  box.addEventListener('input', () => {
+    localStorage.setItem(storageKey, box.textContent);
+  });
+});
+
+const pnlLockBtn = document.getElementById('pnlLockBtn');
+const lockIcon = document.getElementById('lockIcon');
+const LOCK_PATH_CLOSED = 'M8 11V7a4 4 0 0 1 8 0v4';
+const LOCK_PATH_OPEN = 'M8 11V7a4 4 0 0 1 7.5-2';
+function setPnlLocked(locked) {
+  document.body.classList.toggle('pnl-hidden', locked);
+  pnlLockBtn.classList.toggle('locked', locked);
+  lockIcon.querySelector('path').setAttribute('d', locked ? LOCK_PATH_CLOSED : LOCK_PATH_OPEN);
+}
+pnlLockBtn.addEventListener('click', () => {
+  setPnlLocked(!document.body.classList.contains('pnl-hidden'));
+});
+setPnlLocked(true);
+
+
+function showDayTab(year) {
+  document.querySelectorAll('.day-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.year === year);
+  });
+  document.getElementById('list2025').style.display = year === '2025' ? '' : 'none';
+  document.getElementById('list2026').style.display = year === '2026' ? '' : 'none';
+}
+document.querySelectorAll('.day-tab').forEach(btn => {
+  btn.addEventListener('click', () => showDayTab(btn.dataset.year));
+});
+
+function setDayTabsVisible(visible) {
+  document.querySelector('.day-tabs').style.display = visible ? 'flex' : 'none';
+}
+
+const yearCardToTab = { '2025년': '2025', '2026년': '2026', [MONTH_KEY]: '2026' };
+document.querySelectorAll('.year-card[data-year], .seg-btn[data-year]').forEach(card => {
+  const label = card.dataset.year;
+  const tabYear = yearCardToTab[label];
+  if (tabYear) {
+    card.addEventListener('click', () => {
+      showDayTab(tabYear);
+      setDayTabsVisible(false);
+    });
+  } else if (label === '2025~2026년 총합') {
+    card.addEventListener('click', () => setDayTabsVisible(true));
+  }
+});
+setDayTabsVisible(false);
+
+const views = {
+  domestic: document.getElementById('view-domestic'),
+  overseas: document.getElementById('view-overseas'),
+  mytrades: document.getElementById('view-mytrades')
+};
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.entries(views).forEach(([key, el]) => {
+      el.style.display = key === btn.dataset.view ? 'flex' : 'none';
+    });
+  });
+});
+</script>
+</body>
+</html>
