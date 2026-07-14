@@ -29,6 +29,14 @@
     border-bottom: 1px solid #e5e5e5;
     background: #fff;
   }
+  .app-logo {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
   .app-nav {
     display: flex;
     gap: 4px;
@@ -636,6 +644,7 @@
 </head>
 <body>
 <header class="app-header">
+  <img class="app-logo" src="apple-touch-icon.png" alt="">
   <nav class="app-nav">
     <button class="nav-btn active" data-view="domestic">국내 주식</button>
     <button class="nav-btn" data-view="overseas">해외 주식</button>
