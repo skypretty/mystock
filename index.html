@@ -1596,9 +1596,11 @@ const narrowQuery = window.matchMedia('(max-width: 768px)');
 function isNarrow() {
   return narrowQuery.matches;
 }
-// Daily swings crammed into a phone-width plot read as jagged spikes.
-function lineTension() {
-  return isNarrow() ? 0.15 : 0;
+// Daily swings crammed into a phone-width plot read as jagged spikes, but with
+// only a month of points the same smoothing makes the line wobble.
+function lineTension(pointCount) {
+  if (!isNarrow() || pointCount < 60) return 0;
+  return 0.15;
 }
 function layoutTotalBar() {
   const bar = document.querySelector('.mytrades-total');
@@ -1674,6 +1676,8 @@ function renderChart(yearLabel, displayLabel) {
       chartInstance.data.datasets[1].data = foreign;
       chartInstance.data.datasets[2].data = institution;
       chartInstance.data.datasets[3].data = kospi;
+      const tension = lineTension(labels.length);
+      chartInstance.data.datasets.forEach(ds => { ds.tension = tension; });
       chartInstance.update('none');
       canvas.classList.remove('swapping');
     }, 130);
@@ -1702,10 +1706,10 @@ function renderChart(yearLabel, displayLabel) {
       data: {
         labels,
         datasets: [
-          { label: '개인', data: individual, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '외국인', data: foreign, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '기관', data: institution, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1.75 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
+          { label: '개인', data: individual, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1.75 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
       plugins: [crosshairPlugin],
