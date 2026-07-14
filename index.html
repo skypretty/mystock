@@ -556,6 +556,12 @@
     width: 100%;
     height: 420px;
   }
+  .chart-container canvas {
+    transition: opacity 0.13s ease;
+  }
+  .chart-container canvas.swapping {
+    opacity: 0;
+  }
   .footer-note {
     font-size: 12px;
     color: #999;
@@ -1629,12 +1635,19 @@ function renderChart(yearLabel, displayLabel) {
   });
 
   if (chartInstance) {
-    chartInstance.data.labels = labels;
-    chartInstance.data.datasets[0].data = individual;
-    chartInstance.data.datasets[1].data = foreign;
-    chartInstance.data.datasets[2].data = institution;
-    chartInstance.data.datasets[3].data = kospi;
-    chartInstance.update();
+    // Periods have different point counts, so Chart.js morphing looks like the
+    // lines are crawling. Swap the data instantly behind a short fade instead.
+    const canvas = chartInstance.canvas;
+    canvas.classList.add('swapping');
+    setTimeout(() => {
+      chartInstance.data.labels = labels;
+      chartInstance.data.datasets[0].data = individual;
+      chartInstance.data.datasets[1].data = foreign;
+      chartInstance.data.datasets[2].data = institution;
+      chartInstance.data.datasets[3].data = kospi;
+      chartInstance.update('none');
+      canvas.classList.remove('swapping');
+    }, 130);
   } else {
     const crosshairPlugin = {
       id: 'crosshair',
