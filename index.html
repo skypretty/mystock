@@ -970,10 +970,10 @@
       padding: 18px;
       line-height: 1.85;
     }
-    /* Keep the dialog above the on-screen keyboard instead of centered under it. */
+    /* Centered, but biased up so the keyboard cannot cover the dialog. */
     .pw-overlay {
-      align-items: flex-start;
-      padding-top: 24vh;
+      align-items: center;
+      padding-bottom: 22vh;
       background: rgba(0, 0, 0, 0.55);
     }
     .pw-modal {
