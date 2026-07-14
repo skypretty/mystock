@@ -750,6 +750,35 @@
     .app-nav button:hover {
       background: none;
     }
+    /* Touch devices keep :hover applied after a tap, leaving a stuck highlight. */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:focus,
+    .year-card:focus {
+      outline: none;
+    }
+    .seg-btn:hover,
+    .month-arrow:hover:not(:disabled),
+    .lock-btn:hover,
+    .pw-btn:hover {
+      background: inherit;
+    }
+    .seg-btn.active:hover {
+      background: #fff;
+    }
+    .lock-btn:hover {
+      background: #f5f5f5;
+    }
+    .lock-btn.locked:hover {
+      background: #1a1a1a;
+    }
+    .year-card:hover {
+      border-color: #e5e5e5;
+    }
+    .year-card.active:hover {
+      border-color: #333;
+    }
     .placeholder-view,
     #view-domestic {
       flex: 1 1 auto;
