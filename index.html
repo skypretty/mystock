@@ -609,7 +609,12 @@
   @media (max-width: 768px) {
     .layout {
       flex-direction: column;
+      align-items: stretch;
       min-height: 0;
+    }
+    .content {
+      flex: 0 0 auto;
+      width: 100%;
     }
     .sidebar {
       width: 100%;
@@ -648,6 +653,7 @@
     .cards {
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
+      margin-top: 16px;
       margin-bottom: 20px;
     }
     .card {
@@ -782,7 +788,7 @@
   <nav class="app-nav">
     <button class="nav-btn active" data-view="domestic">국내 주식</button>
     <button class="nav-btn" data-view="overseas">해외 주식</button>
-    <button class="nav-btn" data-view="mytrades">나의 매매 기록</button>
+    <button class="nav-btn" data-view="mytrades">매매 기록</button>
   </nav>
 </header>
 
