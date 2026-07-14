@@ -635,13 +635,13 @@
     .content {
       height: auto;
       overflow-y: visible;
-      padding: 20px;
+      padding: 26px 20px 34px;
     }
     .sidebar {
-      padding: 20px;
+      padding: 32px 20px 36px;
     }
     .mytrades-col {
-      padding: 24px 20px;
+      padding: 28px 20px 32px;
       overflow-y: visible;
     }
     .title-row {
@@ -657,13 +657,19 @@
     .sidebar {
       order: 1;
     }
+    .title-row {
+      margin-bottom: 4px;
+    }
     .cards {
       display: block;
-      margin-top: 16px;
-      margin-bottom: 20px;
+      margin-top: 24px;
+      margin-bottom: 30px;
       background: #f5f5f5;
       border-radius: 8px;
       padding: 4px 14px;
+    }
+    .legend {
+      margin-bottom: 16px;
     }
     .card {
       display: flex;
@@ -725,6 +731,24 @@
     }
     .app-header {
       flex: 0 0 auto;
+    }
+    .app-nav {
+      gap: 12px;
+    }
+    .app-nav button {
+      padding: 8px 2px;
+      font-size: 14px;
+      font-weight: 500;
+      color: #999;
+      border-radius: 0;
+    }
+    .app-nav button.active {
+      background: none;
+      color: #1a1a1a;
+      font-weight: 700;
+    }
+    .app-nav button:hover {
+      background: none;
     }
     .placeholder-view,
     #view-domestic {
@@ -788,10 +812,10 @@
       padding-bottom: 0;
     }
     .sidebar-section + .sidebar-section {
-      margin-top: 8px;
+      margin-top: 34px;
     }
     .sidebar h2 {
-      margin-bottom: 14px;
+      margin-bottom: 16px;
     }
     .day-tabs {
       margin-bottom: 12px;
