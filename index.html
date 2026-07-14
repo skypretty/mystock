@@ -754,6 +754,11 @@
     * {
       -webkit-tap-highlight-color: transparent;
     }
+    /* Kills double-tap-to-zoom (and the scroll jump when it zooms back out);
+       pinch zoom still works. */
+    body {
+      touch-action: manipulation;
+    }
     button:focus,
     .year-card:focus {
       outline: none;
