@@ -1371,8 +1371,20 @@ function setPnlLocked(locked) {
   pnlLockBtn.classList.toggle('locked', locked);
   lockIcon.querySelector('path').setAttribute('d', locked ? LOCK_PATH_CLOSED : LOCK_PATH_OPEN);
 }
+const PNL_PASSWORD = '1234';
 pnlLockBtn.addEventListener('click', () => {
-  setPnlLocked(!document.body.classList.contains('pnl-hidden'));
+  const locked = document.body.classList.contains('pnl-hidden');
+  if (!locked) {
+    setPnlLocked(true);
+    return;
+  }
+  const input = prompt('비밀번호를 입력하세요');
+  if (input === null) return;
+  if (input !== PNL_PASSWORD) {
+    alert('비밀번호가 일치하지 않습니다.');
+    return;
+  }
+  setPnlLocked(false);
 });
 setPnlLocked(true);
 
