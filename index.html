@@ -95,6 +95,30 @@
   .mytrades-col.journal {
     flex: 3;
   }
+  .philosophy-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .philosophy-header .arrow {
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid #999;
+    border-bottom: 1.5px solid #999;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+  .philosophy-header.collapsed .arrow {
+    transform: rotate(-45deg);
+  }
+  .philosophy-list.collapsed {
+    display: none;
+  }
+  .mytrades-col.philosophy.is-collapsed .philosophy-header {
+    margin-bottom: 0;
+  }
   .philosophy-list {
     flex: 1;
     margin: 0;
@@ -644,6 +668,10 @@
       padding: 28px 20px 32px;
       overflow-y: visible;
     }
+    .mytrades-col.philosophy.is-collapsed {
+      padding-top: 20px;
+      padding-bottom: 20px;
+    }
     .title-row {
       flex-direction: column;
       align-items: stretch;
@@ -870,11 +898,10 @@
       background: #ebebeb;
       border-radius: 6px;
       border-bottom: none;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       padding: 9px 6px;
       color: #555;
       font-weight: 600;
-      letter-spacing: 0.2px;
     }
     .day-row {
       grid-template-columns: 32px repeat(4, minmax(0, 1fr)) minmax(0, 0.8fr);
@@ -948,8 +975,8 @@
 <div class="placeholder-view mytrades-view" id="view-mytrades">
   <div class="mytrades-layout">
     <div class="mytrades-col philosophy">
-      <h2>투자 철학</h2>
-      <ol class="philosophy-list">
+      <h2 class="philosophy-header collapsed" id="philosophyToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="philosophyList">투자 철학 <span class="arrow"></span></h2>
+      <ol class="philosophy-list collapsed" id="philosophyList">
         <li>상승장, 하락장에 관계없이 기본 주식은 10분할로 매수한다. 레버리지는 30분할로 나누어 매수한다.</li>
         <li>국내장은 코스피만 한다. 국내장은 기반이 약하기 때문에 분할 매수가 필수다.</li>
       </ol>
@@ -1828,6 +1855,26 @@ layoutTotalBar();
   totalEl.textContent = (total >= 0 ? '+' : '') + total.toLocaleString() + '원';
   totalEl.className = 'value ' + (total >= 0 ? 'pos' : 'neg');
 })();
+
+const philosophyToggle = document.getElementById('philosophyToggle');
+const philosophyList = document.getElementById('philosophyList');
+const philosophyCol = philosophyToggle.closest('.mytrades-col.philosophy');
+function syncPhilosophy(collapsed) {
+  philosophyToggle.classList.toggle('collapsed', collapsed);
+  philosophyCol.classList.toggle('is-collapsed', collapsed);
+  philosophyToggle.setAttribute('aria-expanded', String(!collapsed));
+}
+function togglePhilosophy() {
+  syncPhilosophy(philosophyList.classList.toggle('collapsed'));
+}
+syncPhilosophy(true);
+philosophyToggle.addEventListener('click', togglePhilosophy);
+philosophyToggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    togglePhilosophy();
+  }
+});
 
 const pnlLockBtn = document.getElementById('pnlLockBtn');
 const lockIcon = document.getElementById('lockIcon');
