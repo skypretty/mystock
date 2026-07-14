@@ -663,37 +663,39 @@
     .month-pnl {
       flex: 0 0 auto;
     }
-    .mytrades-view {
-      padding-bottom: 104px;
+    html, body {
+      overflow-x: hidden;
+      max-width: 100%;
     }
-    .mytrades-total {
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+    }
+    .mytrades-view {
+      padding-bottom: 108px;
+    }
+    .mytrades-total.mobile-bar {
+      display: none;
       position: fixed;
-      left: -1px;
-      right: -1px;
-      bottom: -1px;
+      left: 0;
+      right: 0;
+      bottom: 0;
       z-index: 50;
-      width: auto;
-      margin-top: 0;
-      display: flex;
+      width: 100%;
+      margin: 0;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
+      background: #fff;
       border: none;
       border-top: 1px solid #e5e5e5;
       border-radius: 0;
-      padding: 20px calc(20px + 1px) calc(21px + env(safe-area-inset-bottom));
+      padding: 18px 20px calc(18px + env(safe-area-inset-bottom));
       box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
-      transform: translateZ(0);
-      backface-visibility: hidden;
     }
-    .mytrades-total::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 100%;
-      height: 40px;
-      background: #fff;
+    body.view-mytrades .mytrades-total.mobile-bar {
+      display: flex;
     }
     .mytrades-total .label {
       margin: 0;
@@ -719,17 +721,16 @@
       font-size: 14px;
       margin: 0;
     }
-    .day-list {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
     .day-row {
-      grid-template-columns: 36px repeat(4, minmax(52px, 1fr)) minmax(44px, 0.85fr);
-      gap: 6px;
-      padding: 8px;
-      font-size: 10.5px;
-      min-width: 360px;
+      grid-template-columns: 32px repeat(4, minmax(0, 1fr)) minmax(0, 0.8fr);
+      gap: 4px;
+      padding: 8px 6px;
+      font-size: 10px;
       white-space: nowrap;
+    }
+    .day-row span {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .legend {
       flex-wrap: wrap;
@@ -1332,6 +1333,19 @@ const narrowQuery = window.matchMedia('(max-width: 768px)');
 function isNarrow() {
   return narrowQuery.matches;
 }
+function layoutTotalBar() {
+  const bar = document.querySelector('.mytrades-total');
+  const philosophy = document.querySelector('.mytrades-col.philosophy');
+  if (!bar || !philosophy) return;
+  if (isNarrow()) {
+    bar.classList.add('mobile-bar');
+    if (bar.parentElement !== document.body) document.body.appendChild(bar);
+  } else {
+    bar.classList.remove('mobile-bar');
+    if (bar.parentElement !== philosophy) philosophy.appendChild(bar);
+  }
+}
+
 function layoutMonthPnl() {
   document.querySelectorAll('.month-block').forEach(block => {
     const header = block.querySelector('h4.collapsible-header');
@@ -1348,6 +1362,7 @@ function layoutMonthPnl() {
 
 narrowQuery.addEventListener('change', () => {
   layoutMonthPnl();
+  layoutTotalBar();
   if (!chartInstance) return;
   chartInstance.destroy();
   chartInstance = null;
@@ -1579,6 +1594,7 @@ data2026.map((row, idx) => ({ row, pct: kospiPctChange(data2026, idx, kospiIndex
 
 renderChart('2026년', '2026년 전체');
 layoutMonthPnl();
+layoutTotalBar();
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
@@ -1729,10 +1745,17 @@ const views = {
   overseas: document.getElementById('view-overseas'),
   mytrades: document.getElementById('view-mytrades')
 };
+function setActiveView(view) {
+  document.body.classList.remove('view-domestic', 'view-overseas', 'view-mytrades');
+  document.body.classList.add('view-' + view);
+}
+setActiveView('domestic');
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
+    setActiveView(btn.dataset.view);
     Object.entries(views).forEach(([key, el]) => {
       el.style.display = key === btn.dataset.view ? 'flex' : 'none';
     });
