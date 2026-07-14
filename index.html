@@ -862,16 +862,58 @@
       font-weight: 600;
     }
     .day-row.header {
-      border-bottom: 1px solid #d0d0d0;
-      padding-bottom: 10px;
-      color: #555;
-      font-weight: 600;
+      display: none;
     }
     .day-row {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        "date kospi pct"
+        "p    f     i";
+      gap: 7px 8px;
+      padding: 13px 2px;
+      border-bottom: 1px solid #e2e2e2;
+      font-size: 11px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .day-row span:nth-child(1) {
+      grid-area: date;
+      font-size: 13px;
+      font-weight: 600;
+      color: #1a1a1a;
+      text-align: left;
+    }
+    .day-row span:nth-child(2) { grid-area: p; }
+    .day-row span:nth-child(3) { grid-area: f; }
+    .day-row span:nth-child(4) { grid-area: i; }
+    .day-row span:nth-child(2),
+    .day-row span:nth-child(3),
+    .day-row span:nth-child(4) {
+      text-align: left;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .day-row span:nth-child(2)::before { content: '개인 '; }
+    .day-row span:nth-child(3)::before { content: '외국인 '; }
+    .day-row span:nth-child(4)::before { content: '기관 '; }
+    .day-row span:nth-child(2)::before,
+    .day-row span:nth-child(3)::before,
+    .day-row span:nth-child(4)::before {
+      color: #999;
       font-weight: 500;
     }
-    .day-row span:first-child {
-      color: #444;
+    .day-row span:nth-child(5) {
+      grid-area: kospi;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #333;
+    }
+    .day-row span:nth-child(6) {
+      grid-area: pct;
+      text-align: right;
+      font-size: 12px;
+      font-weight: 600;
     }
     .subtitle {
       color: #555;
@@ -901,17 +943,6 @@
     }
     .footer-note {
       color: #777;
-    }
-    .day-row {
-      grid-template-columns: 32px repeat(4, minmax(0, 1fr)) minmax(0, 0.8fr);
-      gap: 4px;
-      padding: 8px 6px;
-      font-size: 10px;
-      white-space: nowrap;
-    }
-    .day-row span {
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     .legend {
       flex-wrap: wrap;
