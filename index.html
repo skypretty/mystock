@@ -658,13 +658,13 @@
       flex: 0 0 auto;
     }
     .mytrades-view {
-      padding-bottom: 76px;
+      padding-bottom: 104px;
     }
     .mytrades-total {
       position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      left: -1px;
+      right: -1px;
+      bottom: -1px;
       z-index: 50;
       width: auto;
       margin-top: 0;
@@ -675,14 +675,32 @@
       border: none;
       border-top: 1px solid #e5e5e5;
       border-radius: 0;
-      padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+      padding: 20px 18px calc(21px + env(safe-area-inset-bottom));
       box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
     }
     .mytrades-total .label {
       margin: 0;
+      font-size: 14px;
+      font-weight: 600;
     }
     .mytrades-total .value {
-      font-size: 18px;
+      font-size: 22px;
+    }
+    .month-block h4.collapsible-header {
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .month-block h4.collapsible-header .month-pnl {
+      flex: 0 0 auto;
+      text-align: right;
+    }
+    .month-block h4.collapsible-header .pnl-label {
+      display: none;
+    }
+    .month-block h4.collapsible-header .pnl-value {
+      font-size: 14px;
+      margin: 0;
     }
     .day-list {
       overflow-x: auto;
@@ -1297,7 +1315,22 @@ const narrowQuery = window.matchMedia('(max-width: 768px)');
 function isNarrow() {
   return narrowQuery.matches;
 }
+function layoutMonthPnl() {
+  document.querySelectorAll('.month-block').forEach(block => {
+    const header = block.querySelector('h4.collapsible-header');
+    const entry = block.querySelector('.month-entry');
+    const pnl = block.querySelector('.month-pnl');
+    if (!header || !entry || !pnl) return;
+    if (isNarrow()) {
+      if (pnl.parentElement !== header) header.appendChild(pnl);
+    } else if (pnl.parentElement !== entry) {
+      entry.insertBefore(pnl, entry.firstChild);
+    }
+  });
+}
+
 narrowQuery.addEventListener('change', () => {
+  layoutMonthPnl();
   if (!chartInstance) return;
   chartInstance.destroy();
   chartInstance = null;
@@ -1528,6 +1561,7 @@ data2026.map((row, idx) => ({ row, pct: kospiPctChange(data2026, idx, kospiIndex
 });
 
 renderChart('2026년', '2026년 전체');
+layoutMonthPnl();
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
