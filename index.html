@@ -651,21 +651,33 @@
       order: 1;
     }
     .cards {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 8px;
+      display: block;
       margin-top: 16px;
       margin-bottom: 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      padding: 4px 14px;
     }
     .card {
-      padding: 12px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: transparent;
+      border-radius: 0;
+      border-bottom: 1px solid #e5e5e5;
+      padding: 13px 0;
+    }
+    .card:last-child {
+      border-bottom: none;
     }
     .card p.label {
-      font-size: 11px;
-      margin: 0 0 4px;
+      font-size: 13px;
+      margin: 0;
       white-space: nowrap;
     }
     .card p.value {
-      font-size: 15px;
+      font-size: 17px;
       white-space: nowrap;
     }
     .mytrades-layout {
