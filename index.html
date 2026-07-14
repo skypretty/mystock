@@ -180,7 +180,8 @@
     width: 100%;
     box-sizing: border-box;
     padding: 9px 11px;
-    font-size: 15px;
+    /* iOS zooms the page when focusing an input under 16px. */
+    font-size: 16px;
     letter-spacing: 2px;
     border: 1px solid #ddd;
     border-radius: 7px;
@@ -1448,6 +1449,10 @@ const narrowQuery = window.matchMedia('(max-width: 768px)');
 function isNarrow() {
   return narrowQuery.matches;
 }
+// Daily swings crammed into a phone-width plot read as jagged spikes.
+function lineTension() {
+  return isNarrow() ? 0.25 : 0;
+}
 function layoutTotalBar() {
   const bar = document.querySelector('.mytrades-total');
   const philosophy = document.querySelector('.mytrades-col.philosophy');
@@ -1543,10 +1548,10 @@ function renderChart(yearLabel, displayLabel) {
       data: {
         labels,
         datasets: [
-          { label: '개인', data: individual, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
-          { label: '외국인', data: foreign, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
-          { label: '기관', data: institution, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y' },
-          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: 0, yAxisID: 'y1', spanGaps: true }
+          { label: '개인', data: individual, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1.75 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
       plugins: [crosshairPlugin],
@@ -1799,7 +1804,9 @@ function openPwModal() {
   pwInput.value = '';
   pwError.classList.remove('show');
   pwOverlay.classList.add('open');
-  pwInput.focus();
+  // Autofocus raises the mobile keyboard, which shrinks the viewport and
+  // reflows the whole shell; let the user tap the field instead.
+  if (!isNarrow()) pwInput.focus();
 }
 function closePwModal() {
   pwOverlay.classList.remove('open');
