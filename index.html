@@ -1465,9 +1465,31 @@ function setPnlLocked(locked) {
   lockIcon.querySelector('path').setAttribute('d', locked ? LOCK_PATH_CLOSED : LOCK_PATH_OPEN);
 }
 const PNL_PASSWORD = '1234';
+const PNL_UNLOCK_MS = 30 * 60 * 1000;
+const PNL_UNLOCK_KEY = 'mystock-pnl-unlocked-until';
 const pwOverlay = document.getElementById('pwOverlay');
 const pwInput = document.getElementById('pwInput');
 const pwError = document.getElementById('pwError');
+let relockTimer = null;
+
+function unlockExpiresAt() {
+  return Number(localStorage.getItem(PNL_UNLOCK_KEY)) || 0;
+}
+function scheduleRelock() {
+  clearTimeout(relockTimer);
+  const remaining = unlockExpiresAt() - Date.now();
+  if (remaining > 0) relockTimer = setTimeout(lockPnl, remaining);
+}
+function unlockPnl() {
+  localStorage.setItem(PNL_UNLOCK_KEY, String(Date.now() + PNL_UNLOCK_MS));
+  setPnlLocked(false);
+  scheduleRelock();
+}
+function lockPnl() {
+  clearTimeout(relockTimer);
+  localStorage.removeItem(PNL_UNLOCK_KEY);
+  setPnlLocked(true);
+}
 
 function openPwModal() {
   pwInput.value = '';
@@ -1484,13 +1506,13 @@ function submitPw() {
     pwInput.select();
     return;
   }
-  setPnlLocked(false);
+  unlockPnl();
   closePwModal();
 }
 
 pnlLockBtn.addEventListener('click', () => {
   if (document.body.classList.contains('pnl-hidden')) openPwModal();
-  else setPnlLocked(true);
+  else lockPnl();
 });
 document.getElementById('pwConfirm').addEventListener('click', submitPw);
 document.getElementById('pwCancel').addEventListener('click', closePwModal);
@@ -1503,7 +1525,19 @@ pwOverlay.addEventListener('click', e => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape' && pwOverlay.classList.contains('open')) closePwModal();
 });
-setPnlLocked(true);
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  if (unlockExpiresAt() > Date.now()) scheduleRelock();
+  else if (!document.body.classList.contains('pnl-hidden')) lockPnl();
+});
+
+if (unlockExpiresAt() > Date.now()) {
+  setPnlLocked(false);
+  scheduleRelock();
+} else {
+  lockPnl();
+}
 
 
 function showDayTab(year) {
