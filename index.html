@@ -1486,17 +1486,19 @@ let relockTimer = null;
 function unlockExpiresAt() {
   return Number(localStorage.getItem(PNL_UNLOCK_KEY)) || 0;
 }
+function isUnlockValid() {
+  return unlockExpiresAt() > Date.now();
+}
 function scheduleRelock() {
   clearTimeout(relockTimer);
   const remaining = unlockExpiresAt() - Date.now();
-  if (remaining > 0) relockTimer = setTimeout(lockPnl, remaining);
+  if (remaining > 0) relockTimer = setTimeout(expireUnlock, remaining);
 }
-function unlockPnl() {
+function grantUnlock() {
   localStorage.setItem(PNL_UNLOCK_KEY, String(Date.now() + PNL_UNLOCK_MS));
-  setPnlLocked(false);
   scheduleRelock();
 }
-function lockPnl() {
+function expireUnlock() {
   clearTimeout(relockTimer);
   localStorage.removeItem(PNL_UNLOCK_KEY);
   setPnlLocked(true);
@@ -1517,13 +1519,19 @@ function submitPw() {
     pwInput.select();
     return;
   }
-  unlockPnl();
+  grantUnlock();
+  setPnlLocked(false);
   closePwModal();
 }
 
 pnlLockBtn.addEventListener('click', () => {
-  if (document.body.classList.contains('pnl-hidden')) openPwModal();
-  else lockPnl();
+  if (!document.body.classList.contains('pnl-hidden')) {
+    setPnlLocked(true);
+  } else if (isUnlockValid()) {
+    setPnlLocked(false);
+  } else {
+    openPwModal();
+  }
 });
 document.getElementById('pwConfirm').addEventListener('click', submitPw);
 document.getElementById('pwCancel').addEventListener('click', closePwModal);
@@ -1539,15 +1547,15 @@ document.addEventListener('keydown', e => {
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
-  if (unlockExpiresAt() > Date.now()) scheduleRelock();
-  else if (!document.body.classList.contains('pnl-hidden')) lockPnl();
+  if (isUnlockValid()) scheduleRelock();
+  else expireUnlock();
 });
 
-if (unlockExpiresAt() > Date.now()) {
+if (isUnlockValid()) {
   setPnlLocked(false);
   scheduleRelock();
 } else {
-  lockPnl();
+  expireUnlock();
 }
 
 
