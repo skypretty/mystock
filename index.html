@@ -3,9 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>투자자별 누적 순매매 동향</title>
+<title>주식 투자 기록</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+<meta property="og:title" content="주식 투자 기록">
+<meta property="og:description" content="투자자별 누적 순매매 동향과 매매 기록">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://skypretty.github.io/mystock/">
+<meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
   * { box-sizing: border-box; }
@@ -652,6 +657,29 @@
     .month-pnl {
       flex: 0 0 auto;
     }
+    .day-list {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .day-row {
+      grid-template-columns: 36px repeat(4, minmax(52px, 1fr)) minmax(44px, 0.85fr);
+      gap: 6px;
+      padding: 8px;
+      font-size: 10.5px;
+      min-width: 360px;
+      white-space: nowrap;
+    }
+    .legend {
+      flex-wrap: wrap;
+      gap: 8px 14px;
+    }
+    .period-buttons {
+      flex-wrap: wrap;
+      max-width: 100%;
+    }
+    .chart-container {
+      height: 300px;
+    }
   }
 </style>
 </head>
@@ -1235,13 +1263,26 @@ function getKospiLookup(yearLabel) {
 }
 
 let activeYearLabel = '2026년';
+let activeDisplayLabel = null;
 let chartInstance = null;
+
+const narrowQuery = window.matchMedia('(max-width: 768px)');
+function isNarrow() {
+  return narrowQuery.matches;
+}
+narrowQuery.addEventListener('change', () => {
+  if (!chartInstance) return;
+  chartInstance.destroy();
+  chartInstance = null;
+  renderChart(activeYearLabel, activeDisplayLabel);
+});
 
 function renderChart(yearLabel, displayLabel) {
   const dataArr = yearDatasets[yearLabel];
   if (!dataArr || dataArr.length === 0) return;
 
   activeYearLabel = yearLabel;
+  activeDisplayLabel = displayLabel;
   const kospiLookup = getKospiLookup(yearLabel);
   const { labels, individual, foreign, institution, kospi } = buildCumulative(dataArr, kospiLookup);
   const p = sumField(dataArr, 'p');
@@ -1332,18 +1373,18 @@ function renderChart(yearLabel, displayLabel) {
         scales: {
           y: {
             position: 'left',
-            title: { display: true, text: '누적 순매수 (조원)', color: '#8a8a8a', font: { size: 12 } },
-            ticks: { color: '#8a8a8a', font: { size: 11 } },
+            title: { display: !isNarrow(), text: '누적 순매수 (조원)', color: '#8a8a8a', font: { size: 12 } },
+            ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 10 : 11 }, maxTicksLimit: isNarrow() ? 6 : undefined },
             grid: { color: '#e2e2e2' }
           },
           y1: {
             position: 'right',
-            title: { display: true, text: '코스피 지수', color: '#008300', font: { size: 12 } },
-            ticks: { color: '#008300', font: { size: 11 } },
+            title: { display: !isNarrow(), text: '코스피 지수', color: '#008300', font: { size: 12 } },
+            ticks: { color: '#008300', font: { size: isNarrow() ? 10 : 11 }, maxTicksLimit: isNarrow() ? 6 : undefined },
             grid: { display: false }
           },
           x: {
-            ticks: { color: '#8a8a8a', font: { size: 10 }, maxRotation: 60, autoSkip: true, maxTicksLimit: 16 },
+            ticks: { color: '#8a8a8a', font: { size: 10 }, maxRotation: isNarrow() ? 45 : 60, autoSkip: true, maxTicksLimit: isNarrow() ? 6 : 16 },
             grid: { display: false }
           }
         }
