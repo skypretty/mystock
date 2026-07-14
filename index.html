@@ -1716,6 +1716,11 @@ function renderChart(yearLabel, displayLabel) {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        // The built-in grow-from-baseline animation reads as a flash of a flat
+        // line; the canvas cross-fade handles the transition instead.
+        animation: false,
+        animations: { colors: false, x: false, y: false },
+        transitions: { active: { animation: { duration: 0 } } },
         interaction: { mode: 'index', intersect: false },
         hover: { mode: 'index', intersect: false },
         plugins: {
