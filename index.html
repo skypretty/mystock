@@ -616,6 +616,12 @@
       flex: 0 0 auto;
       width: 100%;
     }
+    h1,
+    .mytrades-col h2,
+    .sidebar h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
     .sidebar {
       width: 100%;
       height: auto;
@@ -1549,6 +1555,20 @@ function renderChart(yearLabel, displayLabel) {
           }
         }
       }
+    });
+
+    const canvas = document.getElementById('investorChart');
+    const clearTooltip = () => {
+      if (!chartInstance) return;
+      chartInstance.setActiveElements([]);
+      chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+      chartInstance.update('none');
+    };
+    canvas.addEventListener('mouseleave', clearTooltip, { passive: true });
+    ['touchend', 'touchcancel'].forEach(evt => {
+      // Chart.js handles the touch after us and would re-show the tooltip,
+      // so clear once its own handler has run.
+      canvas.addEventListener(evt, () => setTimeout(clearTooltip, 50), { passive: true });
     });
   }
 }
