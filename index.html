@@ -1857,7 +1857,24 @@ if (monthKeys2026.length) {
   monthNav.appendChild(nextBtn);
   periodButtonsEl.appendChild(monthNav);
 
-  monthBtn.addEventListener('click', () => renderChart(MONTH_KEY, monthLabel(currentMonthIdx)));
+  // Pressing the month button again returns to whatever period was showing.
+  let periodBeforeMonth = '2025~2026년 총합';
+  monthBtn.addEventListener('click', () => {
+    if (activeYearLabel === MONTH_KEY) {
+      renderChart(periodBeforeMonth);
+      if (periodBeforeMonth === '2025~2026년 총합') {
+        setDayTabsVisible(true);
+      } else {
+        showDayTab(yearCardToTab[periodBeforeMonth]);
+        setDayTabsVisible(false);
+      }
+      return;
+    }
+    periodBeforeMonth = activeYearLabel;
+    renderChart(MONTH_KEY, monthLabel(currentMonthIdx));
+    showDayTab('2026');
+    setDayTabsVisible(false);
+  });
   prevBtn.addEventListener('click', () => {
     if (currentMonthIdx <= 0) return;
     currentMonthIdx--;
@@ -2091,6 +2108,9 @@ function setDayTabsVisible(visible) {
 const yearCardToTab = { '2025년': '2025', '2026년': '2026', [MONTH_KEY]: '2026' };
 document.querySelectorAll('.year-card[data-year], .seg-btn[data-year]').forEach(card => {
   const label = card.dataset.year;
+  // The month button manages the day tabs itself (it toggles back to the
+  // previous period), so keep this listener off it.
+  if (label === MONTH_KEY) return;
   const tabYear = yearCardToTab[label];
   if (tabYear) {
     card.addEventListener('click', () => {
