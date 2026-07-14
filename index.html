@@ -122,15 +122,27 @@
   .philosophy-list {
     flex: 1;
     margin: 0;
-    padding: 0 0 0 20px;
+    padding: 0;
+    list-style: none;
+    counter-reset: philosophy;
     font-size: 13.5px;
     line-height: 1.8;
     color: #333;
     word-break: keep-all;
   }
   .philosophy-list li {
+    counter-increment: philosophy;
+    position: relative;
     margin-bottom: 12px;
-    padding-left: 2px;
+    padding-left: 22px;
+  }
+  .philosophy-list li::before {
+    content: counter(philosophy) ".";
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: #888;
+    font-weight: 600;
   }
   .mytrades-col h2 {
     font-size: 17px;
@@ -1839,7 +1851,7 @@ data2026.map((row, idx) => ({ row, pct: kospiPctChange(data2026, idx, kospiIndex
   list2026El.appendChild(div);
 });
 
-renderChart('2026년', '2026년 전체');
+renderChart('2025~2026년 총합');
 layoutMonthPnl();
 layoutTotalBar();
 
@@ -1998,7 +2010,7 @@ document.querySelectorAll('.year-card[data-year], .seg-btn[data-year]').forEach(
     card.addEventListener('click', () => setDayTabsVisible(true));
   }
 });
-setDayTabsVisible(false);
+setDayTabsVisible(true);
 
 const views = {
   domestic: document.getElementById('view-domestic'),
