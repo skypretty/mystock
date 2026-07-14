@@ -1742,16 +1742,73 @@ function setActiveView(view) {
 }
 setActiveView('domestic');
 
+function showView(view) {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.view === view);
+  });
+  setActiveView(view);
+  Object.entries(views).forEach(([key, el]) => {
+    el.style.display = key === view ? 'flex' : 'none';
+  });
+}
+
 document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    setActiveView(btn.dataset.view);
-    Object.entries(views).forEach(([key, el]) => {
-      el.style.display = key === btn.dataset.view ? 'flex' : 'none';
-    });
+    showView(btn.dataset.view);
+    saveViewState();
   });
 });
+
+const VIEW_STATE_KEY = 'mystock-view-state';
+const SCROLLERS = ['#view-domestic', '#view-overseas', '#view-mytrades', '.content', '.sidebar', '.mytrades-col.philosophy', '.mytrades-col.journal'];
+
+function currentView() {
+  const active = document.querySelector('.nav-btn.active');
+  return active ? active.dataset.view : 'domestic';
+}
+function saveViewState() {
+  const scroll = {};
+  SCROLLERS.forEach(sel => {
+    const el = document.querySelector(sel);
+    if (el && el.scrollTop > 0) scroll[sel] = el.scrollTop;
+  });
+  if (window.scrollY > 0) scroll.window = window.scrollY;
+  try {
+    sessionStorage.setItem(VIEW_STATE_KEY, JSON.stringify({ view: currentView(), scroll }));
+  } catch (e) {}
+}
+function restoreViewState() {
+  let state;
+  try {
+    state = JSON.parse(sessionStorage.getItem(VIEW_STATE_KEY) || 'null');
+  } catch (e) {}
+  if (!state) return;
+  if (state.view && views[state.view]) showView(state.view);
+  requestAnimationFrame(() => {
+    Object.entries(state.scroll || {}).forEach(([sel, top]) => {
+      if (sel === 'window') window.scrollTo(0, top);
+      else {
+        const el = document.querySelector(sel);
+        if (el) el.scrollTop = top;
+      }
+    });
+  });
+}
+
+let saveTimer = null;
+function queueSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveViewState, 150);
+}
+SCROLLERS.forEach(sel => {
+  const el = document.querySelector(sel);
+  if (el) el.addEventListener('scroll', queueSave, { passive: true });
+});
+window.addEventListener('scroll', queueSave, { passive: true });
+window.addEventListener('pagehide', saveViewState);
+
+if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+restoreViewState();
 </script>
 </body>
 </html>
