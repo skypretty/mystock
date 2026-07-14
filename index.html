@@ -614,10 +614,11 @@
     .sidebar {
       width: 100%;
       height: auto;
-      max-height: 45vh;
-      max-height: 45dvh;
+      max-height: none;
+      overflow: visible;
       border-right: none;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: none;
+      border-top: 1px solid #e5e5e5;
     }
     .content {
       height: auto;
@@ -638,8 +639,28 @@
     .period-buttons {
       align-self: flex-start;
     }
+    .content {
+      order: 0;
+    }
+    .sidebar {
+      order: 1;
+    }
     .cards {
-      grid-template-columns: 1fr;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .card {
+      padding: 12px 10px;
+    }
+    .card p.label {
+      font-size: 11px;
+      margin: 0 0 4px;
+      white-space: nowrap;
+    }
+    .card p.value {
+      font-size: 15px;
+      white-space: nowrap;
     }
     .mytrades-layout {
       flex-direction: column;
@@ -750,7 +771,7 @@
       max-width: 100%;
     }
     .chart-container {
-      height: 300px;
+      height: 340px;
     }
   }
 </style>
@@ -1471,21 +1492,41 @@ function renderChart(yearLabel, displayLabel) {
             }
           }
         },
+        layout: { padding: { right: isNarrow() ? 4 : 0 } },
         scales: {
           y: {
             position: 'left',
             title: { display: !isNarrow(), text: '누적 순매수 (조원)', color: '#8a8a8a', font: { size: 12 } },
-            ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 10 : 11 }, maxTicksLimit: isNarrow() ? 6 : undefined },
+            ticks: {
+              color: '#8a8a8a',
+              font: { size: isNarrow() ? 10 : 11 },
+              maxTicksLimit: isNarrow() ? 5 : undefined,
+              padding: isNarrow() ? 2 : 3
+            },
             grid: { color: '#e2e2e2' }
           },
           y1: {
             position: 'right',
             title: { display: !isNarrow(), text: '코스피 지수', color: '#008300', font: { size: 12 } },
-            ticks: { color: '#008300', font: { size: isNarrow() ? 10 : 11 }, maxTicksLimit: isNarrow() ? 6 : undefined },
+            ticks: {
+              color: '#008300',
+              font: { size: isNarrow() ? 10 : 11 },
+              maxTicksLimit: isNarrow() ? 5 : undefined,
+              padding: isNarrow() ? 2 : 3,
+              callback: value => isNarrow() ? Math.round(value).toLocaleString() : value
+            },
             grid: { display: false }
           },
           x: {
-            ticks: { color: '#8a8a8a', font: { size: 10 }, maxRotation: isNarrow() ? 45 : 60, autoSkip: true, maxTicksLimit: isNarrow() ? 6 : 16 },
+            ticks: {
+              color: '#8a8a8a',
+              font: { size: isNarrow() ? 9 : 10 },
+              maxRotation: isNarrow() ? 0 : 60,
+              minRotation: 0,
+              autoSkip: true,
+              maxTicksLimit: isNarrow() ? 5 : 16,
+              padding: 4
+            },
             grid: { display: false }
           }
         }
