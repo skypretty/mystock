@@ -702,20 +702,30 @@
     .sidebar {
       order: 1;
     }
+    .wrap {
+      display: flex;
+      flex-direction: column;
+    }
     .title-row {
+      order: 0;
       margin-bottom: 4px;
     }
+    .legend {
+      order: 1;
+      margin-bottom: 16px;
+    }
+    .chart-container {
+      order: 2;
+    }
     .cards {
+      order: 3;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 0;
-      margin-top: 14px;
-      margin-bottom: 30px;
+      margin-top: 26px;
+      margin-bottom: 0;
       background: #f5f5f5;
       border-radius: 8px;
       padding: 4px 4px;
-    }
-    .legend {
-      margin-bottom: 16px;
     }
     .card {
       position: relative;
@@ -733,12 +743,12 @@
       border-left: 1px solid #dcdcdc;
     }
     .card p.label {
-      font-size: 11px;
-      margin: 0 0 5px;
+      font-size: 12.5px;
+      margin: 0 0 6px;
       white-space: nowrap;
     }
     .card p.value {
-      font-size: 15px;
+      font-size: 17px;
       white-space: nowrap;
     }
     .mytrades-layout {
@@ -950,20 +960,29 @@
     }
     .subtitle {
       color: #555;
+      font-size: 13.5px;
     }
     .legend {
       color: #333;
       font-weight: 500;
+      font-size: 14px;
     }
     .card p.label {
       color: #555;
       font-weight: 500;
     }
+    .year-card {
+      padding: 13px 14px;
+    }
     .year-card .year-label {
       color: #333;
+      font-size: 13.5px;
+      margin-bottom: 8px;
     }
     .year-card .row {
       font-weight: 500;
+      font-size: 13.5px;
+      padding: 3px 0;
     }
     .year-card .row span:first-child {
       color: #555;
@@ -971,7 +990,8 @@
     .month-note-box {
       color: #2b2b2b;
       padding: 18px;
-      line-height: 1.85;
+      line-height: 1.9;
+      font-size: 14.5px;
     }
     /* Centered, but biased up so the keyboard cannot cover the dialog. */
     .pw-overlay {
@@ -994,6 +1014,10 @@
     }
     .philosophy-list {
       color: #2b2b2b;
+      font-size: 14.5px;
+    }
+    .month-block h4.collapsible-header {
+      font-size: 16px;
     }
     .footer-note {
       color: #777;
