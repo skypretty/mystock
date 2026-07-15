@@ -3,10 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>주식 투자 기록</title>
+<title>주식왕 한개미</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-<meta property="og:title" content="주식 투자 기록">
+<meta property="og:title" content="주식왕 한개미">
 <meta property="og:description" content="투자자별 누적 순매매 동향과 매매 기록">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
@@ -1819,8 +1819,8 @@ function renderChart(yearLabel, displayLabel) {
         labels,
         datasets: [
           { label: '개인', data: individual, borderColor: '#808080', backgroundColor: '#808080', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: isNarrow() ? 1 : 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: isNarrow() ? 1 : 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
           { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
