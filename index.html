@@ -706,36 +706,32 @@
       margin-bottom: 4px;
     }
     .cards {
-      display: block;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
       margin-top: 14px;
       margin-bottom: 30px;
       background: #f5f5f5;
       border-radius: 8px;
-      padding: 4px 18px;
+      padding: 4px 4px;
     }
     .legend {
       margin-bottom: 16px;
     }
     .card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
       background: transparent;
       border-radius: 0;
-      border-bottom: 1px solid #e5e5e5;
-      padding: 13px 0;
+      padding: 14px 12px;
     }
-    .card:last-child {
-      border-bottom: none;
+    .card + .card {
+      border-left: 1px solid #e2e2e2;
     }
     .card p.label {
-      font-size: 13px;
-      margin: 0;
+      font-size: 11px;
+      margin: 0 0 5px;
       white-space: nowrap;
     }
     .card p.value {
-      font-size: 17px;
+      font-size: 15px;
       white-space: nowrap;
     }
     .mytrades-layout {
@@ -1004,7 +1000,7 @@
       max-width: 100%;
     }
     .chart-container {
-      height: 380px;
+      height: 300px;
     }
   }
 </style>
