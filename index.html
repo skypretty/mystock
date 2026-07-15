@@ -1211,7 +1211,7 @@
         <span><span class="dot" style="background:#808080"></span>개인</span>
         <span><span class="dot" style="background:#e34948"></span>외국인</span>
         <span><span class="dot" style="background:#2a78d6"></span>기관</span>
-        <span><span class="dot" style="background:#f5a623"></span>코스피</span>
+        <span><span class="dot" style="background:#008300"></span>코스피</span>
       </div>
 
       <div class="chart-container">
@@ -1709,10 +1709,10 @@ function renderChart(yearLabel, displayLabel) {
       data: {
         labels,
         datasets: [
-          { label: '개인', data: individual, borderColor: '#808080', backgroundColor: '#808080', borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '코스피', data: kospi, borderColor: '#f5a623', backgroundColor: '#f5a623', borderWidth: isNarrow() ? 1.75 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
+          { label: '개인', data: individual, borderColor: '#808080', backgroundColor: '#808080', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: isNarrow() ? 1 : 2, borderDash: [6,3], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: isNarrow() ? 1 : 1.5, borderDash: [2,2], pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
       plugins: [crosshairPlugin],
@@ -1767,8 +1767,8 @@ function renderChart(yearLabel, displayLabel) {
             display: !isNarrow(),
             // Without headroom the KOSPI line is pinned to the axis line.
             grace: isNarrow() ? '12%' : '4%',
-            title: { display: true, text: '코스피 지수', color: '#d18a00', font: { size: 12 } },
-            ticks: { color: '#d18a00', font: { size: 11 }, padding: 3 },
+            title: { display: true, text: '코스피 지수', color: '#008300', font: { size: 12 } },
+            ticks: { color: '#008300', font: { size: 11 }, padding: 3 },
             grid: { display: false }
           },
           x: {
