@@ -119,6 +119,27 @@
   .mytrades-col.philosophy.is-collapsed .philosophy-header {
     margin-bottom: 0;
   }
+  .sidebar h2.section-toggle {
+    cursor: pointer;
+  }
+  .sidebar h2.section-toggle .arrow {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-right: 1.5px solid #999;
+    border-bottom: 1.5px solid #999;
+    border-top: none;
+    border-left: none;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+    margin-left: 4px;
+  }
+  .sidebar h2.section-toggle.collapsed .arrow {
+    transform: rotate(-45deg);
+  }
+  .collapsible-content.collapsed {
+    display: none;
+  }
   .philosophy-list {
     flex: 1;
     margin: 0;
@@ -422,20 +443,19 @@
     border-bottom: none;
   }
   .year-card {
-    background: #ffffff;
-    border: 2px solid #e5e5e5;
+    background: #f2f3f5;
+    border: none;
     border-radius: 8px;
     padding: 10px 12px;
     margin-bottom: 8px;
     cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    transition: background 0.15s ease;
   }
   .year-card:hover {
-    border-color: #c9c9c9;
+    background: #eceef1;
   }
   .year-card.active {
-    border-color: #333;
-    background: #fff;
+    background: #e0e4ea;
   }
   .year-card.active .year-label {
     color: #1a1a1a;
@@ -662,7 +682,7 @@
     h1,
     .mytrades-col h2,
     .sidebar h2 {
-      font-size: 18px;
+      font-size: 20.5px;
       font-weight: 600;
     }
     .sidebar {
@@ -796,6 +816,8 @@
     }
     .app-logo {
       order: 2;
+      width: 38px;
+      height: 38px;
       margin-right: 0;
       margin-left: 12px;
     }
@@ -936,12 +958,12 @@
       font-weight: 600;
     }
     .day-row.header {
-      background: #ebebeb;
-      border-radius: 10px;
-      border-bottom: none;
-      margin-bottom: 4px;
-      padding: 9px 6px;
-      color: #555;
+      background: transparent;
+      border-radius: 0;
+      border-bottom: 1.5px solid #e5e5e5;
+      margin-bottom: 2px;
+      padding: 2px 6px 9px;
+      color: #a0a0a0;
       font-weight: 600;
     }
     .day-row {
@@ -1048,7 +1070,7 @@
     }
     .wrap {
       background: #fff;
-      border-radius: 14px;
+      border-radius: 30px;
       padding: 20px 16px;
     }
     .sidebar {
@@ -1058,7 +1080,7 @@
     }
     .sidebar-section {
       background: #fff;
-      border-radius: 14px;
+      border-radius: 30px;
       padding: 20px 16px;
       margin: 10px 0 0;
       border: none;
@@ -1072,7 +1094,7 @@
     }
     .mytrades-col {
       background: #fff;
-      border-radius: 14px;
+      border-radius: 30px;
       padding: 20px 16px;
     }
     .mytrades-col.philosophy {
@@ -1244,7 +1266,7 @@
 
   <aside class="sidebar" id="sidebarPanel">
     <div class="sidebar-section">
-      <h2 data-target="yearlySummary">년도별 누적데이터 <span class="arrow"></span></h2>
+      <h2 class="section-toggle" id="yearlyToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="yearlySummary">년도별 누적데이터 <span class="arrow"></span></h2>
       <div id="yearlySummary" class="collapsible-content"></div>
     </div>
 
@@ -2042,6 +2064,21 @@ philosophyToggle.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     togglePhilosophy();
+  }
+});
+
+const yearlyToggle = document.getElementById('yearlyToggle');
+const yearlySummaryPanel = document.getElementById('yearlySummary');
+function toggleYearly() {
+  const collapsed = yearlySummaryPanel.classList.toggle('collapsed');
+  yearlyToggle.classList.toggle('collapsed', collapsed);
+  yearlyToggle.setAttribute('aria-expanded', String(!collapsed));
+}
+yearlyToggle.addEventListener('click', toggleYearly);
+yearlyToggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    toggleYearly();
   }
 });
 
