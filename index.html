@@ -718,12 +718,19 @@
       margin-bottom: 16px;
     }
     .card {
+      position: relative;
       background: transparent;
       border-radius: 0;
       padding: 14px 12px;
     }
-    .card + .card {
-      border-left: 1px solid #e2e2e2;
+    .card + .card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      border-left: 1px solid #dcdcdc;
     }
     .card p.label {
       font-size: 11px;
