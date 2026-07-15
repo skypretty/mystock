@@ -1036,6 +1036,61 @@
     .chart-container {
       height: 300px;
     }
+
+    /* Section = card on a light gray page (mobile only) */
+    #view-domestic,
+    #view-mytrades {
+      background: #eceef1;
+    }
+    .content {
+      padding: 10px 10px 2px;
+      background: transparent;
+    }
+    .wrap {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 16px;
+    }
+    .sidebar {
+      padding: 0 10px 14px;
+      background: transparent;
+      border: none;
+    }
+    .sidebar-section {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 16px;
+      margin: 10px 0 0;
+      border: none;
+    }
+    .sidebar-section + .sidebar-section {
+      margin-top: 10px;
+    }
+    .mytrades-layout {
+      padding: 10px 10px 0;
+      gap: 10px;
+    }
+    .mytrades-col {
+      background: #fff;
+      border-radius: 14px;
+      padding: 20px 16px;
+    }
+    .mytrades-col.philosophy {
+      border-bottom: none;
+    }
+    .mytrades-col.philosophy.is-collapsed {
+      padding-bottom: 20px;
+    }
+    #view-domestic,
+    #view-overseas,
+    #view-mytrades {
+      scrollbar-width: none;
+    }
+    #view-domestic::-webkit-scrollbar,
+    #view-overseas::-webkit-scrollbar,
+    #view-mytrades::-webkit-scrollbar {
+      display: none;
+    }
   }
 </style>
 </head>
