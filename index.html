@@ -600,6 +600,10 @@
   }
   .chart-container canvas {
     transition: opacity 0.13s ease;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
   }
   .chart-container canvas.swapping {
     opacity: 0;
@@ -1866,10 +1870,20 @@ function renderChart(yearLabel, displayLabel) {
         plugins: {
           legend: { display: false },
           tooltip: {
-            padding: 12,
+            backgroundColor: 'rgba(26, 26, 26, 0.92)',
+            cornerRadius: 12,
+            padding: 14,
             boxPadding: 6,
             bodySpacing: 8,
             titleMarginBottom: 10,
+            titleColor: '#fff',
+            bodyColor: '#f0f0f0',
+            titleFont: { size: 13, weight: '600' },
+            bodyFont: { size: 12 },
+            caretPadding: 8,
+            caretSize: 6,
+            displayColors: true,
+            usePointStyle: true,
             callbacks: {
               label: (ctx) => {
                 if (ctx.dataset.label === '코스피') {
@@ -1931,6 +1945,9 @@ function renderChart(yearLabel, displayLabel) {
       chartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
       chartInstance.update('none');
     };
+    // Leave only the tooltip interaction; block long-press copy/save and drag.
+    canvas.addEventListener('contextmenu', e => e.preventDefault());
+    canvas.addEventListener('dragstart', e => e.preventDefault());
     canvas.addEventListener('mouseleave', clearTooltip, { passive: true });
     ['touchend', 'touchcancel'].forEach(evt => {
       // Chart.js handles the touch after us and would re-show the tooltip,
