@@ -490,6 +490,24 @@
     border-radius: 8px;
     background: #fff;
   }
+  .day-row.hidden {
+    display: none;
+  }
+  .day-more {
+    display: block;
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid #f0f0f0;
+    padding: 12px 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #666;
+    cursor: pointer;
+  }
+  .day-more:hover {
+    color: #1a1a1a;
+  }
   .day-row {
     display: grid;
     grid-template-columns: 38px repeat(4, 1fr) 0.85fr;
@@ -962,18 +980,28 @@
       font-weight: 600;
     }
     .day-row.header {
+      position: relative;
       background: transparent;
       border-radius: 0;
-      border-bottom: 1.5px solid #e5e5e5;
-      margin-bottom: 2px;
-      padding: 2px 6px 9px;
+      border-bottom: none;
+      margin-bottom: 4px;
+      padding: 2px 6px 12px;
       color: #a0a0a0;
       font-weight: 600;
+    }
+    .day-row.header::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1.5px;
+      background: linear-gradient(to right, rgba(200,200,200,0), rgba(200,200,200,0.85) 22%, rgba(200,200,200,0.85) 78%, rgba(200,200,200,0));
     }
     .day-row {
       grid-template-columns: 32px repeat(4, minmax(0, 1fr)) minmax(0, 0.8fr);
       gap: 4px;
-      padding: 8px 6px;
+      padding: 12px 6px;
       font-size: 10px;
       font-weight: 500;
       white-space: nowrap;
@@ -2016,25 +2044,64 @@ function kospiPctChange(dataArr, idx, kospiMap) {
   return { text: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%', cls: pct >= 0 ? 'pos' : 'neg' };
 }
 
+const DAY_LIST_LIMIT = 10;
+function renderDayList(el, data, kospiIndex) {
+  const rows = data.map((row, idx) => ({ row, pct: kospiPctChange(data, idx, kospiIndex) })).reverse();
+  rows.forEach(({ row, pct }, i) => {
+    const div = document.createElement('div');
+    div.className = 'day-row' + (i >= DAY_LIST_LIMIT ? ' extra hidden' : '');
+    div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex)}</span><span class="${pct.cls}">${pct.text}</span>`;
+    el.appendChild(div);
+  });
+  if (rows.length > DAY_LIST_LIMIT) {
+    const hiddenCount = rows.length - DAY_LIST_LIMIT;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day-more';
+    btn.textContent = `더보기 (${hiddenCount})`;
+    btn.addEventListener('click', () => {
+      const nowExpanded = !el.querySelector('.day-row.extra.hidden');
+      el.querySelectorAll('.day-row.extra').forEach(r => r.classList.toggle('hidden', nowExpanded));
+      btn.textContent = nowExpanded ? `더보기 (${hiddenCount})` : '접기';
+    });
+    el.appendChild(btn);
+  }
+}
+
 const list2025El = document.getElementById('list2025');
 if (data2025.length === 0) {
   list2025El.innerHTML = `<p class="empty-note">2025년 데이터가 아직 없습니다.<br>일자별 순매수 데이터를 추가해 주시면 이 자리에 반영됩니다.</p>`;
 } else {
-  data2025.map((row, idx) => ({ row, pct: kospiPctChange(data2025, idx, kospiIndex2025) })).reverse().forEach(({ row, pct }) => {
-    const div = document.createElement('div');
-    div.className = 'day-row';
-    div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex2025)}</span><span class="${pct.cls}">${pct.text}</span>`;
-    list2025El.appendChild(div);
-  });
+  renderDayList(list2025El, data2025, kospiIndex2025);
 }
 
 const list2026El = document.getElementById('list2026');
-data2026.map((row, idx) => ({ row, pct: kospiPctChange(data2026, idx, kospiIndex2026) })).reverse().forEach(({ row, pct }) => {
-  const div = document.createElement('div');
-  div.className = 'day-row';
-  div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex2026)}</span><span class="${pct.cls}">${pct.text}</span>`;
-  list2026El.appendChild(div);
-});
+renderDayList(list2026El, data2026, kospiIndex2026);
+
+// Scrolling back up to the top of the day list resets it to the first 10 rows.
+function collapseDayLists() {
+  document.querySelectorAll('.day-list .day-more').forEach(btn => {
+    const list = btn.parentElement;
+    if (!list.querySelector('.day-row.extra:not(.hidden)')) return;
+    list.querySelectorAll('.day-row.extra').forEach(r => r.classList.add('hidden'));
+    btn.textContent = `더보기 (${list.querySelectorAll('.day-row.extra').length})`;
+  });
+}
+// Reset to the first 10 rows after the user has scrolled down into the list
+// and then scrolled back up far enough that its header is well in view again.
+let dayEngaged = false;
+function onDayScroll() {
+  const tabs = document.querySelector('.day-tabs');
+  if (!tabs) return;
+  const top = tabs.getBoundingClientRect().top;
+  if (top < 0) {
+    dayEngaged = true;
+  } else if (dayEngaged && top > 120) {
+    dayEngaged = false;
+    collapseDayLists();
+  }
+}
+document.addEventListener('scroll', onDayScroll, true);
 
 renderChart('2025~2026년 총합');
 layoutMonthPnl();
