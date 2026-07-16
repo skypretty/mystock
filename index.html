@@ -25,6 +25,14 @@
     margin: 0;
     padding: 0;
   }
+  /* 스크롤바는 숨기되 스크롤 기능은 유지 */
+  * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  *::-webkit-scrollbar {
+    display: none;
+  }
   .app-header {
     display: flex;
     align-items: center;
@@ -391,13 +399,14 @@
     min-height: calc(100dvh - 57px);
   }
   .sidebar {
-    width: 420px;
+    width: 500px;
     flex-shrink: 0;
     background: #f5f5f5;
     border-right: 1px solid #e5e5e5;
     height: calc(100vh - 57px);
     height: calc(100dvh - 57px);
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 20px 16px;
   }
   .day-tabs {
@@ -470,13 +479,19 @@
     color: #666;
     margin: 0 0 6px;
   }
-  .year-card .row {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    padding: 2px 0;
+  .year-card .year-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
   }
-  .year-card .row span:first-child { color: #888; }
+  .year-card .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+  .year-card .stat .k { font-size: 11px; color: #888; }
+  .year-card .stat .v { font-size: 13px; font-weight: 600; white-space: nowrap; }
   .empty-note {
     font-size: 12px;
     color: #999;
@@ -484,11 +499,9 @@
     line-height: 1.5;
   }
   .day-list {
-    max-height: 320px;
-    overflow-y: auto;
-    border: 1px solid #e5e5e5;
-    border-radius: 8px;
-    background: #fff;
+    border: none;
+    border-radius: 0;
+    background: transparent;
   }
   .day-row.hidden {
     display: none;
@@ -499,8 +512,8 @@
     background: none;
     border: none;
     border-top: 1px solid #f0f0f0;
-    margin-top: 8px;
-    padding: 18px 0 12px;
+    margin-top: 4px;
+    padding: 10px 0 8px;
     font-size: 12.5px;
     font-weight: 600;
     color: #666;
@@ -511,7 +524,7 @@
   }
   .day-row {
     display: grid;
-    grid-template-columns: 38px repeat(4, 1fr) 0.85fr;
+    grid-template-columns: 38px repeat(5, minmax(0, 1fr)) minmax(0, 0.85fr);
     gap: 8px;
     padding: 8px 10px;
     font-size: 11px;
@@ -530,12 +543,76 @@
   .day-row span:first-child { text-align: left; color: #666; }
   .pos { color: #c0392b; }
   .neg { color: #2a78d6; }
+  /* PC(넓은 화면): 연기금 컬럼 노출, 더보기 없이 전체 표시 */
+  @media (min-width: 769px) {
+    /* body 자체는 스크롤 금지 → 헤더 절대 고정, 스크롤은 좌/우 컬럼 안에서만 */
+    html, body { overflow: hidden; height: 100vh; }
+    .day-row span { overflow: hidden; text-overflow: ellipsis; }
+    .app-header { position: sticky; top: 0; z-index: 100; }
+    /* 좌/우 컬럼은 각자 독립 스크롤 (base의 .sidebar / .content 스크롤 유지). */
+    /* 타이틀 아래 구분선 + 컬럼헤더 고정(flex item) */
+    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; flex: 0 0 auto; }
+    /* 사이드바: 년도별 고정 + 일별 섹션 */
+    #view-domestic .sidebar {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #view-domestic .sidebar > .sidebar-section:first-child {
+      flex: 0 0 auto;   /* 년도별 누적데이터: 항상 고정 */
+    }
+    /* 일별 데이터 섹션: 타이틀·탭·컬럼헤더 고정, 실데이터(#dayRows)만 스크롤 */
+    #view-domestic .sidebar > .sidebar-section:last-child {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    #view-domestic #dayListSection:not(.collapsed) {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #view-domestic .day-tabs { flex: 0 0 auto; }
+    #view-domestic .day-list {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #view-domestic .day-rows {
+      flex: 1 1 auto;
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
+    #view-domestic .panel-card {
+      background: #fff;
+      border: 1px solid #ececec;
+      border-radius: 16px;
+      padding: 22px 24px;
+    }
+    #view-domestic .panel-card .month-updown,
+    #view-domestic .month-updown { margin-top: 0; }
+    /* 달력 섹션: 2컬럼 (새 월 컬럼 자리 확보) */
+    #view-domestic .calendar-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+      margin-top: 20px;
+      align-items: start;
+    }
+  }
   .content {
     flex: 1;
     min-width: 0;
     height: calc(100vh - 57px);
     height: calc(100dvh - 57px);
     overflow-y: auto;
+    overscroll-behavior: contain;
     padding: 32px 24px;
   }
   .wrap {
@@ -609,6 +686,69 @@
   .chart-container canvas.swapping {
     opacity: 0;
   }
+  .month-updown {
+    margin-top: 28px;
+  }
+  .mu-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+  .mu-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0;
+  }
+  .mu-legend {
+    display: flex;
+    gap: 14px;
+    font-size: 12px;
+    color: #666;
+  }
+  .mu-legend span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .mu-swatch {
+    width: 11px;
+    height: 11px;
+    border-radius: 3px;
+    display: inline-block;
+  }
+  .mu-swatch.up { background: #e34948; }
+  .mu-swatch.down { background: #2a78d6; }
+  .mu-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    max-width: 460px;
+  }
+  .mu-dow {
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #999;
+    padding-bottom: 2px;
+  }
+  .mu-cell {
+    aspect-ratio: 1 / 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    border-radius: 8px;
+  }
+  .mu-day { font-size: 13px; font-weight: 600; line-height: 1; }
+  .mu-pct { font-size: 10px; font-weight: 600; line-height: 1; opacity: 0.92; }
+  .mu-cell.up { background: #e34948; color: #fff; }
+  .mu-cell.down { background: #2a78d6; color: #fff; }
+  .mu-cell.flat { background: #b8b8b8; color: #fff; }
+  .mu-cell.none { background: #f3f4f6; color: #c4c4c4; }
+  .mu-cell.empty { background: transparent; }
   .footer-note {
     font-size: 12px;
     color: #999;
@@ -1011,6 +1151,7 @@
       font-weight: 500;
       white-space: nowrap;
     }
+    .col-pension { display: none; } /* 모바일은 연기금 컬럼 숨김 */
     .day-row span {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1040,13 +1181,13 @@
       font-size: 13.5px;
       margin-bottom: 8px;
     }
-    .year-card .row {
-      font-weight: 500;
-      font-size: 13.5px;
-      padding: 3px 0;
-    }
-    .year-card .row span:first-child {
+    .year-card .stat .k {
+      font-size: 12px;
       color: #555;
+    }
+    .year-card .stat .v {
+      font-size: 14px;
+      font-weight: 600;
     }
     .month-note-box {
       color: #2b2b2b;
@@ -1315,10 +1456,9 @@
           <button class="day-tab" data-year="2025">2025</button>
           <button class="day-tab active" data-year="2026">2026</button>
         </div>
-        <div class="day-list">
-          <div class="day-row header"><span>날짜</span><span>개인</span><span>외국인</span><span>기관</span><span>코스피</span><span>등락률</span></div>
-          <div id="list2025" style="display:none;"></div>
-          <div id="list2026"></div>
+        <div class="day-list" id="dayList">
+          <div class="day-row header"><span>날짜</span><span>개인</span><span>외국인</span><span>기관</span><span class="col-pension">연기금</span><span>코스피</span><span>등락률</span></div>
+          <div class="day-rows" id="dayRows"></div>
         </div>
       </div>
     </div>
@@ -1326,38 +1466,54 @@
 
   <main class="content">
     <div class="wrap">
-      <div class="title-row">
-        <div class="title-block">
-          <h1>투자자별 누적 순매매 동향</h1>
-          <p class="subtitle" id="pageSubtitle">2026.01.02 ~ 2026.07.10 (KOSPI, 단위: 조원)</p>
+      <section class="panel-card">
+        <div class="title-row">
+          <div class="title-block">
+            <h1>투자자별 누적 순매매 동향</h1>
+            <p class="subtitle" id="pageSubtitle">2026.01.02 ~ 2026.07.10 (KOSPI, 단위: 조원)</p>
+          </div>
+          <div class="period-buttons" id="periodButtons"></div>
         </div>
-        <div class="period-buttons" id="periodButtons"></div>
-      </div>
 
-      <div class="cards">
-        <div class="card">
-          <p class="label">개인 순매수</p>
-          <p class="value red" id="totalIndividual">+108.5조원</p>
+        <div class="cards">
+          <div class="card">
+            <p class="label">개인 순매수</p>
+            <p class="value red" id="totalIndividual">+108.5조원</p>
+          </div>
+          <div class="card">
+            <p class="label">기관 순매수</p>
+            <p class="value gray" id="totalInstitution">+37.6조원</p>
+          </div>
+          <div class="card">
+            <p class="label">외국인 순매도</p>
+            <p class="value blue" id="totalForeign">-160.6조원</p>
+          </div>
         </div>
-        <div class="card">
-          <p class="label">기관 순매수</p>
-          <p class="value gray" id="totalInstitution">+37.6조원</p>
-        </div>
-        <div class="card">
-          <p class="label">외국인 순매도</p>
-          <p class="value blue" id="totalForeign">-160.6조원</p>
-        </div>
-      </div>
 
-      <div class="legend">
-        <span><span class="dot" style="background:#808080"></span>개인</span>
-        <span><span class="dot" style="background:#e34948"></span>외국인</span>
-        <span><span class="dot" style="background:#2a78d6"></span>기관</span>
-        <span><span class="dot" style="background:#008300"></span>코스피</span>
-      </div>
+        <div class="legend">
+          <span><span class="dot" style="background:#808080"></span>개인</span>
+          <span><span class="dot" style="background:#e34948"></span>외국인</span>
+          <span><span class="dot" style="background:#2a78d6"></span>기관</span>
+          <span><span class="dot" style="background:#e8912d"></span>연기금</span>
+          <span><span class="dot" style="background:#008300"></span>코스피</span>
+        </div>
 
-      <div class="chart-container">
-        <canvas id="investorChart" role="img" aria-label="2026년 1월 2일부터 7월 10일까지 개인, 외국인, 기관의 누적 순매수 추이"></canvas>
+        <div class="chart-container">
+          <canvas id="investorChart" role="img" aria-label="2026년 1월 2일부터 7월 10일까지 개인, 외국인, 기관의 누적 순매수 추이"></canvas>
+        </div>
+      </section>
+
+      <div class="calendar-row">
+        <section class="panel-card month-updown" id="monthUpdown">
+          <div class="mu-head">
+            <p class="mu-title">7월 등락 달력</p>
+            <div class="mu-legend">
+              <span><span class="mu-swatch up"></span>상승</span>
+              <span><span class="mu-swatch down"></span>하락</span>
+            </div>
+          </div>
+          <div class="mu-grid" id="muGrid"></div>
+        </section>
       </div>
 
     </div>
@@ -1386,251 +1542,253 @@ const dailyIndividual2026 = [-4252,-15141,5963,-2944,12540,1339,-1013,-7125,-437
 const dailyForeign2026 = [6309,21726,-6184,12548,-979,-16068,-3512,-2793,-3760,3450,4350,5532,1232,4394,-2432,1438,-1588,8448,4008,-14897,-19729,-25168,7038,-9413,-50108,-33233,4320,1474,8461,29954,-9220,-9396,-7420,-11132,-2013,-13082,-21135,-70528,-51487,2303,-1446,-19418,-31735,10283,-2563,-23831,-14502,-8485,-1740,8802,-18760,-12402,-36751,-19863,-12895,-29370,-34286,-20945,-38386,-6411,-1368,8035,-1596,3704,19089,18476,10641,-4579,8276,4973,4814,-19974,-2338,11565,-6762,-820,-19496,8563,-1843,-6071,-14559,29308,31085,-66987,-52967,-28147,-56090,-37227,-21450,-56040,-36492,-57242,-29310,-2212,-19221,-1321,-2493,-27414,-10421,-28219,-63035,-66663,-27638,-2644,-20064,-27754,-14640,22041,10774,15353,-9952,12776,-3555,-25466,-42047,-46546,-8754,-42906,-77332,-37992,-17028,-43706,-21750,-13144,-29172,3437,1343,-3228,-16705,9523,23031,-11397];
 
 const dailyInstitution2026 = [-2477,-7046,-664,-9397,-14014,12046,2101,7881,5887,12905,3083,-256,-6500,3217,-1568,4790,-15414,2474,-14021,-1673,-4241,-22125,21708,17836,-20693,9414,27123,5643,6927,13800,831,16542,16149,-1271,23773,14701,12569,5666,-8859,-5978,-17186,-11142,-15441,9164,7821,775,-10434,911,7341,31093,-6649,-10260,-38173,9683,23230,-2999,7785,8450,10251,40419,-14517,7390,8371,-4001,27268,-25125,-2031,-6698,12545,368,10783,1501,2938,9181,-4046,-2965,8053,11349,3532,4771,2838,20098,-22894,8917,12542,-458,-12138,16876,1927,-17347,13904,1575,11070,29008,7583,8168,-126,-10422,23688,24427,-546,15255,-13809,-17164,25048,-22665,-7561,22870,4462,7076,5957,-7682,-12244,3034,-44760,19095,33244,-41224,29327,29332,-700,-20825,44079,-14618,-3108,-3552,12884,11314,-22338,32159,1992,-12274];
+// 연기금등 (기관 내 세부, 억원) — 네이버 investorDealTrendDay
+const dailyPension2026 = [-196,-1564,-724,-947,-1510,527,-501,22,149,-312,-901,-1188,-1729,-564,-2049,-2719,-1730,-572,-900,-1197,-307,-399,958,290,-985,1323,-863,-977,-263,722,563,154,-1422,-2685,-718,750,-981,-2283,412,-727,-872,-1748,-1020,-93,-893,-374,285,412,843,960,-649,606,-1617,435,147,-2423,-228,-812,-291,-192,91,-557,-850,-818,-2083,49,-416,-1733,-256,-1116,-299,-757,80,622,995,197,-202,-1771,-277,-21,350,-507,-1590,494,-502,-2948,-1857,-2363,-1933,-949,16,-1386,-1515,-959,-1161,-1162,-3930,-275,909,-305,707,-492,-607,485,-233,-2642,-1125,-3248,250,-338,-1676,-3921,-5267,-1834,-2937,131,-25,-482,581,-394,-2177,-495,563,-338,285,-950,736,355,-662,868,205,1881];
 
 // 2025년도 데이터
 const data2025 = [
-{date:'01.02',p:4143,f:-2388,i:-2589},
-{date:'01.03',p:-6985,f:2801,i:3204},
-{date:'01.06',p:-5370,f:3662,i:654},
-{date:'01.07',p:-2049,f:1587,i:-423},
-{date:'01.08',p:-3855,f:2209,i:1096},
-{date:'01.09',p:-3270,f:7482,i:-5056},
-{date:'01.10',p:3381,f:-16,i:-3976},
-{date:'01.13',p:7486,f:-8717,i:260},
-{date:'01.14',p:2992,f:-2946,i:-580},
-{date:'01.15',p:1231,f:561,i:-2590},
-{date:'01.16',p:-5757,f:6244,i:190},
-{date:'01.17',p:2864,f:-2331,i:-1007},
-{date:'01.20',p:2767,f:-4162,i:664},
-{date:'01.21',p:534,f:-1731,i:620},
-{date:'01.22',p:-8232,f:3500,i:4208},
-{date:'01.23',p:7596,f:-6174,i:-2032},
-{date:'01.24',p:-3830,f:2751,i:436},
-{date:'01.31',p:9620,f:-11679,i:2859},
-{date:'02.03',p:11220,f:-8689,i:-3704},
-{date:'02.04',p:-2932,f:799,i:1231},
-{date:'02.05',p:-1929,f:645,i:312},
-{date:'02.06',p:-6060,f:3516,i:1612},
-{date:'02.07',p:3302,f:-2389,i:-2099},
-{date:'02.10',p:-700,f:-2786,i:2626},
-{date:'02.11',p:-4694,f:1402,i:2437},
-{date:'02.12',p:-1982,f:3729,i:-2217},
-{date:'02.13',p:-6096,f:-1138,i:6730},
-{date:'02.14',p:-652,f:-3218,i:3661},
-{date:'02.17',p:-336,f:-2228,i:2431},
-{date:'02.18',p:-1884,f:185,i:1648},
-{date:'02.19',p:-12186,f:3927,i:7767},
-{date:'02.20',p:2907,f:-2904,i:-1079},
-{date:'02.21',p:28,f:-2181,i:1181},
-{date:'02.24',p:1929,f:-2040,i:-925},
-{date:'02.25',p:3121,f:-3190,i:-944},
-{date:'02.26',p:-201,f:-3228,i:2404},
-{date:'02.27',p:4810,f:-1754,i:-3389},
-{date:'02.28',p:20324,f:-15524,i:-6167},
-{date:'03.04',p:2044,f:-1896,i:-1473},
-{date:'03.05',p:911,f:-2233,i:479},
-{date:'03.06',p:-3693,f:1382,i:1561},
-{date:'03.07',p:-1941,f:596,i:279},
-{date:'03.10',p:2097,f:-4242,i:1428},
-{date:'03.11',p:4929,f:-15373,i:-2381},
-{date:'03.12',p:-5050,f:3790,i:319},
-{date:'03.13',p:-737,f:-4804,i:4448},
-{date:'03.14',p:2079,f:-2894,i:-205},
-{date:'03.17',p:-11804,f:6152,i:4947},
-{date:'03.18',p:-6126,f:4408,i:950},
-{date:'03.19',p:-6744,f:3026,i:2873},
-{date:'03.20',p:-7013,f:5487,i:664},
-{date:'03.21',p:-5379,f:8478,i:-4020},
-{date:'03.24',p:-781,f:76,i:-288},
-{date:'03.25',p:-642,f:-787,i:691},
-{date:'03.26',p:-6798,f:3504,i:2603},
-{date:'03.27',p:1196,f:877,i:-3152},
-{date:'03.28',p:5408,f:-6403,i:31},
-{date:'03.31',p:7891,f:-15754,i:6673},
-{date:'04.01',p:866,f:-3901,i:1806},
-{date:'04.02',p:4791,f:-7242,i:1480},
-{date:'04.03',p:8014,f:-13752,i:4610},
-{date:'04.04',p:10770,f:-17869,i:6211},
-{date:'04.07',p:16721,f:-20957,i:2571},
-{date:'04.08',p:6029,f:-6425,i:-898},
-{date:'04.09',p:9389,f:-10007,i:-698},
-{date:'04.10',p:-10693,f:3287,i:6682},
-{date:'04.11',p:4339,f:-6888,i:1378},
-{date:'04.14',p:1939,f:-2420,i:-67},
-{date:'04.15',p:-1468,f:-1177,i:1831},
-{date:'04.16',p:3835,f:-4577,i:-153},
-{date:'04.17',p:-1102,f:-3519,i:3689},
-{date:'04.18',p:-223,f:-1052,i:816},
-{date:'04.21',p:1864,f:-2886,i:234},
-{date:'04.22',p:1667,f:-2430,i:107},
-{date:'04.23',p:-5485,f:-1977,i:6866},
-{date:'04.24',p:1351,f:-77,i:-1987},
-{date:'04.25',p:-7741,f:6126,i:5072},
-{date:'04.28',p:-496,f:-854,i:916},
-{date:'04.29',p:-1591,f:6925,i:-5804},
-{date:'04.30',p:3055,f:-1688,i:-2210},
-{date:'05.02',p:-2349,f:-1702,i:3228},
-{date:'05.07',p:-4646,f:3488,i:869},
-{date:'05.08',p:-13,f:1303,i:-1898},
-{date:'05.09',p:632,f:675,i:-1873},
-{date:'05.12',p:-3907,f:-71,i:3429},
-{date:'05.13',p:-1360,f:1714,i:-893},
-{date:'05.14',p:-10024,f:4704,i:5348},
-{date:'05.15',p:460,f:2723,i:-3681},
-{date:'05.16',p:-2823,f:1694,i:1134},
-{date:'05.19',p:2986,f:-1134,i:-1948},
-{date:'05.20',p:206,f:-1145,i:610},
-{date:'05.21',p:-3315,f:1920,i:1046},
-{date:'05.22',p:6848,f:-2237,i:-4319},
-{date:'05.23',p:1347,f:-585,i:-1026},
-{date:'05.26',p:-5158,f:1015,i:4323},
-{date:'05.27',p:537,f:-781,i:-201},
-{date:'05.28',p:-9907,f:2999,i:7438},
-{date:'05.29',p:-9963,f:2897,i:6842},
-{date:'05.30',p:6051,f:-6070,i:-160},
-{date:'06.02',p:982,f:1250,i:-2415},
-{date:'06.04',p:-12260,f:10507,i:2046},
-{date:'06.05',p:-11892,f:9801,i:2207},
-{date:'06.09',p:-2301,f:9767,i:-7332},
-{date:'06.10',p:-6269,f:6323,i:142},
-{date:'06.11',p:-3663,f:1661,i:2304},
-{date:'06.12',p:-1794,f:4073,i:-2304},
-{date:'06.13',p:4674,f:1210,i:-6461},
-{date:'06.16',p:463,f:-3224,i:2524},
-{date:'06.17',p:2245,f:-953,i:-1006},
-{date:'06.18',p:-4318,f:2870,i:1101},
-{date:'06.19',p:3500,f:-826,i:-3018},
-{date:'06.20',p:-5966,f:5626,i:372},
-{date:'06.23',p:13797,f:-3668,i:-9485},
-{date:'06.24',p:-5676,f:4383,i:2594},
-{date:'06.25',p:7580,f:-1108,i:-5883},
-{date:'06.26',p:8325,f:-5794,i:-4080},
-{date:'06.27',p:4868,f:-8580,i:3434},
-{date:'06.30',p:1892,f:-6489,i:4757},
-{date:'07.01',p:-6405,f:1760,i:4745},
-{date:'07.02',p:2329,f:-3278,i:720},
-{date:'07.03',p:-12330,f:6427,i:5484},
-{date:'07.04',p:2575,f:1624,i:-3822},
-{date:'07.07',p:1558,f:-937,i:-811},
-{date:'07.08',p:-2549,f:2461,i:-326},
-{date:'07.09',p:4310,f:-4105,i:-571},
-{date:'07.10',p:-5869,f:4694,i:447},
-{date:'07.11',p:1250,f:3259,i:-743},
-{date:'07.14',p:-3568,f:3707,i:-947},
-{date:'07.15',p:-3102,f:2123,i:-167},
-{date:'07.16',p:4016,f:555,i:-5525},
-{date:'07.17',p:-3356,f:493,i:1583},
-{date:'07.18',p:-3411,f:1878,i:320},
-{date:'07.21',p:-10578,f:8935,i:994},
-{date:'07.22',p:4780,f:-1288,i:-4128},
-{date:'07.23',p:-6982,f:4228,i:1917},
-{date:'07.24',p:-9513,f:7386,i:1273},
-{date:'07.25',p:-4616,f:2706,i:1100},
-{date:'07.28',p:-9975,f:4753,i:4520},
-{date:'07.29',p:-8259,f:6054,i:1167},
-{date:'07.30',p:-9844,f:5783,i:3307},
-{date:'07.31',p:2235,f:3450,i:-7053},
-{date:'08.01',p:16283,f:-6524,i:-10720},
-{date:'08.04',p:-2996,f:830,i:1316},
-{date:'08.05',p:-4785,f:2919,i:947},
-{date:'08.06',p:474,f:2804,i:-4020},
-{date:'08.07',p:-2048,f:-171,i:1092},
-{date:'08.08',p:1835,f:-1576,i:-1318},
-{date:'08.11',p:-1407,f:2169,i:-2160},
-{date:'08.12',p:634,f:-604,i:-981},
-{date:'08.13',p:-6648,f:6349,i:-809},
-{date:'08.14',p:-534,f:-779,i:197},
-{date:'08.18',p:3570,f:-4881,i:813},
-{date:'08.19',p:904,f:-4544,i:2539},
-{date:'08.20',p:-3929,f:-2185,i:5024},
-{date:'08.21',p:-2591,f:-152,i:1598},
-{date:'08.22',p:-4572,f:1826,i:1556},
-{date:'08.25',p:-3857,f:1224,i:1543},
-{date:'08.26',p:8519,f:-6836,i:-2657},
-{date:'08.27',p:569,f:-2023,i:277},
-{date:'08.28',p:-3939,f:-241,i:3264},
-{date:'08.29',p:2353,f:-3724,i:648},
-{date:'09.01',p:3469,f:-2720,i:-1940},
-{date:'09.02',p:-3474,f:4010,i:-1416},
-{date:'09.03',p:-1563,f:4359,i:-3756},
-{date:'09.04',p:-2847,f:2025,i:-232},
-{date:'09.05',p:-552,f:-1374,i:1124},
-{date:'09.08',p:-3848,f:2301,i:778},
-{date:'09.09',p:-10371,f:6808,i:2806},
-{date:'09.10',p:-22634,f:13817,i:9046},
-{date:'09.11',p:-11493,f:3000,i:8225},
-{date:'09.12',p:-20287,f:14355,i:6119},
-{date:'09.15',p:-1374,f:2667,i:-1376},
-{date:'09.16',p:-17637,f:17927,i:1083},
-{date:'09.17',p:2522,f:-347,i:-3075},
-{date:'09.18',p:-7816,f:2851,i:4294},
-{date:'09.19',p:5332,f:-3080,i:-3357},
-{date:'09.22',p:-7682,f:5653,i:2672},
-{date:'09.23',p:-2462,f:3414,i:-1363},
-{date:'09.24',p:17,f:-2486,i:2124},
-{date:'09.25',p:-5411,f:2196,i:2707},
-{date:'09.26',p:10997,f:-5707,i:-4892},
-{date:'09.29',p:-7480,f:4472,i:3014},
-{date:'09.30',p:-265,f:230,i:-497},
-{date:'10.01',p:-10812,f:8455,i:2208},
-{date:'10.02',p:-30715,f:31265,i:-675},
-{date:'10.10',p:-5022,f:10592,i:-5936},
-{date:'10.13',p:11649,f:-8220,i:-4471},
-{date:'10.14',p:20,f:5581,i:-6299},
-{date:'10.15',p:-9706,f:1631,i:7512},
-{date:'10.16',p:-13936,f:6533,i:7813},
-{date:'10.17',p:-3122,f:4438,i:-1688},
-{date:'10.20',p:-4109,f:-2500,i:6428},
-{date:'10.21',p:-1556,f:-124,i:2116},
-{date:'10.22',p:-769,f:-7033,i:7633},
-{date:'10.23',p:7505,f:-4071,i:-3972},
-{date:'10.24',p:-20005,f:5756,i:14054},
-{date:'10.27',p:-7969,f:6471,i:2343},
-{date:'10.28',p:15728,f:-16379,i:925},
-{date:'10.29',p:-3583,f:-1066,i:5196},
-{date:'10.30',p:9363,f:-1173,i:-8379},
-{date:'10.31',p:-2018,f:13212,i:-11064},
-{date:'11.03',p:6256,f:-7949,i:1841},
-{date:'11.04',p:27009,f:-22282,i:-4989},
-{date:'11.05',p:25538,f:-20695,i:-1877},
-{date:'11.06',p:8840,f:-16950,i:8301},
-{date:'11.07',p:6791,f:-4550,i:-2446},
-{date:'11.10',p:-11607,f:-1510,i:13066},
-{date:'11.11',p:-2830,f:770,i:2247},
-{date:'11.12',p:-4423,f:-4265,i:9093},
-{date:'11.13',p:-2343,f:9989,i:-7179},
-{date:'11.14',p:32346,f:-23575,i:-9005},
-{date:'11.17',p:-5000,f:5189,i:-245},
-{date:'11.18',p:12382,f:-5500,i:-6788},
-{date:'11.19',p:4450,f:-10495,i:6256},
-{date:'11.20',p:-13817,f:7406,i:7566},
-{date:'11.21',p:22695,f:-28229,i:4935},
-{date:'11.24',p:-4619,f:-7993,i:12719},
-{date:'11.25',p:-276,f:49,i:315},
-{date:'11.26',p:-18048,f:5158,i:12280},
-{date:'11.27',p:-6152,f:1546,i:4326},
-{date:'11.28',p:15685,f:-20369,i:4587},
-{date:'12.01',p:528,f:2235,i:-2333},
-{date:'12.02',p:-15763,f:12147,i:3929},
-{date:'12.03',p:-8984,f:2816,i:7364},
-{date:'12.04',p:5585,f:-6960,i:1318},
-{date:'12.05',p:-21156,f:9934,i:11528},
-{date:'12.08',p:-3449,f:3211,i:-308},
-{date:'12.09',p:-133,f:-889,i:494},
-{date:'12.10',p:-889,f:3739,i:-3003},
-{date:'12.11',p:3922,f:3656,i:-7753},
-{date:'12.12',p:-14625,f:414,i:14184},
-{date:'12.15',p:14210,f:-9569,i:-4803},
-{date:'12.16',p:12410,f:-10305,i:-2309},
-{date:'12.17',p:-3374,f:-322,i:3353},
-{date:'12.18',p:4130,f:-3459,i:-1006},
-{date:'12.19',p:-1412,f:-7573,i:8541},
-{date:'12.22',p:-26714,f:11017,i:16055},
-{date:'12.23',p:-12853,f:9551,i:3527},
-{date:'12.24',p:-7171,f:5225,i:2039},
-{date:'12.26',p:-23265,f:17790,i:4435},
-{date:'12.29',p:661,f:3337,i:-3133},
-{date:'12.30',p:8448,f:-4768,i:-3763}
+{date:'01.02',p:4143,f:-2388,i:-2589,pn:92},
+{date:'01.03',p:-6985,f:2801,i:3204,pn:410},
+{date:'01.06',p:-5370,f:3662,i:654,pn:400},
+{date:'01.07',p:-2049,f:1587,i:-423,pn:969},
+{date:'01.08',p:-3855,f:2209,i:1096,pn:1385},
+{date:'01.09',p:-3270,f:7482,i:-5056,pn:253},
+{date:'01.10',p:3381,f:-16,i:-3976,pn:2643},
+{date:'01.13',p:7486,f:-8717,i:260,pn:2593},
+{date:'01.14',p:2992,f:-2946,i:-580,pn:570},
+{date:'01.15',p:1231,f:561,i:-2590,pn:386},
+{date:'01.16',p:-5757,f:6244,i:190,pn:757},
+{date:'01.17',p:2864,f:-2331,i:-1007,pn:1314},
+{date:'01.20',p:2767,f:-4162,i:664,pn:736},
+{date:'01.21',p:534,f:-1731,i:620,pn:589},
+{date:'01.22',p:-8232,f:3500,i:4208,pn:881},
+{date:'01.23',p:7596,f:-6174,i:-2032,pn:1504},
+{date:'01.24',p:-3830,f:2751,i:436,pn:651},
+{date:'01.31',p:9620,f:-11679,i:2859,pn:355},
+{date:'02.03',p:11220,f:-8689,i:-3704,pn:2097},
+{date:'02.04',p:-2932,f:799,i:1231,pn:1387},
+{date:'02.05',p:-1929,f:645,i:312,pn:908},
+{date:'02.06',p:-6060,f:3516,i:1612,pn:471},
+{date:'02.07',p:3302,f:-2389,i:-2099,pn:1224},
+{date:'02.10',p:-700,f:-2786,i:2626,pn:1848},
+{date:'02.11',p:-4694,f:1402,i:2437,pn:587},
+{date:'02.12',p:-1982,f:3729,i:-2217,pn:102},
+{date:'02.13',p:-6096,f:-1138,i:6730,pn:683},
+{date:'02.14',p:-652,f:-3218,i:3661,pn:1760},
+{date:'02.17',p:-336,f:-2228,i:2431,pn:828},
+{date:'02.18',p:-1884,f:185,i:1648,pn:1210},
+{date:'02.19',p:-12186,f:3927,i:7767,pn:677},
+{date:'02.20',p:2907,f:-2904,i:-1079,pn:808},
+{date:'02.21',p:28,f:-2181,i:1181,pn:743},
+{date:'02.24',p:1929,f:-2040,i:-925,pn:178},
+{date:'02.25',p:3121,f:-3190,i:-944,pn:138},
+{date:'02.26',p:-201,f:-3228,i:2404,pn:574},
+{date:'02.27',p:4810,f:-1754,i:-3389,pn:459},
+{date:'02.28',p:20324,f:-15524,i:-6167,pn:59},
+{date:'03.04',p:2044,f:-1896,i:-1473,pn:515},
+{date:'03.05',p:911,f:-2233,i:479,pn:709},
+{date:'03.06',p:-3693,f:1382,i:1561,pn:-6},
+{date:'03.07',p:-1941,f:596,i:279,pn:463},
+{date:'03.10',p:2097,f:-4242,i:1428,pn:461},
+{date:'03.11',p:4929,f:-15373,i:-2381,pn:-269},
+{date:'03.12',p:-5050,f:3790,i:319,pn:-306},
+{date:'03.13',p:-737,f:-4804,i:4448,pn:-466},
+{date:'03.14',p:2079,f:-2894,i:-205,pn:561},
+{date:'03.17',p:-11804,f:6152,i:4947,pn:289},
+{date:'03.18',p:-6126,f:4408,i:950,pn:342},
+{date:'03.19',p:-6744,f:3026,i:2873,pn:230},
+{date:'03.20',p:-7013,f:5487,i:664,pn:-30},
+{date:'03.21',p:-5379,f:8478,i:-4020,pn:134},
+{date:'03.24',p:-781,f:76,i:-288,pn:50},
+{date:'03.25',p:-642,f:-787,i:691,pn:-196},
+{date:'03.26',p:-6798,f:3504,i:2603,pn:156},
+{date:'03.27',p:1196,f:877,i:-3152,pn:-255},
+{date:'03.28',p:5408,f:-6403,i:31,pn:401},
+{date:'03.31',p:7891,f:-15754,i:6673,pn:607},
+{date:'04.01',p:866,f:-3901,i:1806,pn:774},
+{date:'04.02',p:4791,f:-7242,i:1480,pn:1735},
+{date:'04.03',p:8014,f:-13752,i:4610,pn:2722},
+{date:'04.04',p:10770,f:-17869,i:6211,pn:2067},
+{date:'04.07',p:16721,f:-20957,i:2571,pn:4307},
+{date:'04.08',p:6029,f:-6425,i:-898,pn:1132},
+{date:'04.09',p:9389,f:-10007,i:-698,pn:579},
+{date:'04.10',p:-10693,f:3287,i:6682,pn:540},
+{date:'04.11',p:4339,f:-6888,i:1378,pn:1749},
+{date:'04.14',p:1939,f:-2420,i:-67,pn:1119},
+{date:'04.15',p:-1468,f:-1177,i:1831,pn:945},
+{date:'04.16',p:3835,f:-4577,i:-153,pn:868},
+{date:'04.17',p:-1102,f:-3519,i:3689,pn:562},
+{date:'04.18',p:-223,f:-1052,i:816,pn:784},
+{date:'04.21',p:1864,f:-2886,i:234,pn:563},
+{date:'04.22',p:1667,f:-2430,i:107,pn:943},
+{date:'04.23',p:-5485,f:-1977,i:6866,pn:637},
+{date:'04.24',p:1351,f:-77,i:-1987,pn:-160},
+{date:'04.25',p:-7741,f:6126,i:5072,pn:844},
+{date:'04.28',p:-496,f:-854,i:916,pn:306},
+{date:'04.29',p:-1591,f:6925,i:-5804,pn:574},
+{date:'04.30',p:3055,f:-1688,i:-2210,pn:-90},
+{date:'05.02',p:-2349,f:-1702,i:3228,pn:452},
+{date:'05.07',p:-4646,f:3488,i:869,pn:-82},
+{date:'05.08',p:-13,f:1303,i:-1898,pn:-82},
+{date:'05.09',p:632,f:675,i:-1873,pn:912},
+{date:'05.12',p:-3907,f:-71,i:3429,pn:261},
+{date:'05.13',p:-1360,f:1714,i:-893,pn:-600},
+{date:'05.14',p:-10024,f:4704,i:5348,pn:141},
+{date:'05.15',p:460,f:2723,i:-3681,pn:47},
+{date:'05.16',p:-2823,f:1694,i:1134,pn:156},
+{date:'05.19',p:2986,f:-1134,i:-1948,pn:-243},
+{date:'05.20',p:206,f:-1145,i:610,pn:-207},
+{date:'05.21',p:-3315,f:1920,i:1046,pn:-52},
+{date:'05.22',p:6848,f:-2237,i:-4319,pn:83},
+{date:'05.23',p:1347,f:-585,i:-1026,pn:-107},
+{date:'05.26',p:-5158,f:1015,i:4323,pn:475},
+{date:'05.27',p:537,f:-781,i:-201,pn:-206},
+{date:'05.28',p:-9907,f:2999,i:7438,pn:448},
+{date:'05.29',p:-9963,f:2897,i:6842,pn:680},
+{date:'05.30',p:6051,f:-6070,i:-160,pn:144},
+{date:'06.02',p:982,f:1250,i:-2415,pn:-90},
+{date:'06.04',p:-12260,f:10507,i:2046,pn:29},
+{date:'06.05',p:-11892,f:9801,i:2207,pn:616},
+{date:'06.09',p:-2301,f:9767,i:-7332,pn:-1114},
+{date:'06.10',p:-6269,f:6323,i:142,pn:-90},
+{date:'06.11',p:-3663,f:1661,i:2304,pn:-276},
+{date:'06.12',p:-1794,f:4073,i:-2304,pn:1240},
+{date:'06.13',p:4674,f:1210,i:-6461,pn:293},
+{date:'06.16',p:463,f:-3224,i:2524,pn:-284},
+{date:'06.17',p:2245,f:-953,i:-1006,pn:-1110},
+{date:'06.18',p:-4318,f:2870,i:1101,pn:-475},
+{date:'06.19',p:3500,f:-826,i:-3018,pn:-1356},
+{date:'06.20',p:-5966,f:5626,i:372,pn:113},
+{date:'06.23',p:13797,f:-3668,i:-9485,pn:-168},
+{date:'06.24',p:-5676,f:4383,i:2594,pn:-984},
+{date:'06.25',p:7580,f:-1108,i:-5883,pn:-520},
+{date:'06.26',p:8325,f:-5794,i:-4080,pn:-467},
+{date:'06.27',p:4868,f:-8580,i:3434,pn:-128},
+{date:'06.30',p:1892,f:-6489,i:4757,pn:-301},
+{date:'07.01',p:-6405,f:1760,i:4745,pn:-688},
+{date:'07.02',p:2329,f:-3278,i:720,pn:-19},
+{date:'07.03',p:-12330,f:6427,i:5484,pn:-67},
+{date:'07.04',p:2575,f:1624,i:-3822,pn:-795},
+{date:'07.07',p:1558,f:-937,i:-811,pn:-593},
+{date:'07.08',p:-2549,f:2461,i:-326,pn:-26},
+{date:'07.09',p:4310,f:-4105,i:-571,pn:31},
+{date:'07.10',p:-5869,f:4694,i:447,pn:450},
+{date:'07.11',p:1250,f:3259,i:-743,pn:46},
+{date:'07.14',p:-3568,f:3707,i:-947,pn:-205},
+{date:'07.15',p:-3102,f:2123,i:-167,pn:289},
+{date:'07.16',p:4016,f:555,i:-5525,pn:-748},
+{date:'07.17',p:-3356,f:493,i:1583,pn:-136},
+{date:'07.18',p:-3411,f:1878,i:320,pn:-942},
+{date:'07.21',p:-10578,f:8935,i:994,pn:-93},
+{date:'07.22',p:4780,f:-1288,i:-4128,pn:-760},
+{date:'07.23',p:-6982,f:4228,i:1917,pn:-1034},
+{date:'07.24',p:-9513,f:7386,i:1273,pn:-157},
+{date:'07.25',p:-4616,f:2706,i:1100,pn:464},
+{date:'07.28',p:-9975,f:4753,i:4520,pn:-668},
+{date:'07.29',p:-8259,f:6054,i:1167,pn:-119},
+{date:'07.30',p:-9844,f:5783,i:3307,pn:-157},
+{date:'07.31',p:2235,f:3450,i:-7053,pn:-1427},
+{date:'08.01',p:16283,f:-6524,i:-10720,pn:-196},
+{date:'08.04',p:-2996,f:830,i:1316,pn:104},
+{date:'08.05',p:-4785,f:2919,i:947,pn:189},
+{date:'08.06',p:474,f:2804,i:-4020,pn:-39},
+{date:'08.07',p:-2048,f:-171,i:1092,pn:410},
+{date:'08.08',p:1835,f:-1576,i:-1318,pn:-802},
+{date:'08.11',p:-1407,f:2169,i:-2160,pn:-907},
+{date:'08.12',p:634,f:-604,i:-981,pn:214},
+{date:'08.13',p:-6648,f:6349,i:-809,pn:-171},
+{date:'08.14',p:-534,f:-779,i:197,pn:-788},
+{date:'08.18',p:3570,f:-4881,i:813,pn:348},
+{date:'08.19',p:904,f:-4544,i:2539,pn:-222},
+{date:'08.20',p:-3929,f:-2185,i:5024,pn:-720},
+{date:'08.21',p:-2591,f:-152,i:1598,pn:252},
+{date:'08.22',p:-4572,f:1826,i:1556,pn:110},
+{date:'08.25',p:-3857,f:1224,i:1543,pn:280},
+{date:'08.26',p:8519,f:-6836,i:-2657,pn:-161},
+{date:'08.27',p:569,f:-2023,i:277,pn:171},
+{date:'08.28',p:-3939,f:-241,i:3264,pn:748},
+{date:'08.29',p:2353,f:-3724,i:648,pn:-270},
+{date:'09.01',p:3469,f:-2720,i:-1940,pn:146},
+{date:'09.02',p:-3474,f:4010,i:-1416,pn:174},
+{date:'09.03',p:-1563,f:4359,i:-3756,pn:-649},
+{date:'09.04',p:-2847,f:2025,i:-232,pn:-212},
+{date:'09.05',p:-552,f:-1374,i:1124,pn:-138},
+{date:'09.08',p:-3848,f:2301,i:778,pn:-130},
+{date:'09.09',p:-10371,f:6808,i:2806,pn:270},
+{date:'09.10',p:-22634,f:13817,i:9046,pn:373},
+{date:'09.11',p:-11493,f:3000,i:8225,pn:-1489},
+{date:'09.12',p:-20287,f:14355,i:6119,pn:1863},
+{date:'09.15',p:-1374,f:2667,i:-1376,pn:-567},
+{date:'09.16',p:-17637,f:17927,i:1083,pn:138},
+{date:'09.17',p:2522,f:-347,i:-3075,pn:435},
+{date:'09.18',p:-7816,f:2851,i:4294,pn:467},
+{date:'09.19',p:5332,f:-3080,i:-3357,pn:-600},
+{date:'09.22',p:-7682,f:5653,i:2672,pn:-137},
+{date:'09.23',p:-2462,f:3414,i:-1363,pn:-295},
+{date:'09.24',p:17,f:-2486,i:2124,pn:-958},
+{date:'09.25',p:-5411,f:2196,i:2707,pn:-962},
+{date:'09.26',p:10997,f:-5707,i:-4892,pn:-687},
+{date:'09.29',p:-7480,f:4472,i:3014,pn:126},
+{date:'09.30',p:-265,f:230,i:-497,pn:-17},
+{date:'10.01',p:-10812,f:8455,i:2208,pn:-349},
+{date:'10.02',p:-30715,f:31265,i:-675,pn:450},
+{date:'10.10',p:-5022,f:10592,i:-5936,pn:834},
+{date:'10.13',p:11649,f:-8220,i:-4471,pn:252},
+{date:'10.14',p:20,f:5581,i:-6299,pn:-351},
+{date:'10.15',p:-9706,f:1631,i:7512,pn:822},
+{date:'10.16',p:-13936,f:6533,i:7813,pn:982},
+{date:'10.17',p:-3122,f:4438,i:-1688,pn:-80},
+{date:'10.20',p:-4109,f:-2500,i:6428,pn:32},
+{date:'10.21',p:-1556,f:-124,i:2116,pn:496},
+{date:'10.22',p:-769,f:-7033,i:7633,pn:317},
+{date:'10.23',p:7505,f:-4071,i:-3972,pn:-1007},
+{date:'10.24',p:-20005,f:5756,i:14054,pn:730},
+{date:'10.27',p:-7969,f:6471,i:2343,pn:-886},
+{date:'10.28',p:15728,f:-16379,i:925,pn:-666},
+{date:'10.29',p:-3583,f:-1066,i:5196,pn:-3123},
+{date:'10.30',p:9363,f:-1173,i:-8379,pn:-1734},
+{date:'10.31',p:-2018,f:13212,i:-11064,pn:-1567},
+{date:'11.03',p:6256,f:-7949,i:1841,pn:-332},
+{date:'11.04',p:27009,f:-22282,i:-4989,pn:-1195},
+{date:'11.05',p:25538,f:-20695,i:-1877,pn:583},
+{date:'11.06',p:8840,f:-16950,i:8301,pn:-368},
+{date:'11.07',p:6791,f:-4550,i:-2446,pn:-688},
+{date:'11.10',p:-11607,f:-1510,i:13066,pn:648},
+{date:'11.11',p:-2830,f:770,i:2247,pn:-899},
+{date:'11.12',p:-4423,f:-4265,i:9093,pn:-452},
+{date:'11.13',p:-2343,f:9989,i:-7179,pn:275},
+{date:'11.14',p:32346,f:-23575,i:-9005,pn:-67},
+{date:'11.17',p:-5000,f:5189,i:-245,pn:-467},
+{date:'11.18',p:12382,f:-5500,i:-6788,pn:-594},
+{date:'11.19',p:4450,f:-10495,i:6256,pn:59},
+{date:'11.20',p:-13817,f:7406,i:7566,pn:-314},
+{date:'11.21',p:22695,f:-28229,i:4935,pn:851},
+{date:'11.24',p:-4619,f:-7993,i:12719,pn:-228},
+{date:'11.25',p:-276,f:49,i:315,pn:-611},
+{date:'11.26',p:-18048,f:5158,i:12280,pn:362},
+{date:'11.27',p:-6152,f:1546,i:4326,pn:-6},
+{date:'11.28',p:15685,f:-20369,i:4587,pn:-1367},
+{date:'12.01',p:528,f:2235,i:-2333,pn:-962},
+{date:'12.02',p:-15763,f:12147,i:3929,pn:708},
+{date:'12.03',p:-8984,f:2816,i:7364,pn:627},
+{date:'12.04',p:5585,f:-6960,i:1318,pn:522},
+{date:'12.05',p:-21156,f:9934,i:11528,pn:58},
+{date:'12.08',p:-3449,f:3211,i:-308,pn:-153},
+{date:'12.09',p:-133,f:-889,i:494,pn:996},
+{date:'12.10',p:-889,f:3739,i:-3003,pn:157},
+{date:'12.11',p:3922,f:3656,i:-7753,pn:-174},
+{date:'12.12',p:-14625,f:414,i:14184,pn:892},
+{date:'12.15',p:14210,f:-9569,i:-4803,pn:1166},
+{date:'12.16',p:12410,f:-10305,i:-2309,pn:137},
+{date:'12.17',p:-3374,f:-322,i:3353,pn:-287},
+{date:'12.18',p:4130,f:-3459,i:-1006,pn:-846},
+{date:'12.19',p:-1412,f:-7573,i:8541,pn:-412},
+{date:'12.22',p:-26714,f:11017,i:16055,pn:228},
+{date:'12.23',p:-12853,f:9551,i:3527,pn:-374},
+{date:'12.24',p:-7171,f:5225,i:2039,pn:327},
+{date:'12.26',p:-23265,f:17790,i:4435,pn:-975},
+{date:'12.29',p:661,f:3337,i:-3133,pn:379},
+{date:'12.30',p:8448,f:-4768,i:-3763,pn:-1084}
 ];
 
 // 2026년도 데이터 구성
@@ -1638,7 +1796,8 @@ const data2026 = labels2026.map((d, idx) => ({
   date: d,
   p: dailyIndividual2026[idx],
   f: dailyForeign2026[idx],
-  i: dailyInstitution2026[idx]
+  i: dailyInstitution2026[idx],
+  pn: dailyPension2026[idx]
 }));
 
 // 누적치 계산 (연도별)
@@ -1654,8 +1813,8 @@ function fmtEok(v) {
 }
 
 const yearlySummaryEl = document.getElementById('yearlySummary');
-const combinedData = data2025.map(row => ({ date: '25.' + row.date, p: row.p, f: row.f, i: row.i }))
-  .concat(data2026.map(row => ({ date: '26.' + row.date, p: row.p, f: row.f, i: row.i })));
+const combinedData = data2025.map(row => ({ date: '25.' + row.date, p: row.p, f: row.f, i: row.i, pn: row.pn }))
+  .concat(data2026.map(row => ({ date: '26.' + row.date, p: row.p, f: row.f, i: row.i, pn: row.pn })));
 
 function groupByMonth(dataArr) {
   const groups = new Map();
@@ -1702,14 +1861,16 @@ function buildCumulative(dataArr, kospiLookup) {
   const individual = [];
   const foreign = [];
   const institution = [];
+  const pension = [];
   const kospi = [];
-  let si = 0, sf = 0, sn = 0;
+  let si = 0, sf = 0, sn = 0, sp = 0;
   dataArr.forEach(row => {
-    si += row.p; sf += row.f; sn += row.i;
+    si += row.p; sf += row.f; sn += row.i; sp += (row.pn || 0);
     labels.push(row.date);
     individual.push(Math.round(si / 1000) / 10);
     foreign.push(Math.round(sf / 1000) / 10);
     institution.push(Math.round(sn / 1000) / 10);
+    pension.push(Math.round(sp / 1000) / 10);
     let kVal;
     if (typeof kospiLookup === 'function') {
       kVal = kospiLookup(row.date);
@@ -1718,7 +1879,7 @@ function buildCumulative(dataArr, kospiLookup) {
     }
     kospi.push(kVal === undefined || kVal === null ? null : kVal);
   });
-  return { labels, individual, foreign, institution, kospi };
+  return { labels, individual, foreign, institution, pension, kospi };
 }
 
 function getKospiLookup(yearLabel) {
@@ -1790,7 +1951,7 @@ function renderChart(yearLabel, displayLabel) {
   activeYearLabel = yearLabel;
   activeDisplayLabel = displayLabel;
   const kospiLookup = getKospiLookup(yearLabel);
-  const { labels, individual, foreign, institution, kospi } = buildCumulative(dataArr, kospiLookup);
+  const { labels, individual, foreign, institution, pension, kospi } = buildCumulative(dataArr, kospiLookup);
   const p = sumField(dataArr, 'p');
   const f = sumField(dataArr, 'f');
   const i = sumField(dataArr, 'i');
@@ -1820,7 +1981,8 @@ function renderChart(yearLabel, displayLabel) {
       chartInstance.data.datasets[0].data = individual;
       chartInstance.data.datasets[1].data = foreign;
       chartInstance.data.datasets[2].data = institution;
-      chartInstance.data.datasets[3].data = kospi;
+      chartInstance.data.datasets[3].data = pension;
+      chartInstance.data.datasets[4].data = kospi;
       const tension = lineTension(labels.length);
       chartInstance.data.datasets.forEach(ds => { ds.tension = tension; });
       chartInstance.update('none');
@@ -1854,6 +2016,7 @@ function renderChart(yearLabel, displayLabel) {
           { label: '개인', data: individual, borderColor: '#808080', backgroundColor: '#808080', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
           { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
           { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '연기금', data: pension, borderColor: '#e8912d', backgroundColor: '#e8912d', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
           { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
@@ -1895,7 +2058,9 @@ function renderChart(yearLabel, displayLabel) {
               afterBody: (items) => {
                 const idx = items[0].dataIndex;
                 const row = yearDatasets[activeYearLabel][idx];
-                return ['', `[${row.date} 당일]`, `개인 ${fmtEok(row.p)}원`, `외국인 ${fmtEok(row.f)}원`, `기관 ${fmtEok(row.i)}원`];
+                const lines = ['', `[${row.date} 당일]`, `개인 ${fmtEok(row.p)}원`, `외국인 ${fmtEok(row.f)}원`, `기관 ${fmtEok(row.i)}원`];
+                if (row.pn != null) lines.push(`연기금 ${fmtEok(row.pn)}원`);
+                return lines;
               }
             }
           }
@@ -1969,14 +2134,20 @@ Object.keys(yearDatasets).forEach(label => {
     card.style.cursor = 'default';
     card.style.opacity = '0.6';
   } else {
-    const p = sumField(data, 'p');
-    const f = sumField(data, 'f');
-    const i = sumField(data, 'i');
+    const stats = [
+      ['개인', sumField(data, 'p')],
+      ['외국인', sumField(data, 'f')],
+      ['기관', sumField(data, 'i')]
+    ];
+    if (data.some(r => r.pn != null)) {
+      stats.push(['연기금', data.reduce((a, r) => a + (r.pn || 0), 0)]);
+    }
+    const statsHtml = stats.map(([k, v]) =>
+      `<div class="stat"><span class="k">${k}</span><span class="v ${v>=0?'pos':'neg'}">${fmtJo(v)}</span></div>`
+    ).join('');
     card.innerHTML = `
       <p class="year-label">${label}</p>
-      <div class="row"><span>개인</span><span class="${p>=0?'pos':'neg'}">${fmtJo(p)}</span></div>
-      <div class="row"><span>외국인</span><span class="${f>=0?'pos':'neg'}">${fmtJo(f)}</span></div>
-      <div class="row"><span>기관</span><span class="${i>=0?'pos':'neg'}">${fmtJo(i)}</span></div>
+      <div class="year-stats" style="grid-template-columns:repeat(${stats.length},minmax(0,1fr))">${statsHtml}</div>
     `;
     card.addEventListener('click', () => renderChart(label));
   }
@@ -2063,46 +2234,51 @@ function kospiPctChange(dataArr, idx, kospiMap) {
 }
 
 const DAY_LIST_LIMIT = 10;
-function renderDayList(el, data, kospiIndex) {
+// 실데이터 행/더보기는 전용 스크롤 컨테이너(#dayRows)에만 렌더 → 타이틀·탭·컬럼헤더는 고정.
+const dayListEl = document.getElementById('dayRows');
+// 탭 전환은 data-year로 필터링한다.
+function extrasFor(year) {
+  return dayListEl.querySelectorAll(`.day-row.extra[data-year="${year}"]`);
+}
+function renderDayList(data, kospiIndex, year) {
   const rows = data.map((row, idx) => ({ row, pct: kospiPctChange(data, idx, kospiIndex) })).reverse();
   rows.forEach(({ row, pct }, i) => {
     const div = document.createElement('div');
     div.className = 'day-row' + (i >= DAY_LIST_LIMIT ? ' extra hidden' : '');
-    div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span><span>${fmtKospi(row.date, kospiIndex)}</span><span class="${pct.cls}">${pct.text}</span>`;
-    el.appendChild(div);
+    div.dataset.year = year;
+    const pn = row.pn;
+    const pnCell = pn == null
+      ? `<span class="col-pension">-</span>`
+      : `<span class="col-pension ${pn>=0?'pos':'neg'}">${fmtEok(pn)}</span>`;
+    div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span>${pnCell}<span>${fmtKospi(row.date, kospiIndex)}</span><span class="${pct.cls}">${pct.text}</span>`;
+    dayListEl.appendChild(div);
   });
   if (rows.length > DAY_LIST_LIMIT) {
     const hiddenCount = rows.length - DAY_LIST_LIMIT;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'day-more';
+    btn.dataset.year = year;
     btn.textContent = `더보기 (${hiddenCount})`;
     btn.addEventListener('click', () => {
-      const nowExpanded = !el.querySelector('.day-row.extra.hidden');
-      el.querySelectorAll('.day-row.extra').forEach(r => r.classList.toggle('hidden', nowExpanded));
+      const nowExpanded = ![...extrasFor(year)].some(r => r.classList.contains('hidden'));
+      extrasFor(year).forEach(r => r.classList.toggle('hidden', nowExpanded));
       btn.textContent = nowExpanded ? `더보기 (${hiddenCount})` : '접기';
     });
-    el.appendChild(btn);
+    dayListEl.appendChild(btn);
   }
 }
 
-const list2025El = document.getElementById('list2025');
-if (data2025.length === 0) {
-  list2025El.innerHTML = `<p class="empty-note">2025년 데이터가 아직 없습니다.<br>일자별 순매수 데이터를 추가해 주시면 이 자리에 반영됩니다.</p>`;
-} else {
-  renderDayList(list2025El, data2025, kospiIndex2025);
-}
-
-const list2026El = document.getElementById('list2026');
-renderDayList(list2026El, data2026, kospiIndex2026);
+if (data2025.length > 0) renderDayList(data2025, kospiIndex2025, '2025');
+renderDayList(data2026, kospiIndex2026, '2026');
 
 // Scrolling back up to the top of the day list resets it to the first 10 rows.
 function collapseDayLists() {
   document.querySelectorAll('.day-list .day-more').forEach(btn => {
-    const list = btn.parentElement;
-    if (!list.querySelector('.day-row.extra:not(.hidden)')) return;
-    list.querySelectorAll('.day-row.extra').forEach(r => r.classList.add('hidden'));
-    btn.textContent = `더보기 (${list.querySelectorAll('.day-row.extra').length})`;
+    const extras = extrasFor(btn.dataset.year);
+    if (![...extras].some(r => !r.classList.contains('hidden'))) return;
+    extras.forEach(r => r.classList.add('hidden'));
+    btn.textContent = `더보기 (${extras.length})`;
   });
 }
 // Reset to the first 10 rows after the user has scrolled down into the list
@@ -2124,6 +2300,47 @@ document.addEventListener('scroll', onDayScroll, true);
 renderChart('2025~2026년 총합');
 layoutMonthPnl();
 layoutTotalBar();
+
+// 월별 등락 달력: 전일 종가 대비 상승(빨강)/하락(파랑)
+function renderMonthUpdown(year, month) {
+  const grid = document.getElementById('muGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+  ['일','월','화','수','목','금','토'].forEach(d => {
+    const el = document.createElement('div');
+    el.className = 'mu-dow';
+    el.textContent = d;
+    grid.appendChild(el);
+  });
+  const firstDow = new Date(year, month - 1, 1).getDay();
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const pad = n => String(n).padStart(2, '0');
+  for (let i = 0; i < firstDow; i++) {
+    const el = document.createElement('div');
+    el.className = 'mu-cell empty';
+    grid.appendChild(el);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const key = pad(month) + '.' + pad(d);
+    const idx = labels2026.indexOf(key);
+    let cls = 'none', pct = null;
+    if (idx > 0) {
+      const cur = kospiIndex2026[key];
+      const prev = kospiIndex2026[labels2026[idx - 1]];
+      if (cur != null && prev != null) {
+        cls = cur > prev ? 'up' : (cur < prev ? 'down' : 'flat');
+        pct = (cur - prev) / prev * 100;
+      }
+    }
+    const el = document.createElement('div');
+    el.className = 'mu-cell ' + cls;
+    el.innerHTML = pct === null
+      ? `<span class="mu-day">${d}</span>`
+      : `<span class="mu-day">${d}</span><span class="mu-pct">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</span>`;
+    grid.appendChild(el);
+  }
+}
+renderMonthUpdown(2026, 7);
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
@@ -2148,7 +2365,7 @@ function syncPhilosophy(collapsed) {
 function togglePhilosophy() {
   syncPhilosophy(philosophyList.classList.toggle('collapsed'));
 }
-syncPhilosophy(true);
+syncPhilosophy(narrowQuery.matches); // PC는 펼침, 모바일은 접힘
 philosophyToggle.addEventListener('click', togglePhilosophy);
 philosophyToggle.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') {
@@ -2159,6 +2376,7 @@ philosophyToggle.addEventListener('keydown', e => {
 
 const yearlyToggle = document.getElementById('yearlyToggle');
 const yearlySummaryPanel = document.getElementById('yearlySummary');
+// 년도별 섹션은 CSS flex로 고정, 일별 컬럼 헤더는 CSS sticky(top:0)로 처리 → JS 오프셋 불필요
 function toggleYearly() {
   const collapsed = yearlySummaryPanel.classList.toggle('collapsed');
   yearlyToggle.classList.toggle('collapsed', collapsed);
@@ -2171,6 +2389,11 @@ yearlyToggle.addEventListener('keydown', e => {
     toggleYearly();
   }
 });
+if (!narrowQuery.matches) { // PC는 펼침, 모바일은 접힘
+  yearlySummaryPanel.classList.remove('collapsed');
+  yearlyToggle.classList.remove('collapsed');
+  yearlyToggle.setAttribute('aria-expanded', 'true');
+}
 
 const pnlLockBtn = document.getElementById('pnlLockBtn');
 const lockIcon = document.getElementById('lockIcon');
@@ -2303,12 +2526,15 @@ function showDayTab(year) {
   document.querySelectorAll('.day-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.year === year);
   });
-  document.getElementById('list2025').style.display = year === '2025' ? '' : 'none';
-  document.getElementById('list2026').style.display = year === '2026' ? '' : 'none';
+  // 언랩된 구조: 행/더보기 버튼을 data-year로 필터
+  dayListEl.querySelectorAll('.day-row[data-year], .day-more[data-year]').forEach(el => {
+    el.style.display = el.dataset.year === year ? '' : 'none';
+  });
 }
 document.querySelectorAll('.day-tab').forEach(btn => {
   btn.addEventListener('click', () => showDayTab(btn.dataset.year));
 });
+showDayTab('2026'); // 초기 탭: 2025 행 숨김
 
 function setDayTabsVisible(visible) {
   document.querySelector('.day-tabs').style.display = visible ? 'flex' : 'none';
