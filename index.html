@@ -2840,7 +2840,9 @@ document.querySelectorAll('.year-card[data-year], .seg-btn[data-year]').forEach(
     card.addEventListener('click', () => setDayTabsVisible(true));
   }
 });
-setDayTabsVisible(true);
+// 시작이 2026년 누적이므로 일별도 2026 고정(탭 숨김)
+showDayTab('2026');
+setDayTabsVisible(false);
 
 const views = {
   domestic: document.getElementById('view-domestic'),
