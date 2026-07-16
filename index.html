@@ -186,12 +186,36 @@
   }
   .journal-title-row {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 10px;
     margin-bottom: 14px;
   }
   .journal-title-row h2 {
+    margin: 0;
+  }
+  /* 해외주식: 시나리오 카테고리 / 설명 */
+  .scenario-cats {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+  }
+  .scenario-cat {
+    padding: 12px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    color: #444;
+    cursor: pointer;
+    margin-bottom: 4px;
+    transition: background 0.15s ease;
+  }
+  .scenario-cat:hover { background: #eceef1; }
+  .scenario-cat.active { background: #e6e8ec; color: #1a1a1a; font-weight: 600; }
+  .scenario-body {
+    font-size: 15px;
+    line-height: 1.75;
+    color: #2b2b2b;
+    white-space: pre-wrap;
     margin: 0;
   }
   .lock-btn {
@@ -383,8 +407,8 @@
     flex: 1;
     min-width: 0;
     background: #f3f4f6;
-    border-radius: 4px;
-    padding: 14px 18px;
+    border-radius: 16px;
+    padding: 20px 24px;
     font-size: 13.5px;
     line-height: 1.8;
     color: #333;
@@ -550,11 +574,20 @@
     .day-row span { overflow: hidden; text-overflow: ellipsis; }
     .app-header { position: sticky; top: 0; z-index: 100; }
     /* 좌 컬럼: 년도별 + 일별(탭·컬럼헤더=.day-head) 모두 고정, 실데이터만 스크롤 (flex 분리, sticky 안 씀) */
-    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; }
+    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; background: transparent; }
+    /* 2025/2026 탭: 라운드·상하 높이 키우고, 선택 시 검정 배경 */
+    #view-domestic .day-tab { border-radius: 12px; padding: 12px 0; }
+    #view-domestic .day-tab.active {
+      background: #1a1a1a;
+      color: #fff;
+      border-color: #1a1a1a;
+    }
     #view-domestic .sidebar {
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      width: 560px;
+      padding: 32px 28px;  /* 매매기록 투자철학 컬럼과 동일 */
     }
     #view-domestic .sidebar > .sidebar-section:first-child { flex: 0 0 auto; }
     #view-domestic .sidebar > .sidebar-section:last-child {
@@ -563,6 +596,8 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
+      margin-bottom: 0;   /* 하단 여백 제거 → 접기 버튼이 사이드바 맨 아래에 정렬 */
+      padding-bottom: 0;
     }
     #view-domestic #dayListSection:not(.collapsed) {
       flex: 1 1 auto;
@@ -578,12 +613,11 @@
       flex-direction: column;
     }
     #view-domestic .day-rows {
-      flex: 0 1 auto;
+      flex: 1 1 0;        /* 남은 영역 꽉 채움 → 더보기 버튼이 항상 맨 아래 */
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
     }
-    #view-domestic .day-list.rows-expanded .day-rows { flex: 1 1 0; }
     #view-domestic .day-more-wrap { flex: 0 0 auto; }
     /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
     #view-domestic .panel-card {
@@ -606,10 +640,11 @@
       flex: 1 1 auto;
       min-height: 0;
       overflow-y: auto;
+      overflow-x: hidden;          /* 좌우 스크롤 방지 */
       overscroll-behavior: contain; /* 카드 안에서만 휠 스크롤 */
     }
     /* 년도별 누적데이터: 선택 영역 여유 있게 + 지표 사이 세로 컬럼 디바이더 */
-    #view-domestic .year-card { padding: 22px 16px; margin-bottom: 10px; }
+    #view-domestic .year-card { padding: 22px 14px; margin-bottom: 0; border-radius: 16px; }
     #view-domestic .year-card .year-stats { gap: 0; }
     #view-domestic .year-card .stat {
       padding: 0 14px;
@@ -617,6 +652,15 @@
     }
     #view-domestic .year-card .stat:first-child { padding-left: 0; }
     #view-domestic .year-card .stat:last-child { border-right: none; padding-right: 0; }
+    /* 타이틀 텍스트를 매매기록 제목(17px / #1a1a1a)에 맞춤 */
+    #view-domestic h1,
+    #view-domestic .sidebar h2,
+    #view-domestic .mu-title,
+    #view-domestic .mr-title {
+      font-size: 17px;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
     /* 순매수 요약(좌) + 범례(우) 같은 줄 */
     #view-domestic .stats-row {
       display: flex;
@@ -797,7 +841,7 @@
     align-items: center;
     justify-content: center;
     gap: 2px;
-    border-radius: 8px;
+    border-radius: 16px;
   }
   .mu-day { font-size: 13px; font-weight: 600; line-height: 1; }
   .mu-pct { font-size: 10px; font-weight: 600; line-height: 1; opacity: 0.92; }
@@ -1380,7 +1424,38 @@
   </nav>
 </header>
 
-<div class="placeholder-view" id="view-overseas">해외 주식 화면은 준비 중입니다.</div>
+<div class="placeholder-view mytrades-view" id="view-overseas">
+  <div class="mytrades-layout">
+    <div class="mytrades-col philosophy">
+      <h2>시나리오</h2>
+      <ul class="scenario-cats" id="scenarioCats">
+        <li class="scenario-cat active" data-scenario="ai">AI 강세 지속</li>
+        <li class="scenario-cat" data-scenario="rate">금리 인하 사이클</li>
+        <li class="scenario-cat" data-scenario="recession">경기 침체</li>
+        <li class="scenario-cat" data-scenario="geo">지정학 리스크</li>
+      </ul>
+    </div>
+    <div class="mytrades-col journal">
+      <div class="journal-title-row">
+        <h2 id="scenarioTitle">시나리오 설명</h2>
+      </div>
+      <div class="scenario-panels" id="scenarioPanels">
+        <div class="scenario-panel" data-scenario="ai">
+          <p class="scenario-body">여기에 'AI 강세 지속' 시나리오에 대한 설명을 작성한다.</p>
+        </div>
+        <div class="scenario-panel" data-scenario="rate" hidden>
+          <p class="scenario-body">여기에 '금리 인하 사이클' 시나리오에 대한 설명을 작성한다.</p>
+        </div>
+        <div class="scenario-panel" data-scenario="recession" hidden>
+          <p class="scenario-body">여기에 '경기 침체' 시나리오에 대한 설명을 작성한다.</p>
+        </div>
+        <div class="scenario-panel" data-scenario="geo" hidden>
+          <p class="scenario-body">여기에 '지정학 리스크' 시나리오에 대한 설명을 작성한다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 <div class="placeholder-view mytrades-view" id="view-mytrades">
   <div class="mytrades-layout">
     <div class="mytrades-col philosophy">
@@ -1996,8 +2071,8 @@ function lineTension(pointCount) {
   return 0.15;
 }
 function layoutTotalBar() {
-  const bar = document.querySelector('.mytrades-total');
-  const philosophy = document.querySelector('.mytrades-col.philosophy');
+  const bar = document.querySelector('#view-mytrades .mytrades-total');
+  const philosophy = document.querySelector('#view-mytrades .mytrades-col.philosophy');
   if (!bar || !philosophy) return;
   if (isNarrow()) {
     bar.classList.add('mobile-bar');
@@ -2332,7 +2407,7 @@ function kospiPctChange(dataArr, idx, kospiMap) {
   return { text: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%', cls: pct >= 0 ? 'pos' : 'neg' };
 }
 
-const DAY_LIST_LIMIT = 10;
+const DAY_LIST_LIMIT = Infinity; // 더보기/접기 없이 전체 행을 스크롤로 표시
 const dayListEl = document.getElementById('dayRows');
 const dayMoreWrapEl = document.getElementById('dayMoreWrap');
 const dayListContainerEl = document.getElementById('dayList');
@@ -2728,6 +2803,22 @@ document.querySelectorAll('.day-tab').forEach(btn => {
   btn.addEventListener('click', () => showDayTab(btn.dataset.year));
 });
 showDayTab('2026'); // 초기 탭: 2025 행 숨김
+
+// 해외주식: 좌측 시나리오 카테고리 클릭 → 우측 설명 전환
+(function initScenarios() {
+  const cats = document.getElementById('scenarioCats');
+  const panels = document.getElementById('scenarioPanels');
+  const titleEl = document.getElementById('scenarioTitle');
+  if (!cats || !panels) return;
+  cats.querySelectorAll('.scenario-cat').forEach(cat => {
+    cat.addEventListener('click', () => {
+      const key = cat.dataset.scenario;
+      cats.querySelectorAll('.scenario-cat').forEach(c => c.classList.toggle('active', c === cat));
+      panels.querySelectorAll('.scenario-panel').forEach(p => { p.hidden = p.dataset.scenario !== key; });
+      if (titleEl) titleEl.textContent = cat.textContent;
+    });
+  });
+})();
 
 function setDayTabsVisible(visible) {
   document.querySelector('.day-tabs').style.display = visible ? 'flex' : 'none';
