@@ -549,19 +549,14 @@
     html, body { overflow: hidden; height: 100vh; }
     .day-row span { overflow: hidden; text-overflow: ellipsis; }
     .app-header { position: sticky; top: 0; z-index: 100; }
-    /* 좌/우 컬럼은 각자 독립 스크롤 (base의 .sidebar / .content 스크롤 유지). */
-    /* 타이틀 아래 구분선 + 컬럼헤더 고정(flex item) */
-    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; flex: 0 0 auto; }
-    /* 사이드바: 년도별 고정 + 일별 섹션 */
+    /* 좌 컬럼: 년도별 + 일별(탭·컬럼헤더=.day-head) 모두 고정, 실데이터만 스크롤 (flex 분리, sticky 안 씀) */
+    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; }
     #view-domestic .sidebar {
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-    #view-domestic .sidebar > .sidebar-section:first-child {
-      flex: 0 0 auto;   /* 년도별 누적데이터: 항상 고정 */
-    }
-    /* 일별 데이터 섹션: 타이틀·탭·컬럼헤더 고정, 실데이터(#dayRows)만 스크롤 */
+    #view-domestic .sidebar > .sidebar-section:first-child { flex: 0 0 auto; }
     #view-domestic .sidebar > .sidebar-section:last-child {
       flex: 1 1 auto;
       min-height: 0;
@@ -575,7 +570,7 @@
       display: flex;
       flex-direction: column;
     }
-    #view-domestic .day-tabs { flex: 0 0 auto; }
+    #view-domestic .day-head { flex: 0 0 auto; }
     #view-domestic .day-list {
       flex: 1 1 auto;
       min-height: 0;
@@ -583,11 +578,13 @@
       flex-direction: column;
     }
     #view-domestic .day-rows {
-      flex: 1 1 auto;
+      flex: 0 1 auto;
       min-height: 0;
       overflow-y: auto;
       overscroll-behavior: contain;
     }
+    #view-domestic .day-list.rows-expanded .day-rows { flex: 1 1 0; }
+    #view-domestic .day-more-wrap { flex: 0 0 auto; }
     /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
     #view-domestic .panel-card {
       background: #fff;
@@ -595,16 +592,37 @@
       border-radius: 16px;
       padding: 22px 24px;
     }
-    #view-domestic .panel-card .month-updown,
-    #view-domestic .month-updown { margin-top: 0; }
-    /* 달력 섹션: 2컬럼 (새 월 컬럼 자리 확보) */
+    /* 등락 달력: 2컬럼 (새 월/섹션 컬럼 자리 확보) */
     #view-domestic .calendar-row {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 20px;
+      gap: 16px;
       margin-top: 20px;
       align-items: start;
     }
+    /* 순매수 요약(좌) + 범례(우) 같은 줄 */
+    #view-domestic .stats-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 16px;
+    }
+    #view-domestic .stats-row .cards,
+    #view-domestic .stats-row .legend { margin-bottom: 0; }
+    /* 순매수 요약: 박스 제거, 좌측 정렬, 텍스트 축소 */
+    #view-domestic .cards {
+      display: flex;
+      gap: 28px;
+      margin-bottom: 18px;
+    }
+    #view-domestic .card {
+      background: transparent;
+      padding: 0;
+      border-radius: 0;
+    }
+    #view-domestic .card p.label { font-size: 12px; margin: 0 0 2px; }
+    #view-domestic .card p.value { font-size: 18px; }
   }
   .content {
     flex: 1;
@@ -686,26 +704,48 @@
   .chart-container canvas.swapping {
     opacity: 0;
   }
-  .month-updown {
-    margin-top: 28px;
+  .month-section {
+    margin-top: 20px;
   }
   .mu-head {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
   }
   .mu-title {
+    flex: 1;
+    text-align: center;
     font-size: 15px;
     font-weight: 600;
     color: #1a1a1a;
     margin: 0;
   }
+  .mu-nav {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+    border: 1px solid #e5e5e5;
+    border-radius: 8px;
+    background: #fff;
+    color: #444;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mu-nav:hover { background: #f5f5f5; }
+  .mu-nav:disabled { opacity: 0.35; cursor: default; }
   .mu-legend {
     display: flex;
+    justify-content: center;
     gap: 14px;
     font-size: 12px;
     color: #666;
+    margin-bottom: 14px;
   }
   .mu-legend span {
     display: inline-flex;
@@ -744,6 +784,24 @@
   }
   .mu-day { font-size: 13px; font-weight: 600; line-height: 1; }
   .mu-pct { font-size: 10px; font-weight: 600; line-height: 1; opacity: 0.92; }
+  .mr-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 10px;
+  }
+  .mr-list { display: flex; flex-direction: column; }
+  .mr-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 9px 2px;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 14px;
+  }
+  .mr-row:last-child { border-bottom: none; }
+  .mr-month { color: #555; }
+  .mr-val { font-weight: 600; }
   .mu-cell.up { background: #e34948; color: #fff; }
   .mu-cell.down { background: #2a78d6; color: #fff; }
   .mu-cell.flat { background: #b8b8b8; color: #fff; }
@@ -1452,13 +1510,16 @@
     <div class="sidebar-section">
       <h2 data-target="dayListSection">일별 데이터 <span class="arrow"></span></h2>
       <div id="dayListSection" class="collapsible-content">
-        <div class="day-tabs">
-          <button class="day-tab" data-year="2025">2025</button>
-          <button class="day-tab active" data-year="2026">2026</button>
+        <div class="day-head">
+          <div class="day-tabs">
+            <button class="day-tab" data-year="2025">2025</button>
+            <button class="day-tab active" data-year="2026">2026</button>
+          </div>
+          <div class="day-row header"><span>날짜</span><span>개인</span><span>외국인</span><span>기관</span><span class="col-pension">연기금</span><span>코스피</span><span>등락률</span></div>
         </div>
         <div class="day-list" id="dayList">
-          <div class="day-row header"><span>날짜</span><span>개인</span><span>외국인</span><span>기관</span><span class="col-pension">연기금</span><span>코스피</span><span>등락률</span></div>
           <div class="day-rows" id="dayRows"></div>
+          <div class="day-more-wrap" id="dayMoreWrap"></div>
         </div>
       </div>
     </div>
@@ -1475,27 +1536,29 @@
           <div class="period-buttons" id="periodButtons"></div>
         </div>
 
-        <div class="cards">
-          <div class="card">
-            <p class="label">개인 순매수</p>
-            <p class="value red" id="totalIndividual">+108.5조원</p>
+        <div class="stats-row">
+          <div class="cards">
+            <div class="card">
+              <p class="label">개인 순매수</p>
+              <p class="value red" id="totalIndividual">+108.5조원</p>
+            </div>
+            <div class="card">
+              <p class="label">기관 순매수</p>
+              <p class="value gray" id="totalInstitution">+37.6조원</p>
+            </div>
+            <div class="card">
+              <p class="label">외국인 순매도</p>
+              <p class="value blue" id="totalForeign">-160.6조원</p>
+            </div>
           </div>
-          <div class="card">
-            <p class="label">기관 순매수</p>
-            <p class="value gray" id="totalInstitution">+37.6조원</p>
-          </div>
-          <div class="card">
-            <p class="label">외국인 순매도</p>
-            <p class="value blue" id="totalForeign">-160.6조원</p>
-          </div>
-        </div>
 
-        <div class="legend">
-          <span><span class="dot" style="background:#808080"></span>개인</span>
-          <span><span class="dot" style="background:#e34948"></span>외국인</span>
-          <span><span class="dot" style="background:#2a78d6"></span>기관</span>
-          <span><span class="dot" style="background:#e8912d"></span>연기금</span>
-          <span><span class="dot" style="background:#008300"></span>코스피</span>
+          <div class="legend">
+            <span><span class="dot" style="background:#808080"></span>개인</span>
+            <span><span class="dot" style="background:#e34948"></span>외국인</span>
+            <span><span class="dot" style="background:#2a78d6"></span>기관</span>
+            <span><span class="dot" style="background:#e8912d"></span>연기금</span>
+            <span><span class="dot" style="background:#008300"></span>코스피</span>
+          </div>
         </div>
 
         <div class="chart-container">
@@ -1504,15 +1567,18 @@
       </section>
 
       <div class="calendar-row">
-        <section class="panel-card month-updown" id="monthUpdown">
+        <section class="panel-card" id="monthUpdown">
           <div class="mu-head">
-            <p class="mu-title">7월 등락 달력</p>
-            <div class="mu-legend">
-              <span><span class="mu-swatch up"></span>상승</span>
-              <span><span class="mu-swatch down"></span>하락</span>
-            </div>
+            <button type="button" class="mu-nav" id="muPrev" aria-label="이전 달">‹</button>
+            <p class="mu-title" id="muTitle">7월 등락 달력</p>
+            <button type="button" class="mu-nav" id="muNext" aria-label="다음 달">›</button>
           </div>
           <div class="mu-grid" id="muGrid"></div>
+        </section>
+
+        <section class="panel-card" id="monthReturns">
+          <p class="mr-title">월별 상승 폭</p>
+          <div class="mr-list" id="mrList"></div>
         </section>
       </div>
 
@@ -2234,11 +2300,17 @@ function kospiPctChange(dataArr, idx, kospiMap) {
 }
 
 const DAY_LIST_LIMIT = 10;
-// 실데이터 행/더보기는 전용 스크롤 컨테이너(#dayRows)에만 렌더 → 타이틀·탭·컬럼헤더는 고정.
 const dayListEl = document.getElementById('dayRows');
+const dayMoreWrapEl = document.getElementById('dayMoreWrap');
+const dayListContainerEl = document.getElementById('dayList');
 // 탭 전환은 data-year로 필터링한다.
 function extrasFor(year) {
   return dayListEl.querySelectorAll(`.day-row.extra[data-year="${year}"]`);
+}
+// 더보기로 펼치면 실데이터 영역이 남은 공간을 채우도록
+function syncRowsExpanded(year) {
+  const expanded = [...extrasFor(year)].some(r => !r.classList.contains('hidden'));
+  dayListContainerEl.classList.toggle('rows-expanded', expanded);
 }
 function renderDayList(data, kospiIndex, year) {
   const rows = data.map((row, idx) => ({ row, pct: kospiPctChange(data, idx, kospiIndex) })).reverse();
@@ -2264,8 +2336,9 @@ function renderDayList(data, kospiIndex, year) {
       const nowExpanded = ![...extrasFor(year)].some(r => r.classList.contains('hidden'));
       extrasFor(year).forEach(r => r.classList.toggle('hidden', nowExpanded));
       btn.textContent = nowExpanded ? `더보기 (${hiddenCount})` : '접기';
+      syncRowsExpanded(year);
     });
-    dayListEl.appendChild(btn);
+    dayMoreWrapEl.appendChild(btn);
   }
 }
 
@@ -2301,7 +2374,9 @@ renderChart('2025~2026년 총합');
 layoutMonthPnl();
 layoutTotalBar();
 
-// 월별 등락 달력: 전일 종가 대비 상승(빨강)/하락(파랑)
+// 월별 등락 달력: 전일 종가 대비 상승(빨강)/하락(파랑), 좌우 화살표로 월 이동
+const muMonths = [...new Set(labels2026.map(k => parseInt(k.slice(0, 2), 10)))].sort((a, b) => a - b);
+let muIdx = muMonths.length - 1; // 최신 월부터
 function renderMonthUpdown(year, month) {
   const grid = document.getElementById('muGrid');
   if (!grid) return;
@@ -2312,9 +2387,9 @@ function renderMonthUpdown(year, month) {
     el.textContent = d;
     grid.appendChild(el);
   });
+  const pad = n => String(n).padStart(2, '0');
   const firstDow = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
-  const pad = n => String(n).padStart(2, '0');
   for (let i = 0; i < firstDow; i++) {
     const el = document.createElement('div');
     el.className = 'mu-cell empty';
@@ -2339,8 +2414,47 @@ function renderMonthUpdown(year, month) {
       : `<span class="mu-day">${d}</span><span class="mu-pct">${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%</span>`;
     grid.appendChild(el);
   }
+  // 월마다 주 수(5~6줄)가 달라 높이가 변하지 않도록 항상 6주(42칸)로 패딩
+  for (let i = firstDow + daysInMonth; i < 42; i++) {
+    const el = document.createElement('div');
+    el.className = 'mu-cell empty';
+    grid.appendChild(el);
+  }
+  const title = document.getElementById('muTitle');
+  if (title) title.textContent = month + '월 등락 달력';
 }
-renderMonthUpdown(2026, 7);
+function updateMuNav() {
+  renderMonthUpdown(2026, muMonths[muIdx]);
+  const prev = document.getElementById('muPrev');
+  const next = document.getElementById('muNext');
+  if (prev) prev.disabled = muIdx <= 0;
+  if (next) next.disabled = muIdx >= muMonths.length - 1;
+}
+document.getElementById('muPrev').addEventListener('click', () => { if (muIdx > 0) { muIdx--; updateMuNav(); } });
+document.getElementById('muNext').addEventListener('click', () => { if (muIdx < muMonths.length - 1) { muIdx++; updateMuNav(); } });
+updateMuNav();
+
+// 월별 상승 폭: 전월 말 종가 대비 코스피 등락률 (1월은 2025-12-30 대비)
+function renderMonthReturns() {
+  const el = document.getElementById('mrList');
+  if (!el) return;
+  el.innerHTML = '';
+  const prevYearLast = (typeof kospiIndex2025 !== 'undefined') ? kospiIndex2025['12.30'] : null;
+  muMonths.forEach(m => {
+    const days = labels2026.filter(k => parseInt(k.slice(0, 2), 10) === m);
+    if (!days.length) return;
+    const fi = labels2026.indexOf(days[0]);
+    const last = kospiIndex2026[days[days.length - 1]];
+    const base = fi > 0 ? kospiIndex2026[labels2026[fi - 1]] : prevYearLast;
+    if (base == null || last == null) return;
+    const ret = (last - base) / base * 100;
+    const row = document.createElement('div');
+    row.className = 'mr-row';
+    row.innerHTML = `<span class="mr-month">${m}월</span><span class="mr-val ${ret >= 0 ? 'pos' : 'neg'}">${ret >= 0 ? '+' : ''}${ret.toFixed(1)}%</span>`;
+    el.appendChild(row);
+  });
+}
+renderMonthReturns();
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
@@ -2376,7 +2490,7 @@ philosophyToggle.addEventListener('keydown', e => {
 
 const yearlyToggle = document.getElementById('yearlyToggle');
 const yearlySummaryPanel = document.getElementById('yearlySummary');
-// 년도별 섹션은 CSS flex로 고정, 일별 컬럼 헤더는 CSS sticky(top:0)로 처리 → JS 오프셋 불필요
+// 년도별·일별헤더는 CSS flex로 고정 → JS 오프셋 불필요
 function toggleYearly() {
   const collapsed = yearlySummaryPanel.classList.toggle('collapsed');
   yearlyToggle.classList.toggle('collapsed', collapsed);
@@ -2526,10 +2640,14 @@ function showDayTab(year) {
   document.querySelectorAll('.day-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.year === year);
   });
-  // 언랩된 구조: 행/더보기 버튼을 data-year로 필터
-  dayListEl.querySelectorAll('.day-row[data-year], .day-more[data-year]').forEach(el => {
+  // 행(#dayRows)과 더보기 버튼(#dayMoreWrap)을 data-year로 필터
+  dayListEl.querySelectorAll('.day-row[data-year]').forEach(el => {
     el.style.display = el.dataset.year === year ? '' : 'none';
   });
+  dayMoreWrapEl.querySelectorAll('.day-more[data-year]').forEach(el => {
+    el.style.display = el.dataset.year === year ? '' : 'none';
+  });
+  syncRowsExpanded(year);
 }
 document.querySelectorAll('.day-tab').forEach(btn => {
   btn.addEventListener('click', () => showDayTab(btn.dataset.year));
