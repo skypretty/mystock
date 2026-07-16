@@ -1632,20 +1632,20 @@
         <div class="stats-row">
           <div class="cards">
             <div class="card">
-              <p class="label">개인 순매수</p>
-              <p class="value red" id="totalIndividual">+108.5조원</p>
+              <p class="label">개인</p>
+              <p class="value red" id="totalIndividual">+109.5조원</p>
             </div>
             <div class="card">
-              <p class="label">기관 순매수</p>
-              <p class="value gray" id="totalInstitution">+37.6조원</p>
+              <p class="label">외국인</p>
+              <p class="value blue" id="totalForeign">-160.4조원</p>
             </div>
             <div class="card">
-              <p class="label">외국인 순매도</p>
-              <p class="value blue" id="totalForeign">-160.6조원</p>
+              <p class="label">기관</p>
+              <p class="value red" id="totalInstitution">+36.4조원</p>
             </div>
             <div class="card">
-              <p class="label" id="labelPension">연기금 순매도</p>
-              <p class="value blue" id="totalPension">-5.1조원</p>
+              <p class="label">연기금</p>
+              <p class="value blue" id="totalPension">-8.8조원</p>
             </div>
           </div>
 
@@ -2131,9 +2131,7 @@ function renderChart(yearLabel, displayLabel) {
   document.getElementById('totalInstitution').className = 'value ' + (i >= 0 ? 'red' : 'blue');
   const pn = dataArr.reduce((acc, r) => acc + (r.pn || 0), 0);
   const pnEl = document.getElementById('totalPension');
-  const pnLabel = document.getElementById('labelPension');
   if (pnEl) { pnEl.textContent = fmtJo(pn); pnEl.className = 'value ' + (pn >= 0 ? 'red' : 'blue'); }
-  if (pnLabel) pnLabel.textContent = '연기금 ' + (pn >= 0 ? '순매수' : '순매도');
   document.getElementById('pageSubtitle').textContent = `${dataArr[0].date} ~ ${dataArr[dataArr.length - 1].date}`;
 
   document.querySelectorAll('.year-card').forEach(card => {
