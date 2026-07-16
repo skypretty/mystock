@@ -613,9 +613,10 @@
       flex-direction: column;
     }
     #view-domestic .day-rows {
-      flex: 1 1 0;        /* 남은 영역 꽉 채움 → 더보기 버튼이 항상 맨 아래 */
+      flex: 1 1 0;        /* 남은 영역 꽉 채움 */
       min-height: 0;
       overflow-y: auto;
+      overflow-x: hidden; /* 좌우 스크롤 방지 */
       overscroll-behavior: contain;
     }
     #view-domestic .day-more-wrap { flex: 0 0 auto; }
@@ -632,7 +633,7 @@
       grid-template-columns: repeat(2, 1fr);
       gap: 16px;
       margin-top: 20px;
-      align-items: start;
+      align-items: stretch;  /* 두 카드 높이 동일 (JS 없이) */
     }
     /* 월별 상승 폭 카드: 높이는 좌측 달력과 동일(JS), 리스트만 스크롤 */
     #view-domestic #monthReturns { display: flex; flex-direction: column; }
@@ -643,7 +644,7 @@
       overflow-x: hidden;          /* 좌우 스크롤 방지 */
       overscroll-behavior: contain; /* 카드 안에서만 휠 스크롤 */
     }
-    /* 년도별 누적데이터: 선택 영역 여유 있게 + 지표 사이 세로 컬럼 디바이더 */
+    /* 선택 영역 여유 있게 + 지표 사이 세로 컬럼 디바이더 */
     #view-domestic .year-card { padding: 22px 14px; margin-bottom: 0; border-radius: 16px; }
     #view-domestic .year-card .year-stats { gap: 0; }
     #view-domestic .year-card .stat {
@@ -1595,7 +1596,7 @@
 
   <aside class="sidebar" id="sidebarPanel">
     <div class="sidebar-section">
-      <h2 class="section-toggle collapsed" id="yearlyToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="yearlySummary">년도별 누적데이터 <span class="arrow"></span></h2>
+      <h2 class="section-toggle collapsed" id="yearlyToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="yearlySummary">누적 데이터 <span class="arrow"></span></h2>
       <div id="yearlySummary" class="collapsible-content collapsed"></div>
     </div>
 
@@ -1641,6 +1642,10 @@
             <div class="card">
               <p class="label">외국인 순매도</p>
               <p class="value blue" id="totalForeign">-160.6조원</p>
+            </div>
+            <div class="card">
+              <p class="label" id="labelPension">연기금 순매도</p>
+              <p class="value blue" id="totalPension">-5.1조원</p>
             </div>
           </div>
 
@@ -2124,6 +2129,11 @@ function renderChart(yearLabel, displayLabel) {
   document.getElementById('totalForeign').className = 'value ' + (f >= 0 ? 'red' : 'blue');
   document.getElementById('totalInstitution').textContent = fmtJo(i);
   document.getElementById('totalInstitution').className = 'value ' + (i >= 0 ? 'red' : 'blue');
+  const pn = dataArr.reduce((acc, r) => acc + (r.pn || 0), 0);
+  const pnEl = document.getElementById('totalPension');
+  const pnLabel = document.getElementById('labelPension');
+  if (pnEl) { pnEl.textContent = fmtJo(pn); pnEl.className = 'value ' + (pn >= 0 ? 'red' : 'blue'); }
+  if (pnLabel) pnLabel.textContent = '연기금 ' + (pn >= 0 ? '순매수' : '순매도');
   document.getElementById('pageSubtitle').textContent = `${dataArr[0].date} ~ ${dataArr[dataArr.length - 1].date}`;
 
   document.querySelectorAll('.year-card').forEach(card => {
@@ -2251,7 +2261,8 @@ function renderChart(yearLabel, displayLabel) {
               maxTicksLimit: isNarrow() ? 5 : undefined,
               padding: isNarrow() ? 2 : 3
             },
-            grid: { color: '#e2e2e2' }
+            grid: { color: '#e2e2e2' },
+            border: { display: true, color: '#e2e2e2' }
           },
           y1: {
             position: 'right',
@@ -2260,7 +2271,8 @@ function renderChart(yearLabel, displayLabel) {
             grace: isNarrow() ? '12%' : '4%',
             title: { display: true, text: '코스피 지수', color: '#008300', font: { size: 12 } },
             ticks: { color: '#008300', font: { size: 11 }, padding: 3 },
-            grid: { display: false }
+            grid: { display: false },
+            border: { display: true, color: '#e2e2e2' }
           },
           x: {
             ticks: {
@@ -2272,7 +2284,8 @@ function renderChart(yearLabel, displayLabel) {
               maxTicksLimit: isNarrow() ? 5 : 9,
               padding: 4
             },
-            grid: { display: false }
+            grid: { display: false },
+            border: { display: false }
           }
         }
       }
@@ -2320,7 +2333,7 @@ Object.keys(yearDatasets).forEach(label => {
       `<div class="stat"><span class="k">${k}</span><span class="v ${v>=0?'pos':'neg'}">${fmtJo(v)}</span></div>`
     ).join('');
     card.innerHTML = `
-      <p class="year-label">${label}</p>
+      <p class="year-label">${label.replace(' 총합', '')}</p>
       <div class="year-stats" style="grid-template-columns:repeat(${stats.length},minmax(0,1fr))">${statsHtml}</div>
     `;
     card.addEventListener('click', () => renderChart(label));
@@ -2358,7 +2371,7 @@ if (monthKeys2026.length) {
   periodButtonsEl.appendChild(monthNav);
 
   // Pressing the month button again returns to whatever period was showing.
-  let periodBeforeMonth = '2025~2026년 총합';
+  let periodBeforeMonth = '2026년';
   monthBtn.addEventListener('click', () => {
     if (activeYearLabel === MONTH_KEY) {
       renderChart(periodBeforeMonth);
@@ -2478,7 +2491,7 @@ function onDayScroll() {
 }
 document.addEventListener('scroll', onDayScroll, true);
 
-renderChart('2025~2026년 총합');
+renderChart('2026년'); // 시작 시 2026년 누적 데이터
 layoutMonthPnl();
 layoutTotalBar();
 
@@ -2589,22 +2602,9 @@ function renderMonthReturns() {
   if (prev) prev.disabled = mrIdx <= 0;
   if (next) next.disabled = mrIdx >= mrYears.length - 1;
 }
-// 상승 폭 카드 높이를 좌측 달력 카드와 동일하게
-function matchReturnsHeight() {
-  const cal = document.getElementById('monthUpdown');
-  const ret = document.getElementById('monthReturns');
-  if (!cal || !ret) return;
-  if (narrowQuery.matches) { ret.style.height = ''; return; }
-  ret.style.height = cal.offsetHeight + 'px';
-}
 document.getElementById('mrPrev').addEventListener('click', () => { if (mrIdx > 0) { mrIdx--; renderMonthReturns(); } });
 document.getElementById('mrNext').addEventListener('click', () => { if (mrIdx < mrYears.length - 1) { mrIdx++; renderMonthReturns(); } });
 renderMonthReturns();
-matchReturnsHeight();
-requestAnimationFrame(matchReturnsHeight);
-window.addEventListener('load', matchReturnsHeight);
-window.addEventListener('resize', matchReturnsHeight);
-document.fonts && document.fonts.ready.then(matchReturnsHeight);
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
