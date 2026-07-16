@@ -2622,12 +2622,13 @@ const philosophyToggle = document.getElementById('philosophyToggle');
 const philosophyList = document.getElementById('philosophyList');
 const philosophyCol = philosophyToggle.closest('.mytrades-col.philosophy');
 function syncPhilosophy(collapsed) {
+  philosophyList.classList.toggle('collapsed', collapsed);
   philosophyToggle.classList.toggle('collapsed', collapsed);
   philosophyCol.classList.toggle('is-collapsed', collapsed);
   philosophyToggle.setAttribute('aria-expanded', String(!collapsed));
 }
 function togglePhilosophy() {
-  syncPhilosophy(philosophyList.classList.toggle('collapsed'));
+  syncPhilosophy(!philosophyList.classList.contains('collapsed'));
 }
 syncPhilosophy(narrowQuery.matches); // PC는 펼침, 모바일은 접힘
 philosophyToggle.addEventListener('click', togglePhilosophy);
