@@ -129,7 +129,7 @@
   }
   .sidebar h2.section-toggle {
     cursor: pointer;
-    justify-content: space-between;  /* 제목 좌측, 화살표 우측 끝 */
+    justify-content: flex-start;
     gap: 8px;
   }
   .sidebar h2.section-toggle .arrow {
@@ -537,11 +537,12 @@
     border: none;
     border-top: 1px solid #f0f0f0;
     margin-top: 4px;
-    padding: 10px 0 8px;
+    padding: 10px 10px 8px;
     font-size: 12.5px;
     font-weight: 600;
     color: #666;
     cursor: pointer;
+    text-align: right;   /* 더보기/접기 우측 정렬 */
   }
   .day-more:hover {
     color: #1a1a1a;
