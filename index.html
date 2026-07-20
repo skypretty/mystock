@@ -629,8 +629,9 @@
       overflow-x: hidden;
       overscroll-behavior: contain;
     }
+    /* 더보기: 박스를 크게(60vh) 넓히되 여전히 목록 안에서만 스크롤 → 컬럼 헤더 고정 유지 */
     #view-domestic #dayList.expanded .day-rows,
-    #view-domestic .credit-list.expanded { max-height: none; }
+    #view-domestic .credit-list.expanded { max-height: 60vh; }
     /* 더보기 이중선 → 단일 구분선: 버튼 자체 보더 제거, 목록 박스 아래 한 줄만 */
     #view-domestic .day-more { border-top: none; margin-top: 0; }
     #view-domestic .day-more-wrap:not(:empty) { border-top: 1px solid #ececec; }
