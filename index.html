@@ -764,6 +764,12 @@
     align-items: center;
     gap: 6px;
   }
+  #investorLegend span[data-ds] {
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+    user-select: none;
+  }
+  #investorLegend span.legend-off { opacity: 0.3; }
   .dot {
     width: 12px;
     height: 12px;
@@ -1682,12 +1688,12 @@
             </div>
           </div>
 
-          <div class="legend">
-            <span><span class="dot" style="background:#808080"></span>개인</span>
-            <span><span class="dot" style="background:#e34948"></span>외국인</span>
-            <span><span class="dot" style="background:#2a78d6"></span>기관</span>
-            <span><span class="dot" style="background:#e8912d"></span>연기금</span>
-            <span><span class="dot" style="background:#008300"></span>코스피</span>
+          <div class="legend" id="investorLegend">
+            <span data-ds="0"><span class="dot" style="background:#808080"></span>개인</span>
+            <span data-ds="1"><span class="dot" style="background:#e34948"></span>외국인</span>
+            <span data-ds="2"><span class="dot" style="background:#2a78d6"></span>기관</span>
+            <span data-ds="3"><span class="dot" style="background:#e8912d"></span>연기금</span>
+            <span data-ds="4"><span class="dot" style="background:#008300"></span>코스피</span>
           </div>
         </div>
 
@@ -2367,7 +2373,34 @@ function renderChart(yearLabel, displayLabel) {
       canvas.addEventListener(evt, () => setTimeout(clearTooltip, 50), { passive: true });
     });
   }
+  syncLegendDim();
 }
+
+// 범례 클릭 → 해당 항목만 표시(다시 누르면 전체 복귀), 나머지는 흐리게
+function syncLegendDim() {
+  const legend = document.getElementById('investorLegend');
+  if (!legend || !chartInstance) return;
+  legend.querySelectorAll('span[data-ds]').forEach(span => {
+    span.classList.toggle('legend-off', !chartInstance.isDatasetVisible(+span.dataset.ds));
+  });
+}
+(function initLegendIsolate() {
+  const legend = document.getElementById('investorLegend');
+  if (!legend) return;
+  legend.querySelectorAll('span[data-ds]').forEach(span => {
+    span.addEventListener('click', () => {
+      if (!chartInstance) return;
+      const idx = +span.dataset.ds;
+      const n = chartInstance.data.datasets.length;
+      let visCount = 0;
+      for (let k = 0; k < n; k++) if (chartInstance.isDatasetVisible(k)) visCount++;
+      const onlyThis = chartInstance.isDatasetVisible(idx) && visCount === 1;
+      for (let k = 0; k < n; k++) chartInstance.setDatasetVisibility(k, onlyThis ? true : k === idx);
+      chartInstance.update();
+      syncLegendDim();
+    });
+  });
+})();
 
 Object.keys(yearDatasets).forEach(label => {
   if (label === MONTH_KEY) return;
