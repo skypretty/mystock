@@ -603,9 +603,11 @@
       padding: 32px 28px;  /* 매매기록 투자철학 컬럼과 동일 */
     }
     #view-domestic .sidebar > .sidebar-section { flex: 0 0 auto; }
-    /* 일별 데이터를 펼쳤을 때만 남은 공간을 채우고 실데이터만 내부 스크롤 */
-    #view-domestic .sidebar > .day-section:has(#dayListSection:not(.collapsed)) {
-      flex: 1 1 auto;
+    /* 일별·신용공여: 펼친 섹션끼리 남은 공간을 균등 분배(flex 1 1 0)하고 각자 내부 스크롤.
+       한쪽이 접히면 다른 쪽이 전부 차지 → 신용공여를 펼쳐도 일별이 짜부라지지 않음 */
+    #view-domestic .sidebar > .day-section:has(#dayListSection:not(.collapsed)),
+    #view-domestic .sidebar > .credit-section:has(#creditSection:not(.collapsed)) {
+      flex: 1 1 0;
       min-height: 0;
       display: flex;
       flex-direction: column;
@@ -632,9 +634,17 @@
       overscroll-behavior: contain;
     }
     #view-domestic .day-more-wrap { flex: 0 0 auto; }
-    /* 신용공여 목록: 사이드바 하단 고정폭 섹션 → 길어지면 내부만 스크롤 */
+    /* 신용공여 섹션 펼침: 헤더 고정 + 목록만 내부 스크롤 (일별과 동일 구조) */
+    #view-domestic #creditSection:not(.collapsed) {
+      flex: 1 1 auto;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+    }
+    #view-domestic #creditSection .credit-row.header { flex: 0 0 auto; }
     #view-domestic .credit-list {
-      max-height: 320px;
+      flex: 1 1 0;
+      min-height: 0;
       overflow-y: auto;
       overflow-x: hidden;
       overscroll-behavior: contain;
