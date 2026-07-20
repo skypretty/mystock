@@ -2384,13 +2384,39 @@ function syncLegendDim() {
     span.classList.toggle('legend-off', !chartInstance.isDatasetVisible(+span.dataset.ds));
   });
 }
+// 호버 프리뷰: 해당 라인만 강조(임시 표시)하고 나머지는 흐리게 → 떼면 원상복구
+let legendHoverState = null;
+function legendHoverPreview(idx) {
+  if (!chartInstance) return;
+  const ds = chartInstance.data.datasets;
+  if (!legendHoverState) {
+    legendHoverState = { colors: ds.map(d => d.borderColor), vis: ds.map((_, k) => chartInstance.isDatasetVisible(k)) };
+  }
+  ds.forEach((d, k) => {
+    chartInstance.setDatasetVisibility(k, k === idx ? true : legendHoverState.vis[k]);
+    d.borderColor = (k === idx) ? legendHoverState.colors[k] : 'rgba(150, 150, 150, 0.16)';
+  });
+  chartInstance.update('none');
+}
+function legendHoverClear() {
+  if (!chartInstance || !legendHoverState) return;
+  chartInstance.data.datasets.forEach((d, k) => {
+    d.borderColor = legendHoverState.colors[k];
+    chartInstance.setDatasetVisibility(k, legendHoverState.vis[k]);
+  });
+  legendHoverState = null;
+  chartInstance.update('none');
+}
 (function initLegendIsolate() {
   const legend = document.getElementById('investorLegend');
   if (!legend) return;
   legend.querySelectorAll('span[data-ds]').forEach(span => {
+    const idx = +span.dataset.ds;
+    span.addEventListener('mouseenter', () => legendHoverPreview(idx));
+    span.addEventListener('mouseleave', legendHoverClear);
     span.addEventListener('click', () => {
       if (!chartInstance) return;
-      const idx = +span.dataset.ds;
+      legendHoverClear(); // 호버 프리뷰 상태(색·표시)를 실제 상태로 복구 후 판단
       const n = chartInstance.data.datasets.length;
       let visCount = 0;
       for (let k = 0; k < n; k++) if (chartInstance.isDatasetVisible(k)) visCount++;
