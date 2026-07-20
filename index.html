@@ -772,6 +772,7 @@
     width: 100%;
     height: 420px;
   }
+  .credit-chart-card { margin-top: 20px; }
   .chart-container canvas {
     transition: opacity 0.13s ease;
     -webkit-touch-callout: none;
@@ -1711,6 +1712,23 @@
         </section>
       </div>
 
+      <section class="panel-card credit-chart-card">
+        <div class="title-row">
+          <div class="title-block">
+            <h1>신용공여 잔고 추이</h1>
+            <p class="subtitle">2026년 · 신용거래융자 (단위: 조원)</p>
+          </div>
+          <div class="legend">
+            <span><span class="dot" style="background:#7b61ff"></span>전체</span>
+            <span><span class="dot" style="background:#e34948"></span>유가증권</span>
+            <span><span class="dot" style="background:#2a78d6"></span>코스닥</span>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="creditChart" role="img" aria-label="2026년 신용공여 잔고(신용거래융자) 추이 차트"></canvas>
+        </div>
+      </section>
+
     </div>
   </main>
 
@@ -2631,6 +2649,58 @@ function renderCreditList() {
   }).join('');
 }
 renderCreditList();
+
+// 신용공여 잔고 추이 2026 차트 (전체 = 유가증권 + 코스닥, 단위: 조원)
+let creditChartInstance = null;
+function buildCreditChart() {
+  const canvas = document.getElementById('creditChart');
+  if (!canvas || typeof Chart === 'undefined' || !creditData2026.length) return;
+  const labels = creditData2026.map(r => r.date);
+  const mkSet = (label, key, color, width) => ({
+    label, data: creditData2026.map(r => r[key]),
+    borderColor: color, backgroundColor: color,
+    borderWidth: width, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4,
+    tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round'
+  });
+  if (creditChartInstance) creditChartInstance.destroy();
+  creditChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: { labels, datasets: [
+      mkSet('전체', 'bal', '#7b61ff', isNarrow() ? 1.5 : 2.5),
+      mkSet('유가증권', 'scrs', '#e34948', isNarrow() ? 1 : 1.5),
+      mkSet('코스닥', 'kosdaq', '#2a78d6', isNarrow() ? 1 : 1.5)
+    ] },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: false,
+      interaction: { mode: 'index', intersect: false },
+      hover: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(26, 26, 26, 0.92)', cornerRadius: 12, padding: 14,
+          boxPadding: 6, bodySpacing: 8, titleMarginBottom: 10, titleColor: '#fff',
+          bodyColor: '#f0f0f0', titleFont: { size: 13, weight: '600' }, bodyFont: { size: 12 },
+          usePointStyle: true,
+          callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}조원` }
+        }
+      },
+      scales: {
+        y: {
+          position: 'left', grace: '4%',
+          title: { display: !isNarrow(), text: '신용잔고 (조원)', color: '#8a8a8a', font: { size: 12 } },
+          ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 10 : 11 }, padding: 3 },
+          grid: { color: '#e2e2e2' }, border: { display: true, color: '#e2e2e2' }
+        },
+        x: {
+          ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 9 : 10 }, autoSkip: true, maxTicksLimit: isNarrow() ? 5 : 9, padding: 4 },
+          grid: { display: false }, border: { display: false }
+        }
+      }
+    }
+  });
+}
+buildCreditChart();
+narrowQuery.addEventListener('change', buildCreditChart); // 모바일/PC 전환 시 두께·틱 갱신
 
 // Scrolling back up to the top of the day list resets it to the first 10 rows.
 renderChart('2026년'); // 시작 시 2026년 누적 데이터
