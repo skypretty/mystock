@@ -537,11 +537,12 @@
     border: none;
     border-top: 1px solid #f0f0f0;
     margin-top: 4px;
-    padding: 10px 0 8px;
+    padding: 10px 10px 8px;
     font-size: 12.5px;
     font-weight: 600;
     color: #666;
     cursor: pointer;
+    text-align: left;   /* 목록 좌측(날짜 컬럼)에 맞춤 */
   }
   .day-more:hover {
     color: #1a1a1a;
@@ -596,59 +597,30 @@
       border-color: #1a1a1a;
     }
     #view-domestic .sidebar {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
+      display: block;
+      overflow-y: auto;      /* 캡을 넘겨 세로가 길어지면 사이드바 자체 스크롤 */
+      overflow-x: hidden;
+      overscroll-behavior: contain;
       width: 560px;
       padding: 32px 28px;  /* 매매기록 투자철학 컬럼과 동일 */
     }
-    #view-domestic .sidebar > .sidebar-section { flex: 0 0 auto; }
-    /* 일별·신용공여: 펼친 섹션끼리 남은 공간을 균등 분배(flex 1 1 0)하고 각자 내부 스크롤.
-       한쪽이 접히면 다른 쪽이 전부 차지 → 신용공여를 펼쳐도 일별이 짜부라지지 않음 */
-    #view-domestic .sidebar > .day-section:has(#dayListSection:not(.collapsed)),
-    #view-domestic .sidebar > .credit-section:has(#creditSection:not(.collapsed)) {
-      flex: 1 1 0;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    #view-domestic #dayListSection:not(.collapsed) {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    #view-domestic .day-head { flex: 0 0 auto; }
-    #view-domestic .day-list {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    #view-domestic .day-rows {
-      flex: 1 1 0;        /* 남은 영역 꽉 채움 */
-      min-height: 0;
-      overflow-y: auto;
-      overflow-x: hidden; /* 좌우 스크롤 방지 */
-      overscroll-behavior: contain;
-    }
-    #view-domestic .day-more-wrap { flex: 0 0 auto; }
-    /* 신용공여 섹션 펼침: 헤더 고정 + 목록만 내부 스크롤 (일별과 동일 구조) */
-    #view-domestic #creditSection:not(.collapsed) {
-      flex: 1 1 auto;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
-    }
-    #view-domestic #creditSection .credit-row.header { flex: 0 0 auto; }
+    /* 일별·신용공여 목록: ATF에 맞춰 기본 약 6행만 노출하고, 더 보려면 목록 안에서 스크롤.
+       컬럼 헤더(.day-head / 신용공여 header)는 스크롤 영역 밖이라 항상 보임 */
+    #view-domestic .day-list { display: block; }
+    /* 목록은 기본 스크롤 박스(약 6행) → 더보기 안 열어도 스크롤 가능.
+       더보기(.expanded)로 펼치면 전체가 인라인으로 나오고 사이드바가 스크롤 */
+    #view-domestic .day-rows,
     #view-domestic .credit-list {
-      flex: 1 1 0;
-      min-height: 0;
+      max-height: 200px;   /* ≈ 6행 + 다음 행 살짝(스크롤 힌트). 조절 지점 */
       overflow-y: auto;
       overflow-x: hidden;
       overscroll-behavior: contain;
     }
+    #view-domestic #dayList.expanded .day-rows,
+    #view-domestic .credit-list.expanded { max-height: none; }
+    /* 더보기 이중선 → 단일 구분선: 버튼 자체 보더 제거, 목록 박스 아래 한 줄만 */
+    #view-domestic .day-more { border-top: none; margin-top: 0; }
+    #view-domestic .day-more-wrap:not(:empty) { border-top: 1px solid #ececec; }
     /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
     #view-domestic .panel-card {
       background: #fff;
@@ -664,8 +636,9 @@
       margin-top: 20px;
       align-items: stretch;  /* 두 카드 높이 동일 (JS 없이) */
     }
-    /* 월별 상승 폭 카드: 높이는 좌측 달력과 동일(JS), 리스트만 스크롤 */
-    #view-domestic #monthReturns { display: flex; flex-direction: column; }
+    /* 월별 상승 폭 카드: 높이는 좌측 달력과 동일(JS로 고정), 리스트만 스크롤.
+       min-height:0 + overflow:hidden 으로 내용이 그리드 행을 밀지 않게 함 */
+    #view-domestic #monthReturns { display: flex; flex-direction: column; min-height: 0; overflow: hidden; align-self: start; }
     #view-domestic #monthReturns .mr-list {
       flex: 1 1 auto;
       min-height: 0;
@@ -1247,6 +1220,8 @@
       border-radius: 0;
       background: transparent;
     }
+    /* 모바일은 목록 전체가 흐름에 노출되므로 더보기 불필요 */
+    .day-more-wrap { display: none; }
     .sidebar-section {
       border-bottom: none;
       padding-bottom: 0;
@@ -1647,10 +1622,11 @@
     </div>
 
     <div class="sidebar-section credit-section">
-      <h2 class="section-toggle collapsed" id="creditToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span></h2>
-      <div id="creditSection" class="collapsible-content collapsed">
+      <h2 class="section-toggle" id="creditToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span></h2>
+      <div id="creditSection" class="collapsible-content">
         <div class="day-row header credit-row"><span>날짜</span><span>신용잔고</span><span>증감</span><span>유가증권</span><span>코스닥</span></div>
         <div class="credit-list" id="creditRows"></div>
+        <div class="day-more-wrap" id="creditMoreWrap"></div>
       </div>
     </div>
   </aside>
@@ -2139,9 +2115,20 @@ function layoutMonthPnl() {
   });
 }
 
+// 월별 상승 폭 카드 높이를 좌측 달력과 동일하게 고정 → 목록이 길어도 늘어나지 않고 스크롤
+function layoutMonthReturns() {
+  const cal = document.getElementById('monthUpdown');
+  const card = document.getElementById('monthReturns');
+  if (!cal || !card) return;
+  if (isNarrow()) { card.style.height = ''; return; } // 모바일은 자연 높이(세로 스택)
+  card.style.height = cal.offsetHeight + 'px';
+}
+window.addEventListener('resize', layoutMonthReturns);
+
 narrowQuery.addEventListener('change', () => {
   layoutMonthPnl();
   layoutTotalBar();
+  layoutMonthReturns();
   if (!chartInstance) return;
   chartInstance.destroy();
   chartInstance = null;
@@ -2455,24 +2442,16 @@ function kospiPctChange(dataArr, idx, kospiMap) {
   return { text: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%', cls: pct >= 0 ? 'pos' : 'neg' };
 }
 
-const DAY_LIST_LIMIT = Infinity; // 더보기/접기 없이 전체 행을 스크롤로 표시
+const DAY_LIST_LIMIT = 6; // ATF: 기본 6행만 노출하고 나머지는 더보기로
 const dayListEl = document.getElementById('dayRows');
 const dayMoreWrapEl = document.getElementById('dayMoreWrap');
 const dayListContainerEl = document.getElementById('dayList');
-// 탭 전환은 data-year로 필터링한다.
-function extrasFor(year) {
-  return dayListEl.querySelectorAll(`.day-row.extra[data-year="${year}"]`);
-}
-// 더보기로 펼치면 실데이터 영역이 남은 공간을 채우도록
-function syncRowsExpanded(year) {
-  const expanded = [...extrasFor(year)].some(r => !r.classList.contains('hidden'));
-  dayListContainerEl.classList.toggle('rows-expanded', expanded);
-}
+// 전체 행을 렌더하고 목록(.day-rows)은 기본 스크롤 박스(약 6행). 더보기는 박스를 펼침.
 function renderDayList(data, kospiIndex, year) {
   const rows = data.map((row, idx) => ({ row, pct: kospiPctChange(data, idx, kospiIndex) })).reverse();
-  rows.forEach(({ row, pct }, i) => {
+  rows.forEach(({ row, pct }) => {
     const div = document.createElement('div');
-    div.className = 'day-row' + (i >= DAY_LIST_LIMIT ? ' extra hidden' : '');
+    div.className = 'day-row';
     div.dataset.year = year;
     const pn = row.pn;
     const pnCell = pn == null
@@ -2482,17 +2461,14 @@ function renderDayList(data, kospiIndex, year) {
     dayListEl.appendChild(div);
   });
   if (rows.length > DAY_LIST_LIMIT) {
-    const hiddenCount = rows.length - DAY_LIST_LIMIT;
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'day-more';
     btn.dataset.year = year;
-    btn.textContent = `더보기 (${hiddenCount})`;
+    btn.textContent = '더보기';
     btn.addEventListener('click', () => {
-      const nowExpanded = ![...extrasFor(year)].some(r => r.classList.contains('hidden'));
-      extrasFor(year).forEach(r => r.classList.toggle('hidden', nowExpanded));
-      btn.textContent = nowExpanded ? `더보기 (${hiddenCount})` : '접기';
-      syncRowsExpanded(year);
+      const expanded = dayListContainerEl.classList.toggle('expanded');
+      btn.textContent = expanded ? '접기' : '더보기';
     });
     dayMoreWrapEl.appendChild(btn);
   }
@@ -2636,47 +2612,38 @@ const creditData2026 = [
   {date:'07.14',bal:34.71,chg:-809,scrs:27.45,kosdaq:7.26},
   {date:'07.15',bal:34.37,chg:-3376,scrs:27.14,kosdaq:7.23}
 ];
+const CREDIT_LIST_LIMIT = 6; // ATF: 기본 6행 + 더보기
 function renderCreditList() {
   const el = document.getElementById('creditRows');
+  const moreWrap = document.getElementById('creditMoreWrap');
   if (!el) return;
+  if (moreWrap) moreWrap.innerHTML = '';
   if (!creditData2026.length) {
     el.innerHTML = '<div class="credit-empty">데이터 준비 중입니다.</div>';
     return;
   }
-  el.innerHTML = creditData2026.slice().reverse().map(r => {
+  const rows = creditData2026.slice().reverse();
+  el.innerHTML = rows.map(r => {
     const chgCell = r.chg == null
       ? '<span>-</span>'
       : `<span class="${r.chg>=0?'pos':'neg'}">${fmtEok(r.chg)}</span>`;
     return `<div class="day-row credit-row"><span>${r.date}</span><span>${r.bal.toFixed(2)}조</span>${chgCell}<span>${r.scrs.toFixed(2)}조</span><span>${r.kosdaq.toFixed(2)}조</span></div>`;
   }).join('');
+  if (moreWrap && rows.length > CREDIT_LIST_LIMIT) {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'day-more';
+    btn.textContent = '더보기';
+    btn.addEventListener('click', () => {
+      const expanded = el.classList.toggle('expanded');
+      btn.textContent = expanded ? '접기' : '더보기';
+    });
+    moreWrap.appendChild(btn);
+  }
 }
 renderCreditList();
 
 // Scrolling back up to the top of the day list resets it to the first 10 rows.
-function collapseDayLists() {
-  document.querySelectorAll('.day-list .day-more').forEach(btn => {
-    const extras = extrasFor(btn.dataset.year);
-    if (![...extras].some(r => !r.classList.contains('hidden'))) return;
-    extras.forEach(r => r.classList.add('hidden'));
-    btn.textContent = `더보기 (${extras.length})`;
-  });
-}
-// Reset to the first 10 rows after the user has scrolled down into the list
-// and then scrolled back up far enough that its header is well in view again.
-let dayEngaged = false;
-function onDayScroll() {
-  const tabs = document.querySelector('.day-tabs');
-  if (!tabs) return;
-  const top = tabs.getBoundingClientRect().top;
-  if (top < 0) {
-    dayEngaged = true;
-  } else if (dayEngaged && top > 120) {
-    dayEngaged = false;
-    collapseDayLists();
-  }
-}
-document.addEventListener('scroll', onDayScroll, true);
-
 renderChart('2026년'); // 시작 시 2026년 누적 데이터
 layoutMonthPnl();
 layoutTotalBar();
@@ -2749,6 +2716,7 @@ function updateMuNav() {
   const next = document.getElementById('muNext');
   if (prev) prev.disabled = muIdx <= 0;
   if (next) next.disabled = muIdx >= muEntries.length - 1;
+  layoutMonthReturns(); // 달력 높이(주 수)가 바뀌면 상승폭 카드도 맞춤
 }
 document.getElementById('muPrev').addEventListener('click', () => { if (muIdx > 0) { muIdx--; updateMuNav(); } });
 document.getElementById('muNext').addEventListener('click', () => { if (muIdx < muEntries.length - 1) { muIdx++; updateMuNav(); } });
@@ -2791,6 +2759,7 @@ function renderMonthReturns() {
 document.getElementById('mrPrev').addEventListener('click', () => { if (mrIdx > 0) { mrIdx--; renderMonthReturns(); } });
 document.getElementById('mrNext').addEventListener('click', () => { if (mrIdx < mrYears.length - 1) { mrIdx++; renderMonthReturns(); } });
 renderMonthReturns();
+layoutMonthReturns();
 
 (function updateMytradesTotal() {
   const totalEl = document.getElementById('mytradesTotal');
@@ -2876,6 +2845,11 @@ creditToggle.addEventListener('click', toggleCredit);
 creditToggle.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCredit(); }
 });
+if (narrowQuery.matches) { // 모바일은 기본 접힘 (일별과 동일)
+  creditSectionPanel.classList.add('collapsed');
+  creditToggle.classList.add('collapsed');
+  creditToggle.setAttribute('aria-expanded', 'false');
+}
 
 const pnlLockBtn = document.getElementById('pnlLockBtn');
 const lockIcon = document.getElementById('lockIcon');
@@ -3015,7 +2989,10 @@ function showDayTab(year) {
   dayMoreWrapEl.querySelectorAll('.day-more[data-year]').forEach(el => {
     el.style.display = el.dataset.year === year ? '' : 'none';
   });
-  syncRowsExpanded(year);
+  // 탭 전환 시 펼침(더보기) 초기화 후 목록 맨 위로
+  dayListContainerEl.classList.remove('expanded');
+  dayMoreWrapEl.querySelectorAll('.day-more').forEach(b => { b.textContent = '더보기'; });
+  dayListEl.scrollTop = 0;
 }
 document.querySelectorAll('.day-tab').forEach(btn => {
   btn.addEventListener('click', () => showDayTab(btn.dataset.year));
