@@ -688,6 +688,9 @@
     }
     #view-domestic .stats-row .cards,
     #view-domestic .stats-row .legend { margin-bottom: 0; }
+    /* 값(24px)과 범례(13px) 라인박스 여백 차이 제거 → 바닥선 정렬 */
+    #view-domestic .stats-row .card p.value,
+    #view-domestic .stats-row .legend { line-height: 1; }
     /* 순매수 요약: 박스 제거, 좌측 정렬, 텍스트 축소 */
     #view-domestic .cards {
       display: flex;
@@ -2663,6 +2666,36 @@ function buildCreditChart() {
     borderWidth: width, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4,
     tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round'
   });
+  // 위 투자자 차트와 동일: 툴팁을 차트 상단에 고정하고 세로 점선 크로스헤어 표시
+  if (!Chart.Tooltip.positioners.fixedTop) {
+    Chart.Tooltip.positioners.fixedTop = function(elements, eventPosition) {
+      const area = this.chart.chartArea;
+      const px = elements.length ? elements[0].element.x : eventPosition.x;
+      const w = this.width || 0;
+      const gap = 18;
+      const x = (px + gap + w <= area.right) ? (px + gap + w / 2) : (px - gap - w / 2);
+      return { x, y: area.top + 6 };
+    };
+  }
+  const creditCrosshair = {
+    id: 'creditCrosshair',
+    afterDraw(chart) {
+      const active = chart.tooltip && chart.tooltip._active;
+      if (!active || !active.length) return;
+      const x = active[0].element.x;
+      const { top, bottom } = chart.chartArea;
+      const ctx = chart.ctx;
+      ctx.save();
+      ctx.beginPath();
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = '#8a8a8a';
+      ctx.moveTo(x, top);
+      ctx.lineTo(x, bottom);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
   if (creditChartInstance) creditChartInstance.destroy();
   creditChartInstance = new Chart(canvas, {
     type: 'line',
@@ -2671,6 +2704,7 @@ function buildCreditChart() {
       mkSet('유가증권', 'scrs', '#e34948', isNarrow() ? 1 : 1.5),
       mkSet('코스닥', 'kosdaq', '#2a78d6', isNarrow() ? 1 : 1.5)
     ] },
+    plugins: [creditCrosshair],
     options: {
       responsive: true, maintainAspectRatio: false, animation: false,
       interaction: { mode: 'index', intersect: false },
@@ -2678,10 +2712,11 @@ function buildCreditChart() {
       plugins: {
         legend: { display: false },
         tooltip: {
+          position: 'fixedTop', yAlign: 'top', caretPadding: 8, caretSize: 0,
           backgroundColor: 'rgba(26, 26, 26, 0.92)', cornerRadius: 12, padding: 14,
           boxPadding: 6, bodySpacing: 8, titleMarginBottom: 10, titleColor: '#fff',
           bodyColor: '#f0f0f0', titleFont: { size: 13, weight: '600' }, bodyFont: { size: 12 },
-          usePointStyle: true,
+          displayColors: true, usePointStyle: true,
           callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}조원` }
         }
       },
