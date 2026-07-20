@@ -147,6 +147,19 @@
   .sidebar h2.section-toggle.collapsed .arrow {
     transform: rotate(-45deg);
   }
+  /* 더보기/접기: 헤더 우측 끝(타이틀 옆) */
+  .sidebar h2.section-toggle .list-more {
+    margin-left: auto;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    padding: 2px 0;
+  }
+  .sidebar h2.section-toggle .list-more:hover { color: #1a1a1a; }
+  .sidebar h2.section-toggle.collapsed .list-more { display: none; }
   .sidebar h2.section-toggle.collapsed {
     margin-bottom: 0;
   }
@@ -1222,6 +1235,7 @@
     }
     /* 모바일은 목록 전체가 흐름에 노출되므로 더보기 불필요 */
     .day-more-wrap { display: none; }
+    .sidebar h2.section-toggle .list-more { display: none; }
     .sidebar-section {
       border-bottom: none;
       padding-bottom: 0;
@@ -1605,7 +1619,7 @@
     </div>
 
     <div class="sidebar-section day-section">
-      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span></h2>
+      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span><button type="button" class="list-more" id="dayListMore">더보기</button></h2>
       <div id="dayListSection" class="collapsible-content">
         <div class="day-head">
           <div class="day-tabs">
@@ -1622,7 +1636,7 @@
     </div>
 
     <div class="sidebar-section credit-section">
-      <h2 class="section-toggle" id="creditToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span></h2>
+      <h2 class="section-toggle" id="creditToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span><button type="button" class="list-more" id="creditMore">더보기</button></h2>
       <div id="creditSection" class="collapsible-content">
         <div class="day-row header credit-row"><span>날짜</span><span>신용잔고</span><span>증감</span><span>유가증권</span><span>코스닥</span></div>
         <div class="credit-list" id="creditRows"></div>
@@ -2460,18 +2474,6 @@ function renderDayList(data, kospiIndex, year) {
     div.innerHTML = `<span>${row.date}</span><span class="${row.p>=0?'pos':'neg'}">${fmtEok(row.p)}</span><span class="${row.f>=0?'pos':'neg'}">${fmtEok(row.f)}</span><span class="${row.i>=0?'pos':'neg'}">${fmtEok(row.i)}</span>${pnCell}<span>${fmtKospi(row.date, kospiIndex)}</span><span class="${pct.cls}">${pct.text}</span>`;
     dayListEl.appendChild(div);
   });
-  if (rows.length > DAY_LIST_LIMIT) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'day-more';
-    btn.dataset.year = year;
-    btn.textContent = '더보기';
-    btn.addEventListener('click', () => {
-      const expanded = dayListContainerEl.classList.toggle('expanded');
-      btn.textContent = expanded ? '접기' : '더보기';
-    });
-    dayMoreWrapEl.appendChild(btn);
-  }
 }
 
 if (data2025.length > 0) renderDayList(data2025, kospiIndex2025, '2025');
@@ -2612,12 +2614,9 @@ const creditData2026 = [
   {date:'07.14',bal:34.71,chg:-809,scrs:27.45,kosdaq:7.26},
   {date:'07.15',bal:34.37,chg:-3376,scrs:27.14,kosdaq:7.23}
 ];
-const CREDIT_LIST_LIMIT = 6; // ATF: 기본 6행 + 더보기
 function renderCreditList() {
   const el = document.getElementById('creditRows');
-  const moreWrap = document.getElementById('creditMoreWrap');
   if (!el) return;
-  if (moreWrap) moreWrap.innerHTML = '';
   if (!creditData2026.length) {
     el.innerHTML = '<div class="credit-empty">데이터 준비 중입니다.</div>';
     return;
@@ -2629,17 +2628,6 @@ function renderCreditList() {
       : `<span class="${r.chg>=0?'pos':'neg'}">${fmtEok(r.chg)}</span>`;
     return `<div class="day-row credit-row"><span>${r.date}</span><span>${r.bal.toFixed(2)}조</span>${chgCell}<span>${r.scrs.toFixed(2)}조</span><span>${r.kosdaq.toFixed(2)}조</span></div>`;
   }).join('');
-  if (moreWrap && rows.length > CREDIT_LIST_LIMIT) {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'day-more';
-    btn.textContent = '더보기';
-    btn.addEventListener('click', () => {
-      const expanded = el.classList.toggle('expanded');
-      btn.textContent = expanded ? '접기' : '더보기';
-    });
-    moreWrap.appendChild(btn);
-  }
 }
 renderCreditList();
 
@@ -2851,6 +2839,21 @@ if (narrowQuery.matches) { // 모바일은 기본 접힘 (일별과 동일)
   creditToggle.setAttribute('aria-expanded', 'false');
 }
 
+// 헤더 우측 '더보기/접기' → 목록 박스를 펼침. 섹션 접기로 이벤트 번짐 방지(stopPropagation)
+function wireListMore(btnId, boxId) {
+  const btn = document.getElementById(btnId);
+  const box = document.getElementById(boxId);
+  if (!btn || !box) return;
+  btn.addEventListener('click', e => {
+    e.stopPropagation();
+    const expanded = box.classList.toggle('expanded');
+    btn.textContent = expanded ? '접기' : '더보기';
+  });
+  btn.addEventListener('keydown', e => e.stopPropagation());
+}
+wireListMore('dayListMore', 'dayList');
+wireListMore('creditMore', 'creditRows');
+
 const pnlLockBtn = document.getElementById('pnlLockBtn');
 const lockIcon = document.getElementById('lockIcon');
 const LOCK_PATH_CLOSED = 'M8 11V7a4 4 0 0 1 8 0v4';
@@ -2982,16 +2985,14 @@ function showDayTab(year) {
   document.querySelectorAll('.day-tab').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.year === year);
   });
-  // 행(#dayRows)과 더보기 버튼(#dayMoreWrap)을 data-year로 필터
+  // 행(#dayRows)을 data-year로 필터
   dayListEl.querySelectorAll('.day-row[data-year]').forEach(el => {
-    el.style.display = el.dataset.year === year ? '' : 'none';
-  });
-  dayMoreWrapEl.querySelectorAll('.day-more[data-year]').forEach(el => {
     el.style.display = el.dataset.year === year ? '' : 'none';
   });
   // 탭 전환 시 펼침(더보기) 초기화 후 목록 맨 위로
   dayListContainerEl.classList.remove('expanded');
-  dayMoreWrapEl.querySelectorAll('.day-more').forEach(b => { b.textContent = '더보기'; });
+  const dlMore = document.getElementById('dayListMore');
+  if (dlMore) dlMore.textContent = '더보기';
   dayListEl.scrollTop = 0;
 }
 document.querySelectorAll('.day-tab').forEach(btn => {
