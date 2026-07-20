@@ -567,6 +567,19 @@
   .day-row span:first-child { text-align: left; color: #666; }
   .pos { color: #c0392b; }
   .neg { color: #2a78d6; }
+  /* 신용공여 잔고 추이: 3컬럼(날짜·신용잔고·증감). .day-row 그리드를 덮기 위해 2클래스 사용 */
+  .day-row.credit-row {
+    grid-template-columns: 56px minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .credit-list {
+    overflow: hidden;
+  }
+  .credit-empty {
+    padding: 14px 10px;
+    font-size: 11.5px;
+    color: #999;
+    text-align: center;
+  }
   /* PC(넓은 화면): 연기금 컬럼 노출, 더보기 없이 전체 표시 */
   @media (min-width: 769px) {
     /* body 자체는 스크롤 금지 → 헤더 절대 고정, 스크롤은 좌/우 컬럼 안에서만 */
@@ -589,15 +602,14 @@
       width: 560px;
       padding: 32px 28px;  /* 매매기록 투자철학 컬럼과 동일 */
     }
-    #view-domestic .sidebar > .sidebar-section:first-child { flex: 0 0 auto; }
-    #view-domestic .sidebar > .sidebar-section:last-child {
+    #view-domestic .sidebar > .sidebar-section { flex: 0 0 auto; }
+    /* 일별 데이터를 펼쳤을 때만 남은 공간을 채우고 실데이터만 내부 스크롤 */
+    #view-domestic .sidebar > .day-section:has(#dayListSection:not(.collapsed)) {
       flex: 1 1 auto;
       min-height: 0;
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      margin-bottom: 0;   /* 하단 여백 제거 → 접기 버튼이 사이드바 맨 아래에 정렬 */
-      padding-bottom: 0;
     }
     #view-domestic #dayListSection:not(.collapsed) {
       flex: 1 1 auto;
@@ -620,6 +632,13 @@
       overscroll-behavior: contain;
     }
     #view-domestic .day-more-wrap { flex: 0 0 auto; }
+    /* 신용공여 목록: 사이드바 하단 고정폭 섹션 → 길어지면 내부만 스크롤 */
+    #view-domestic .credit-list {
+      max-height: 320px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      overscroll-behavior: contain;
+    }
     /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
     #view-domestic .panel-card {
       background: #fff;
@@ -1600,8 +1619,8 @@
       <div id="yearlySummary" class="collapsible-content collapsed"></div>
     </div>
 
-    <div class="sidebar-section">
-      <h2 data-target="dayListSection">일별 데이터 <span class="arrow"></span></h2>
+    <div class="sidebar-section day-section">
+      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span></h2>
       <div id="dayListSection" class="collapsible-content">
         <div class="day-head">
           <div class="day-tabs">
@@ -1614,6 +1633,14 @@
           <div class="day-rows" id="dayRows"></div>
           <div class="day-more-wrap" id="dayMoreWrap"></div>
         </div>
+      </div>
+    </div>
+
+    <div class="sidebar-section credit-section">
+      <h2 class="section-toggle collapsed" id="creditToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span></h2>
+      <div id="creditSection" class="collapsible-content collapsed">
+        <div class="day-row header credit-row"><span>날짜</span><span>신용잔고</span><span>증감</span></div>
+        <div class="credit-list" id="creditRows"></div>
       </div>
     </div>
   </aside>
@@ -2464,6 +2491,157 @@ function renderDayList(data, kospiIndex, year) {
 if (data2025.length > 0) renderDayList(data2025, kospiIndex2025, '2025');
 renderDayList(data2026, kospiIndex2026, '2026');
 
+// 신용공여 잔고 추이 (단위: 억원). date=MM.DD, bal=신용잔고, chg=전일대비 증감.
+// 자동 수집 소스(KRX/KOFIA)가 스크래핑 차단이라 값은 수기로 append한다.
+const creditData2026 = [
+  {date:'01.02',bal:27.42,chg:null},
+  {date:'01.05',bal:27.62,chg:2017},
+  {date:'01.06',bal:27.80,chg:1739},
+  {date:'01.07',bal:27.87,chg:745},
+  {date:'01.08',bal:28.19,chg:3195},
+  {date:'01.09',bal:28.35,chg:1595},
+  {date:'01.12',bal:28.52,chg:1727},
+  {date:'01.13',bal:28.66,chg:1350},
+  {date:'01.14',bal:28.60,chg:-581},
+  {date:'01.15',bal:28.75,chg:1463},
+  {date:'01.16',bal:28.93,chg:1882},
+  {date:'01.19',bal:29.00,chg:612},
+  {date:'01.20',bal:29.06,chg:635},
+  {date:'01.21',bal:29.08,chg:236},
+  {date:'01.22',bal:28.93,chg:-1564},
+  {date:'01.23',bal:29.06,chg:1297},
+  {date:'01.26',bal:29.35,chg:2913},
+  {date:'01.27',bal:29.24,chg:-1017},
+  {date:'01.28',bal:29.60,chg:3512},
+  {date:'01.29',bal:30.09,chg:4963},
+  {date:'01.30',bal:30.28,chg:1854},
+  {date:'02.02',bal:30.47,chg:1952},
+  {date:'02.03',bal:30.54,chg:667},
+  {date:'02.04',bal:30.94,chg:3954},
+  {date:'02.05',bal:30.79,chg:-1484},
+  {date:'02.06',bal:31.10,chg:3127},
+  {date:'02.09',bal:31.61,chg:5082},
+  {date:'02.10',bal:31.56,chg:-470},
+  {date:'02.11',bal:31.32,chg:-2427},
+  {date:'02.12',bal:31.47,chg:1484},
+  {date:'02.13',bal:31.48,chg:103},
+  {date:'02.19',bal:31.59,chg:1166},
+  {date:'02.20',bal:31.64,chg:452},
+  {date:'02.23',bal:31.71,chg:739},
+  {date:'02.24',bal:31.96,chg:2479},
+  {date:'02.25',bal:32.13,chg:1738},
+  {date:'02.26',bal:32.37,chg:2344},
+  {date:'02.27',bal:32.67,chg:3005},
+  {date:'03.03',bal:32.80,chg:1351},
+  {date:'03.04',bal:33.20,chg:3937},
+  {date:'03.05',bal:33.69,chg:4967},
+  {date:'03.06',bal:32.79,chg:-9046},
+  {date:'03.09',bal:31.69,chg:-10994},
+  {date:'03.10',bal:31.80,chg:1128},
+  {date:'03.11',bal:31.76,chg:-449},
+  {date:'03.12',bal:32.14,chg:3836},
+  {date:'03.13',bal:32.68,chg:5414},
+  {date:'03.16',bal:33.22,chg:5358},
+  {date:'03.17',bal:33.33,chg:1125},
+  {date:'03.18',bal:33.49,chg:1560},
+  {date:'03.19',bal:33.31,chg:-1800},
+  {date:'03.20',bal:33.26,chg:-526},
+  {date:'03.23',bal:33.35,chg:936},
+  {date:'03.24',bal:33.42,chg:732},
+  {date:'03.25',bal:33.03,chg:-3933},
+  {date:'03.26',bal:32.75,chg:-2761},
+  {date:'03.27',bal:32.78,chg:321},
+  {date:'03.30',bal:32.60,chg:-1827},
+  {date:'03.31',bal:32.92,chg:3209},
+  {date:'04.01',bal:32.98,chg:584},
+  {date:'04.02',bal:32.73,chg:-2555},
+  {date:'04.03',bal:32.44,chg:-2815},
+  {date:'04.06',bal:32.85,chg:4019},
+  {date:'04.07',bal:32.66,chg:-1882},
+  {date:'04.08',bal:32.73,chg:723},
+  {date:'04.09',bal:32.72,chg:-100},
+  {date:'04.10',bal:32.90,chg:1814},
+  {date:'04.13',bal:33.22,chg:3154},
+  {date:'04.14',bal:33.28,chg:656},
+  {date:'04.15',bal:33.36,chg:742},
+  {date:'04.16',bal:33.87,chg:5156},
+  {date:'04.17',bal:34.03,chg:1557},
+  {date:'04.20',bal:34.26,chg:2313},
+  {date:'04.21',bal:34.69,chg:4354},
+  {date:'04.22',bal:34.81,chg:1161},
+  {date:'04.23',bal:35.08,chg:2692},
+  {date:'04.24',bal:35.46,chg:3831},
+  {date:'04.27',bal:35.54,chg:747},
+  {date:'04.28',bal:35.69,chg:1519},
+  {date:'04.29',bal:36.07,chg:3786},
+  {date:'04.30',bal:35.71,chg:-3552},
+  {date:'05.04',bal:35.84,chg:1258},
+  {date:'05.06',bal:35.43,chg:-4092},
+  {date:'05.07',bal:35.51,chg:774},
+  {date:'05.08',bal:35.95,chg:4428},
+  {date:'05.11',bal:36.00,chg:485},
+  {date:'05.12',bal:36.27,chg:2692},
+  {date:'05.13',bal:36.07,chg:-1937},
+  {date:'05.14',bal:36.47,chg:3958},
+  {date:'05.15',bal:36.57,chg:977},
+  {date:'05.18',bal:36.40,chg:-1709},
+  {date:'05.19',bal:35.86,chg:-5406},
+  {date:'05.20',bal:36.24,chg:3810},
+  {date:'05.21',bal:36.47,chg:2354},
+  {date:'05.22',bal:36.36,chg:-1169},
+  {date:'05.26',bal:36.25,chg:-1007},
+  {date:'05.27',bal:36.69,chg:4352},
+  {date:'05.28',bal:37.07,chg:3787},
+  {date:'05.29',bal:38.02,chg:9540},
+  {date:'06.01',bal:37.68,chg:-3415},
+  {date:'06.02',bal:37.71,chg:280},
+  {date:'06.04',bal:37.74,chg:285},
+  {date:'06.05',bal:37.84,chg:1008},
+  {date:'06.08',bal:37.79,chg:-480},
+  {date:'06.09',bal:37.93,chg:1386},
+  {date:'06.10',bal:36.77,chg:-11554},
+  {date:'06.11',bal:36.66,chg:-1172},
+  {date:'06.12',bal:36.88,chg:2228},
+  {date:'06.15',bal:37.08,chg:1977},
+  {date:'06.16',bal:37.39,chg:3087},
+  {date:'06.17',bal:37.80,chg:4149},
+  {date:'06.18',bal:37.98,chg:1792},
+  {date:'06.19',bal:38.48,chg:4990},
+  {date:'06.22',bal:38.53,chg:525},
+  {date:'06.23',bal:38.09,chg:-4376},
+  {date:'06.24',bal:38.63,chg:5392},
+  {date:'06.25',bal:38.05,chg:-5844},
+  {date:'06.26',bal:37.76,chg:-2868},
+  {date:'06.29',bal:37.81,chg:454},
+  {date:'06.30',bal:37.33,chg:-4788},
+  {date:'07.01',bal:37.34,chg:111},
+  {date:'07.02',bal:37.72,chg:3793},
+  {date:'07.03',bal:37.79,chg:735},
+  {date:'07.06',bal:37.66,chg:-1322},
+  {date:'07.07',bal:37.07,chg:-5946},
+  {date:'07.08',bal:37.20,chg:1345},
+  {date:'07.09',bal:36.63,chg:-5662},
+  {date:'07.10',bal:35.57,chg:-10597},
+  {date:'07.13',bal:34.79,chg:-7854},
+  {date:'07.14',bal:34.71,chg:-809},
+  {date:'07.15',bal:34.37,chg:-3376}
+];
+function renderCreditList() {
+  const el = document.getElementById('creditRows');
+  if (!el) return;
+  if (!creditData2026.length) {
+    el.innerHTML = '<div class="credit-empty">데이터 준비 중입니다.</div>';
+    return;
+  }
+  el.innerHTML = creditData2026.slice().reverse().map(r => {
+    const chgCell = r.chg == null
+      ? '<span>-</span>'
+      : `<span class="${r.chg>=0?'pos':'neg'}">${fmtEok(r.chg)}</span>`;
+    return `<div class="day-row credit-row"><span>${r.date}</span><span>${r.bal.toFixed(2)}조</span>${chgCell}</div>`;
+  }).join('');
+}
+renderCreditList();
+
 // Scrolling back up to the top of the day list resets it to the first 10 rows.
 function collapseDayLists() {
   document.querySelectorAll('.day-list .day-more').forEach(btn => {
@@ -2657,6 +2835,37 @@ if (!narrowQuery.matches) { // PC는 펼침, 모바일은 접힘
   yearlyToggle.classList.remove('collapsed');
   yearlyToggle.setAttribute('aria-expanded', 'true');
 }
+
+// 일별 데이터 접기/펼치기 (기본: PC 펼침, 모바일 접힘)
+const dayListToggle = document.getElementById('dayListToggle');
+const dayListSectionPanel = document.getElementById('dayListSection');
+function toggleDayList() {
+  const collapsed = dayListSectionPanel.classList.toggle('collapsed');
+  dayListToggle.classList.toggle('collapsed', collapsed);
+  dayListToggle.setAttribute('aria-expanded', String(!collapsed));
+}
+dayListToggle.addEventListener('click', toggleDayList);
+dayListToggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDayList(); }
+});
+if (narrowQuery.matches) { // 모바일은 기본 접힘
+  dayListSectionPanel.classList.add('collapsed');
+  dayListToggle.classList.add('collapsed');
+  dayListToggle.setAttribute('aria-expanded', 'false');
+}
+
+// 신용공여 잔고 추이 접기/펼치기 (기본 접힘)
+const creditToggle = document.getElementById('creditToggle');
+const creditSectionPanel = document.getElementById('creditSection');
+function toggleCredit() {
+  const collapsed = creditSectionPanel.classList.toggle('collapsed');
+  creditToggle.classList.toggle('collapsed', collapsed);
+  creditToggle.setAttribute('aria-expanded', String(!collapsed));
+}
+creditToggle.addEventListener('click', toggleCredit);
+creditToggle.addEventListener('keydown', e => {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCredit(); }
+});
 
 const pnlLockBtn = document.getElementById('pnlLockBtn');
 const lockIcon = document.getElementById('lockIcon');
