@@ -1327,15 +1327,32 @@
       margin: 0;
     }
     .day-list {
-      max-height: none;
-      overflow: visible;
       border: none;
       border-radius: 0;
       background: transparent;
     }
-    /* 모바일은 목록 전체가 흐름에 노출되므로 더보기 불필요 */
+    /* 모바일은 페이지와 목록의 이중 스크롤을 피한다. 기본은 최근 행만
+       보여 주고, 제목 오른쪽의 '자세히 보기'를 누르면 전체 행을 페이지
+       흐름으로 펼쳐 한 번의 세로 스크롤로 읽는다. */
+    #view-domestic .day-rows,
+    #view-domestic .credit-list {
+      max-height: 240px;
+      overflow: hidden;
+    }
+    #view-domestic #dayList.expanded .day-rows,
+    #view-domestic .credit-list.expanded {
+      max-height: none;
+      overflow: visible;
+    }
     .day-more-wrap { display: none; }
-    .sidebar h2.section-toggle .list-more { display: none; }
+    .sidebar h2.section-toggle .list-more {
+      display: inline-flex;
+      align-items: center;
+      min-height: 32px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #666;
+    }
     .sidebar-section {
       border-bottom: none;
       padding-bottom: 0;
@@ -1514,9 +1531,29 @@
       padding: 20px 16px;
       margin: 10px 0 0;
       border: none;
+      position: relative;
+      overflow: visible;
     }
     .sidebar-section + .sidebar-section {
       margin-top: 10px;
+    }
+    /* 긴 목록을 읽을 때도 제목과 자세히 보기/간단히 버튼은 카드 상단에
+       남긴다. 카드의 끝에 도달하면 sticky도 함께 풀린다. */
+    #view-domestic .sidebar-section .section-toggle {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      align-self: stretch;
+      margin: -20px -16px 16px;
+      padding: 20px 16px 12px;
+      background: #fff;
+      border-radius: 30px 30px 0 0;
+    }
+    #view-domestic .sidebar-section .section-toggle.collapsed {
+      margin-bottom: 0;
+      padding-bottom: 20px;
+      border-radius: 30px;
     }
     .mytrades-layout {
       padding: 10px 10px 0;
@@ -1755,12 +1792,12 @@
 
   <aside class="sidebar" id="sidebarPanel">
     <div class="sidebar-section">
-      <h2 class="section-toggle collapsed" id="yearlyToggle" role="button" tabindex="0" aria-expanded="false" aria-controls="yearlySummary">누적 데이터 <span class="arrow"></span></h2>
-      <div id="yearlySummary" class="collapsible-content collapsed"></div>
+      <h2 class="section-toggle" id="yearlyToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="yearlySummary">누적 데이터 <span class="arrow"></span></h2>
+      <div id="yearlySummary" class="collapsible-content"></div>
     </div>
 
     <div class="sidebar-section day-section">
-      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span><button type="button" class="list-more" id="dayListMore">더보기</button></h2>
+      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span><button type="button" class="list-more" id="dayListMore">자세히 보기</button></h2>
       <div id="dayListSection" class="collapsible-content">
         <div class="day-head">
           <div class="day-tabs">
@@ -1777,7 +1814,7 @@
     </div>
 
     <div class="sidebar-section credit-section">
-      <h2 class="section-toggle" id="creditToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span><button type="button" class="list-more" id="creditMore">더보기</button></h2>
+      <h2 class="section-toggle" id="creditToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="creditSection">신용공여 잔고 추이 <span class="arrow"></span><button type="button" class="list-more" id="creditMore">자세히 보기</button></h2>
       <div id="creditSection" class="collapsible-content">
         <div class="day-row header credit-row"><span>날짜</span><span>신용잔고</span><span>증감</span><span>유가증권</span><span>코스닥</span></div>
         <div class="credit-list" id="creditRows"></div>
@@ -2405,6 +2442,9 @@ function renderChart(yearLabel, displayLabel) {
         animation: false,
         animations: { colors: false, x: false, y: false },
         transitions: { active: { animation: { duration: 0 } } },
+        // 신용공여 차트와 같은 기본 터치 정책: 누르는 동안 해당 지점을
+        // 탐색하고 손가락 이동에 따라 툴팁이 자연스럽게 갱신된다.
+        events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
         interaction: { mode: 'index', intersect: false },
         hover: { mode: 'index', intersect: false },
         plugins: {
@@ -2414,14 +2454,14 @@ function renderChart(yearLabel, displayLabel) {
             yAlign: 'top',
             backgroundColor: 'rgba(26, 26, 26, 0.92)',
             cornerRadius: 12,
-            padding: 14,
-            boxPadding: 6,
-            bodySpacing: 8,
-            titleMarginBottom: 10,
+            padding: isNarrow() ? 9 : 14,
+            boxPadding: isNarrow() ? 3 : 6,
+            bodySpacing: isNarrow() ? 4 : 8,
+            titleMarginBottom: isNarrow() ? 6 : 10,
             titleColor: '#fff',
             bodyColor: '#f0f0f0',
-            titleFont: { size: 13, weight: '600' },
-            bodyFont: { size: 12 },
+            titleFont: { size: isNarrow() ? 11 : 13, weight: '600' },
+            bodyFont: { size: isNarrow() ? 11 : 12 },
             caretPadding: 8,
             caretSize: 0,
             displayColors: true,
@@ -2496,11 +2536,11 @@ function renderChart(yearLabel, displayLabel) {
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     canvas.addEventListener('dragstart', e => e.preventDefault());
     canvas.addEventListener('mouseleave', clearTooltip, { passive: true });
+    const clearTooltipAfterTouch = () => setTimeout(clearTooltip, 0);
     ['touchend', 'touchcancel'].forEach(evt => {
-      // Chart.js handles the touch after us and would re-show the tooltip,
-      // so clear once its own handler has run.
-      canvas.addEventListener(evt, () => setTimeout(clearTooltip, 50), { passive: true });
+      canvas.addEventListener(evt, clearTooltipAfterTouch, { passive: true });
     });
+
   }
   syncLegendDim();
 }
@@ -2927,6 +2967,19 @@ function buildCreditChart() {
       }
     }
   });
+  const clearCreditTooltip = () => {
+    creditChartInstance.setActiveElements([]);
+    creditChartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
+    creditChartInstance.update('none');
+  };
+  if (canvas._creditClearTooltip) {
+    ['touchend', 'touchcancel'].forEach(evt => canvas.removeEventListener(evt, canvas._creditClearTooltip));
+  }
+  const clearCreditTooltipAfterTouch = () => setTimeout(clearCreditTooltip, 0);
+  canvas._creditClearTooltip = clearCreditTooltipAfterTouch;
+  ['touchend', 'touchcancel'].forEach(evt => {
+    canvas.addEventListener(evt, clearCreditTooltipAfterTouch, { passive: true });
+  });
 }
 buildCreditChart();
 narrowQuery.addEventListener('change', buildCreditChart); // 모바일/PC 전환 시 두께·틱 갱신
@@ -3097,13 +3150,12 @@ yearlyToggle.addEventListener('keydown', e => {
     toggleYearly();
   }
 });
-if (!narrowQuery.matches) { // PC는 펼침, 모바일은 접힘
-  yearlySummaryPanel.classList.remove('collapsed');
-  yearlyToggle.classList.remove('collapsed');
-  yearlyToggle.setAttribute('aria-expanded', 'true');
-}
+// 누적 데이터는 PC·모바일 모두 기본으로 펼친다.
+yearlySummaryPanel.classList.remove('collapsed');
+yearlyToggle.classList.remove('collapsed');
+yearlyToggle.setAttribute('aria-expanded', 'true');
 
-// 일별 데이터 접기/펼치기 (기본: PC 펼침, 모바일 접힘)
+// 일별 데이터 접기/펼치기 (PC·모바일 모두 기본 펼침)
 const dayListToggle = document.getElementById('dayListToggle');
 const dayListSectionPanel = document.getElementById('dayListSection');
 function toggleDayList() {
@@ -3115,13 +3167,7 @@ dayListToggle.addEventListener('click', toggleDayList);
 dayListToggle.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDayList(); }
 });
-if (narrowQuery.matches) { // 모바일은 기본 접힘
-  dayListSectionPanel.classList.add('collapsed');
-  dayListToggle.classList.add('collapsed');
-  dayListToggle.setAttribute('aria-expanded', 'false');
-}
-
-// 신용공여 잔고 추이 접기/펼치기 (기본 접힘)
+// 신용공여 잔고 추이 접기/펼치기 (PC·모바일 모두 기본 펼침)
 const creditToggle = document.getElementById('creditToggle');
 const creditSectionPanel = document.getElementById('creditSection');
 function toggleCredit() {
@@ -3133,13 +3179,7 @@ creditToggle.addEventListener('click', toggleCredit);
 creditToggle.addEventListener('keydown', e => {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleCredit(); }
 });
-if (narrowQuery.matches) { // 모바일은 기본 접힘 (일별과 동일)
-  creditSectionPanel.classList.add('collapsed');
-  creditToggle.classList.add('collapsed');
-  creditToggle.setAttribute('aria-expanded', 'false');
-}
-
-// 헤더 우측 '더보기/접기' → 목록 박스를 펼침. 섹션 접기로 이벤트 번짐 방지(stopPropagation)
+// 헤더 우측 '자세히 보기/간단히' → 목록 박스를 펼침. 섹션 접기로 이벤트 번짐 방지(stopPropagation)
 function wireListMore(btnId, boxId) {
   const btn = document.getElementById(btnId);
   const box = document.getElementById(boxId);
@@ -3147,7 +3187,7 @@ function wireListMore(btnId, boxId) {
   btn.addEventListener('click', e => {
     e.stopPropagation();
     const expanded = box.classList.toggle('expanded');
-    btn.textContent = expanded ? '접기' : '더보기';
+    btn.textContent = expanded ? '간단히' : '자세히 보기';
   });
   btn.addEventListener('keydown', e => e.stopPropagation());
 }
@@ -3292,7 +3332,7 @@ function showDayTab(year) {
   // 탭 전환 시 펼침(더보기) 초기화 후 목록 맨 위로
   dayListContainerEl.classList.remove('expanded');
   const dlMore = document.getElementById('dayListMore');
-  if (dlMore) dlMore.textContent = '더보기';
+  if (dlMore) dlMore.textContent = '자세히 보기';
   dayListEl.scrollTop = 0;
 }
 document.querySelectorAll('.day-tab').forEach(btn => {
