@@ -661,7 +661,7 @@
     text-align: center;
   }
   /* PC(넓은 화면): 연기금 컬럼 노출, 더보기 없이 전체 표시 */
-  @media (min-width: 769px) {
+  @media (min-width: 1100px) {
     /* body 자체는 스크롤 금지 → 헤더 절대 고정, 스크롤은 좌/우 컬럼 안에서만 */
     html, body { overflow: hidden; height: 100vh; }
     .day-row span { overflow: hidden; text-overflow: ellipsis; }
@@ -749,11 +749,13 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      gap: 24px;
+      flex-wrap: wrap;        /* 좁은 데스크탑에서 범례가 잘리지 않고 아래 줄로 */
+      gap: 12px 24px;
       margin-bottom: 16px;
     }
     #view-domestic .stats-row .cards,
     #view-domestic .stats-row .legend { margin-bottom: 0; }
+    #view-domestic .stats-row .legend { flex-wrap: wrap; }
     /* 값(24px)과 범례(13px) 라인박스 여백 차이 제거 → 바닥선 정렬 */
     #view-domestic .stats-row .card p.value,
     #view-domestic .stats-row .legend { line-height: 1; }
@@ -1056,7 +1058,7 @@
     transform: rotate(-45deg);
     margin-right: 2px;
   }
-  @media (max-width: 768px) {
+  @media (max-width: 1099px) {
     .layout {
       flex-direction: column;
       align-items: stretch;
@@ -1129,10 +1131,10 @@
     }
     .cards {
       order: 3;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0;
       margin-top: 26px;
-      margin-bottom: 0;
+      margin-bottom: 20px;   /* 요약 박스와 아래 범례 사이 간격 */
       background: #f3f4f6;
       border-radius: 12px;
       padding: 4px 4px;
@@ -1143,7 +1145,8 @@
       border-radius: 0;
       padding: 14px 12px;
     }
-    .card + .card::before {
+    /* 세로 구분선: 오른쪽 열(2·4번째) 왼쪽 */
+    .card:nth-child(2n)::before {
       content: '';
       position: absolute;
       left: 0;
@@ -1151,6 +1154,15 @@
       transform: translateY(-50%);
       height: 60%;
       border-left: 1px solid #dcdcdc;
+    }
+    /* 가로 구분선: 아래 행(3·4번째) 위 */
+    .card:nth-child(n + 3)::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 12px;
+      right: 12px;
+      border-top: 1px solid #dcdcdc;
     }
     .card p.label {
       font-size: 12.5px;
@@ -1469,14 +1481,28 @@
       background: #eceef1;
     }
     .content {
-      padding: 10px 10px 2px;
+      padding: 10px 10px 0;
       background: transparent;
     }
+    /* 본문: 하나의 큰 카드가 아니라 섹션별 개별 카드로 분리 */
     .wrap {
+      background: transparent;
+      border-radius: 0;
+      padding: 0;
+      gap: 10px;
+    }
+    #view-domestic .panel-card {
       background: #fff;
       border-radius: 30px;
       padding: 20px 16px;
     }
+    #view-domestic .calendar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    /* 신용공여 카드: 데스크탑용 20px 여백 제거 → 다른 카드와 동일한 10px 간격 */
+    #view-domestic .credit-chart-card { margin-top: 0; }
     .sidebar {
       padding: 0 10px 14px;
       background: transparent;
@@ -2224,7 +2250,7 @@ let activeYearLabel = '2026년';
 let activeDisplayLabel = null;
 let chartInstance = null;
 
-const narrowQuery = window.matchMedia('(max-width: 768px)');
+const narrowQuery = window.matchMedia('(max-width: 1099px)');
 function isNarrow() {
   return narrowQuery.matches;
 }
