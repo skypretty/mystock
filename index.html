@@ -1555,6 +1555,37 @@
       padding-bottom: 20px;
       border-radius: 30px;
     }
+    /* 누적 데이터 섹션이 모바일에서 메인(.wrap)으로 이동될 때: .sidebar 하위로
+       스코프됐던 헤더 플렉스/폰트/화살표 스타일을 여기서 복원한다. .wrap 은
+       flex(gap:10px)이므로 섹션 자체 margin 은 제거해 간격 중복을 막는다. */
+    #view-domestic .wrap > .sidebar-section {
+      margin: 0;
+    }
+    #view-domestic .wrap > .sidebar-section h2.section-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 17px;
+      font-weight: 600;
+      color: #333;
+    }
+    #view-domestic .wrap > .sidebar-section h2.section-toggle .arrow {
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      border-right: 1.5px solid #999;
+      border-bottom: 1.5px solid #999;
+      border-top: none;
+      border-left: none;
+      transform: rotate(45deg);
+      transition: transform 0.2s ease;
+      margin-left: 4px;
+    }
+    #view-domestic .wrap > .sidebar-section h2.section-toggle.collapsed .arrow {
+      transform: rotate(-45deg);
+    }
     .mytrades-layout {
       padding: 10px 10px 0;
       gap: 10px;
@@ -2310,6 +2341,23 @@ function layoutTotalBar() {
   }
 }
 
+// 모바일에서는 누적 데이터 섹션을 투자자별 차트 카드 바로 아래로 옮기고,
+// 데스크톱에서는 사이드바 맨 위로 되돌린다. (노드만 이동, 재생성 없음)
+function layoutYearlySection() {
+  const yearlyToggle = document.getElementById('yearlyToggle');
+  const sidebar = document.getElementById('sidebarPanel');
+  const chart = document.getElementById('investorChart');
+  if (!yearlyToggle || !sidebar || !chart) return;
+  const yearlySection = yearlyToggle.closest('.sidebar-section');
+  const chartSection = chart.closest('.panel-card');
+  if (!yearlySection || !chartSection) return;
+  if (isNarrow()) {
+    if (yearlySection.previousElementSibling !== chartSection) chartSection.after(yearlySection);
+  } else if (sidebar.firstElementChild !== yearlySection) {
+    sidebar.insertBefore(yearlySection, sidebar.firstElementChild);
+  }
+}
+
 function layoutMonthPnl() {
   document.querySelectorAll('.month-block').forEach(block => {
     const header = block.querySelector('h4.collapsible-header');
@@ -2337,6 +2385,7 @@ window.addEventListener('resize', layoutMonthReturns);
 narrowQuery.addEventListener('change', () => {
   layoutMonthPnl();
   layoutTotalBar();
+  layoutYearlySection();
   layoutMonthReturns();
   if (!chartInstance) return;
   chartInstance.destroy();
@@ -2536,10 +2585,15 @@ function renderChart(yearLabel, displayLabel) {
     canvas.addEventListener('contextmenu', e => e.preventDefault());
     canvas.addEventListener('dragstart', e => e.preventDefault());
     canvas.addEventListener('mouseleave', clearTooltip, { passive: true });
-    const clearTooltipAfterTouch = () => setTimeout(clearTooltip, 0);
-    ['touchend', 'touchcancel'].forEach(evt => {
-      canvas.addEventListener(evt, clearTooltipAfterTouch, { passive: true });
-    });
+    // 모바일에서 손가락을 떼면 브라우저가 그 지점에 유령 마우스 이벤트
+    // (mousemove/click)를 발생시켜 방금 지운 툴팁을 되살린다. touchend에서
+    // preventDefault로 그 에뮬레이션을 막아, 손을 떼는 즉시 툴팁이 사라지고
+    // 다시 뜨지 않게 한다.
+    canvas.addEventListener('touchend', (e) => {
+      e.preventDefault();
+      clearTooltip();
+    }, { passive: false });
+    canvas.addEventListener('touchcancel', clearTooltip, { passive: true });
 
   }
   syncLegendDim();
@@ -2972,14 +3026,18 @@ function buildCreditChart() {
     creditChartInstance.tooltip.setActiveElements([], { x: 0, y: 0 });
     creditChartInstance.update('none');
   };
-  if (canvas._creditClearTooltip) {
-    ['touchend', 'touchcancel'].forEach(evt => canvas.removeEventListener(evt, canvas._creditClearTooltip));
+  // 이전 빌드(모바일/PC 전환 재빌드)에서 붙인 리스너 제거
+  if (canvas._creditTouchEnd) {
+    canvas.removeEventListener('touchend', canvas._creditTouchEnd);
+    canvas.removeEventListener('touchcancel', canvas._creditTouchCancel);
   }
-  const clearCreditTooltipAfterTouch = () => setTimeout(clearCreditTooltip, 0);
-  canvas._creditClearTooltip = clearCreditTooltipAfterTouch;
-  ['touchend', 'touchcancel'].forEach(evt => {
-    canvas.addEventListener(evt, clearCreditTooltipAfterTouch, { passive: true });
-  });
+  // 투자자 차트와 동일: touchend에서 유령 마우스 이벤트를 막아 손을 떼면 즉시 사라지게.
+  const creditTouchEnd = (e) => { e.preventDefault(); clearCreditTooltip(); };
+  const creditTouchCancel = () => clearCreditTooltip();
+  canvas._creditTouchEnd = creditTouchEnd;
+  canvas._creditTouchCancel = creditTouchCancel;
+  canvas.addEventListener('touchend', creditTouchEnd, { passive: false });
+  canvas.addEventListener('touchcancel', creditTouchCancel, { passive: true });
 }
 buildCreditChart();
 narrowQuery.addEventListener('change', buildCreditChart); // 모바일/PC 전환 시 두께·틱 갱신
@@ -2988,6 +3046,7 @@ narrowQuery.addEventListener('change', buildCreditChart); // 모바일/PC 전환
 renderChart('2026년'); // 시작 시 2026년 누적 데이터
 layoutMonthPnl();
 layoutTotalBar();
+layoutYearlySection();
 
 // 월별 등락 달력: 전일 종가 대비 상승(빨강)/하락(파랑), 좌우 화살표로 월 이동 (연도별)
 const calYearData = {
