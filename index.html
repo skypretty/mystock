@@ -222,7 +222,15 @@
   .idx-chart-c { position: relative; width: 100%; height: 200px; }
   .idx-chart-big { height: 380px; }
   .idx-chart-mid { height: 260px; }
-  .idx-card + .idx-card { margin-top: 12px; }
+  .idx-card + .idx-card { margin-top: 28px; }
+  /* 차트가 뭘 보라는 건지 한 줄로 */
+  .idx-note {
+    margin: -4px 0 14px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--text-4);
+    word-break: keep-all;
+  }
   .mytrades-layout {
     display: flex;
     width: 100%;
@@ -1846,6 +1854,7 @@
               </div>
               <span class="idx-sub">2026 · 시작일=100 기준</span>
             </div>
+            <p class="idx-note">같은 출발선에 놓고 비교 — 선이 벌어질수록 어느 지수가 장을 끌었는지 드러난다.</p>
             <div class="idx-chart-c idx-chart-big"><canvas id="chartIndices" role="img" aria-label="미국 3대 지수(S&P500·나스닥·다우존스) 상대 추이"></canvas></div>
           </div>
         </div>
@@ -1858,6 +1867,7 @@
               </div>
               <span class="idx-sub">2023 ~ 현재 · 금리·달러 괴리</span>
             </div>
+            <p class="idx-note">금리가 오르면 달러도 강해지는 게 보통 — 두 선이 벌어진 구간이 시장이 어긋난 지점이다.</p>
             <div class="idx-chart-c idx-chart-big"><canvas id="chartGap" role="img" aria-label="미국 국채 10년 금리와 달러인덱스의 괴리"></canvas></div>
           </div>
           <div class="idx-card">
@@ -1868,6 +1878,7 @@
               </div>
               <span class="idx-sub">2026 · 단위 %</span>
             </div>
+            <p class="idx-note">2년물이 10년물 위로 올라서면(역전) 경기 침체 신호로 읽는다.</p>
             <div class="idx-chart-c idx-chart-mid"><canvas id="chartRates" role="img" aria-label="미국 국채 10년물·2년물 금리 추이"></canvas></div>
           </div>
           <div class="idx-card">
@@ -1878,6 +1889,7 @@
               </div>
               <span class="idx-sub">2026 · 좌축 인덱스 / 우축 원</span>
             </div>
+            <p class="idx-note">달러가 강해질수록 외국인 자금이 한국 증시에서 빠져나가기 쉽다.</p>
             <div class="idx-chart-c idx-chart-mid"><canvas id="chartDollar" role="img" aria-label="달러인덱스와 원달러 환율 추이"></canvas></div>
           </div>
         </div>
