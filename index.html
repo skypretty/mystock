@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>수상한개미</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -12,6 +12,10 @@
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
 <meta name="theme-color" content="#17171c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="주식왕 한개미">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
   :root {
@@ -1358,9 +1362,10 @@
     }
     .app-header {
       justify-content: space-between;
-      padding: 0 20px;
-      /* iOS 상태바 영역은 페이지 배경색을 그대로 비추므로, 헤더가 다른 색이면
-         상태바와의 경계에 단차가 보인다. 모바일에선 배경을 맞추고 선을 없앤다. */
+      /* 홈 화면 앱에서 헤더가 상태바 밑까지 직접 칠하게 해 경계선을 없앤다.
+         일반 Safari 에선 safe-area 가 0 이라 그대로 56px 헤더가 된다. */
+      padding: env(safe-area-inset-top) 20px 0;
+      height: calc(56px + env(safe-area-inset-top));
       background: var(--bg-page);
       border-bottom: none;
     }
@@ -1770,6 +1775,8 @@
     #view-overseas,
     #view-mytrades {
       scrollbar-width: none;
+      /* 홈 화면 앱: 마지막 내용이 홈 인디케이터에 가리지 않게 */
+      padding-bottom: env(safe-area-inset-bottom);
     }
     #view-domestic::-webkit-scrollbar,
     #view-overseas::-webkit-scrollbar,
