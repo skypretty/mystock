@@ -13,15 +13,105 @@
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
+  :root {
+    color-scheme: light;
+    /* 표면 */
+    --bg-page: #ffffff;
+    --bg-surface: #ffffff;
+    --bg-subtle: #f9fafb;
+    --bg-muted: #f2f4f6;
+    --bg-hover: #f2f4f6;
+    --bg-active: #e5e8eb;
+    --chip-bg: rgba(0, 0, 0, 0.06);
+    /* 선 */
+    --border: #e5e8eb;
+    --border-weak: #f2f4f6;
+    --divider-line: rgba(200, 200, 200, 0.85);
+    /* 글자 */
+    --text-1: #191f28;
+    --text-2: #4e5968;
+    --text-3: #6b7684;
+    --text-4: #8b95a1;
+    --text-5: #b0b8c1;
+    --fill-strong: #191f28;
+    --text-on-strong: #ffffff;
+    /* 강조 */
+    --accent: #3182f6;
+    --accent-weak: #e8f3ff;
+    --up: #f04452;
+    --down: #3182f6;
+    /* 그림자 / 오버레이 */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.15);
+    --overlay: rgba(0, 0, 0, 0.35);
+    --overlay-strong: rgba(0, 0, 0, 0.55);
+    /* 차트 */
+    --chart-grid: #e5e8eb;
+    --chart-axis: #8b95a1;
+    --tooltip-bg: rgba(25, 31, 40, 0.92);
+    --tooltip-title: #ffffff;
+    --tooltip-body: #f2f4f6;
+    --s-individual: #8b95a1;
+    --s-foreign: #f04452;
+    --s-inst: #3182f6;
+    --s-pension: #ff9500;
+    --s-kospi: #15c47e;
+    --s-total: #7b61ff;
+    --s-sp500: #3182f6;
+    --s-nasdaq: #7b61ff;
+    --s-dow: #ff9500;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --bg-page: #17171c;
+    --bg-surface: #1e1e23;
+    --bg-subtle: #1b1b20;
+    --bg-muted: #26262c;
+    --bg-hover: #2a2a31;
+    --bg-active: #33333b;
+    --chip-bg: rgba(255, 255, 255, 0.08);
+    --border: #2e2e36;
+    --border-weak: #26262c;
+    --divider-line: rgba(120, 124, 132, 0.9);
+    --text-1: #f2f4f6;
+    --text-2: #c5cbd3;
+    --text-3: #a0a8b2;
+    --text-4: #848c96;
+    --text-5: #646c77;
+    --fill-strong: #f2f4f6;
+    --text-on-strong: #17171c;
+    --accent: #4593fc;
+    --accent-weak: #172a44;
+    --up: #f66570;
+    --down: #4593fc;
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.6);
+    --overlay: rgba(0, 0, 0, 0.6);
+    --overlay-strong: rgba(0, 0, 0, 0.72);
+    --chart-grid: #2e2e36;
+    --chart-axis: #848c96;
+    --tooltip-bg: rgba(46, 46, 54, 0.96);
+    --tooltip-title: #f2f4f6;
+    --tooltip-body: #c5cbd3;
+    --s-individual: #b0b8c1;
+    --s-foreign: #f66570;
+    --s-inst: #4593fc;
+    --s-pension: #ffa940;
+    --s-kospi: #2ed89a;
+    --s-total: #9b85ff;
+    --s-sp500: #4593fc;
+    --s-nasdaq: #9b85ff;
+    --s-dow: #ffa940;
+  }
+
   * { box-sizing: border-box; }
   html {
-    background: #ffffff;
-    color-scheme: light;
+    background: var(--bg-page);
   }
   body {
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
-    background: #ffffff;
-    color: #1a1a1a;
+    background: var(--bg-page);
+    color: var(--text-1);
     margin: 0;
     padding: 0;
   }
@@ -39,8 +129,8 @@
     justify-content: flex-start;
     height: 56px;
     padding: 0 24px;
-    border-bottom: 1px solid #e5e5e5;
-    background: #fff;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-surface);
   }
   .app-logo {
     width: 30px;
@@ -60,24 +150,51 @@
     padding: 8px 14px;
     font-size: 13px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-3);
     cursor: pointer;
     border-radius: 6px;
   }
   .app-nav button:hover {
-    background: #f0f0f0;
+    background: var(--bg-hover);
   }
   .app-nav button.active {
-    background: #1a1a1a;
+    background: var(--accent);
     color: #fff;
   }
+  .theme-toggle {
+    margin-left: auto;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-surface);
+    color: var(--text-3);
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--text-1);
+  }
+  .theme-toggle svg {
+    width: 17px;
+    height: 17px;
+    display: block;
+  }
+  .theme-toggle .icon-moon { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
+  :root[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   .placeholder-view {
     display: none;
     align-items: center;
     justify-content: center;
     height: calc(100vh - 57px);
     height: calc(100dvh - 57px);
-    color: #999;
+    color: var(--text-4);
     font-size: 14px;
   }
   .mytrades-view {
@@ -87,11 +204,11 @@
   /* 좌측 대카테고리 그룹 간격 (시나리오 / 지수 동향) */
   .cat-group + .cat-group { margin-top: 22px; }
   /* 미국 지수 동향 패널: 3개 지수를 한 차트에 정규화(시작일=100) 비교 */
-  .idx-card { background: #fff; border: 1px solid #ececec; border-radius: 16px; padding: 18px 18px 14px; }
+  .idx-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: 16px; padding: 18px 18px 14px; }
   .idx-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-  .idx-legend { display: flex; gap: 16px; font-size: 13px; color: #444; }
+  .idx-legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-2); }
   .idx-legend span { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
-  .idx-sub { font-size: 12px; color: #999; white-space: nowrap; }
+  .idx-sub { font-size: 12px; color: var(--text-4); white-space: nowrap; }
   .idx-chart-c { position: relative; width: 100%; height: 200px; }
   .idx-chart-big { height: 380px; }
   .mytrades-layout {
@@ -105,8 +222,8 @@
   }
   .mytrades-col.philosophy {
     flex: 1;
-    background: #f5f5f5;
-    border-right: 1px solid #e5e5e5;
+    background: var(--bg-subtle);
+    border-right: 1px solid var(--border);
     display: flex;
     flex-direction: column;
   }
@@ -123,8 +240,8 @@
   .philosophy-header .arrow {
     width: 6px;
     height: 6px;
-    border-right: 1.5px solid #999;
-    border-bottom: 1.5px solid #999;
+    border-right: 1.5px solid var(--text-4);
+    border-bottom: 1.5px solid var(--text-4);
     transform: rotate(45deg);
     transition: transform 0.2s ease;
   }
@@ -146,8 +263,8 @@
     display: inline-block;
     width: 6px;
     height: 6px;
-    border-right: 1.5px solid #999;
-    border-bottom: 1.5px solid #999;
+    border-right: 1.5px solid var(--text-4);
+    border-bottom: 1.5px solid var(--text-4);
     border-top: none;
     border-left: none;
     transform: rotate(45deg);
@@ -165,10 +282,10 @@
     cursor: pointer;
     font-size: 12px;
     font-weight: 600;
-    color: #888;
+    color: var(--text-4);
     padding: 2px 0;
   }
-  .sidebar h2.section-toggle .list-more:hover { color: #1a1a1a; }
+  .sidebar h2.section-toggle .list-more:hover { color: var(--text-1); }
   .sidebar h2.section-toggle.collapsed .list-more { display: none; }
   .sidebar h2.section-toggle.collapsed {
     margin-bottom: 0;
@@ -184,7 +301,7 @@
     counter-reset: philosophy;
     font-size: 13.5px;
     line-height: 1.8;
-    color: #333;
+    color: var(--text-2);
     word-break: keep-all;
   }
   .philosophy-list li {
@@ -198,13 +315,13 @@
     position: absolute;
     left: 0;
     top: 0;
-    color: #888;
+    color: var(--text-4);
     font-weight: 600;
   }
   .mytrades-col h2 {
     font-size: 17px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-1);
     margin: 0 0 14px;
   }
   .journal-title-row {
@@ -227,17 +344,17 @@
     padding: 12px 12px;
     border-radius: 8px;
     font-size: 14px;
-    color: #444;
+    color: var(--text-2);
     cursor: pointer;
     margin-bottom: 4px;
     transition: background 0.15s ease;
   }
-  .scenario-cat:hover { background: #eceef1; }
-  .scenario-cat.active { background: #e6e8ec; color: #1a1a1a; font-weight: 600; }
+  .scenario-cat:hover { background: var(--bg-hover); }
+  .scenario-cat.active { background: var(--accent-weak); color: var(--accent); font-weight: 600; }
   .scenario-body {
     font-size: 15px;
     line-height: 1.75;
-    color: #2b2b2b;
+    color: var(--text-1);
     white-space: pre-wrap;
     margin: 0;
   }
@@ -248,19 +365,19 @@
     gap: 10px;
   }
   .outlook-cell {
-    border: 1px solid #eaeaea;
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 12px 12px 14px;
     min-height: 120px;
     display: flex;
     flex-direction: column;
   }
-  .outlook-cell.current { border-color: #1a1a1a; }
-  .outlook-cell.future { background: #fafafa; }
+  .outlook-cell.current { border-color: var(--fill-strong); }
+  .outlook-cell.future { background: var(--bg-subtle); }
   .outlook-month {
     font-size: 13px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-1);
     margin-bottom: 8px;
     display: flex;
     align-items: center;
@@ -269,38 +386,38 @@
   .outlook-now {
     font-size: 10px;
     font-weight: 600;
-    color: #fff;
-    background: #1a1a1a;
+    color: var(--text-on-strong);
+    background: var(--fill-strong);
     border-radius: 999px;
     padding: 1px 7px;
   }
   .outlook-text {
     font-size: 12.5px;
     line-height: 1.55;
-    color: #333;
+    color: var(--text-2);
     white-space: pre-wrap;
   }
-  .outlook-text.placeholder { color: #bbb; }
+  .outlook-text.placeholder { color: var(--text-5); }
   .lock-btn {
     width: 40px;
     height: 40px;
     flex-shrink: 0;
-    background: #f5f5f5;
-    border: 1px solid #e5e5e5;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
     border-radius: 10px;
-    color: #666;
+    color: var(--text-3);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   .lock-btn:hover {
-    background: #ececec;
+    background: var(--bg-hover);
   }
   .lock-btn.locked {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #fff;
+    background: var(--fill-strong);
+    border-color: var(--fill-strong);
+    color: var(--text-on-strong);
   }
   .pnl-hidden .pnl-value,
   .pnl-hidden #mytradesTotal {
@@ -311,7 +428,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.35);
+    background: var(--overlay);
     z-index: 100;
     align-items: center;
     justify-content: center;
@@ -321,17 +438,17 @@
   }
   .pw-modal {
     width: 260px;
-    background: #fff;
-    border: 1px solid #e5e5e5;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    box-shadow: var(--shadow-md);
     padding: 20px;
   }
   .pw-title {
     margin: 0 0 12px;
     font-size: 15px;
     font-weight: 600;
-    color: #333;
+    color: var(--text-2);
   }
   .pw-modal input {
     width: 100%;
@@ -340,18 +457,18 @@
     /* iOS zooms the page when focusing an input under 16px. */
     font-size: 16px;
     letter-spacing: 2px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--border);
     border-radius: 7px;
     outline: none;
   }
   .pw-modal input:focus {
-    border-color: #1a1a1a;
+    border-color: var(--fill-strong);
   }
   .pw-error {
     display: none;
     margin: 8px 0 0;
     font-size: 12px;
-    color: #d93025;
+    color: var(--up);
   }
   .pw-error.show {
     display: block;
@@ -366,18 +483,18 @@
     padding: 7px 14px;
     font-size: 13px;
     border-radius: 7px;
-    border: 1px solid #e5e5e5;
-    background: #f5f5f5;
-    color: #444;
+    border: 1px solid var(--border);
+    background: var(--bg-subtle);
+    color: var(--text-2);
     cursor: pointer;
   }
   .pw-btn.primary {
-    background: #1a1a1a;
-    border-color: #1a1a1a;
-    color: #fff;
+    background: var(--fill-strong);
+    border-color: var(--fill-strong);
+    color: var(--text-on-strong);
   }
   .mytrades-empty {
-    color: #999;
+    color: var(--text-4);
     font-size: 13px;
     line-height: 1.7;
   }
@@ -385,27 +502,27 @@
     margin-top: auto;
     width: 100%;
     box-sizing: border-box;
-    background: #fff;
-    border: 1px solid #e5e5e5;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 14px 18px;
   }
   .mytrades-total .label {
     font-size: 12px;
-    color: #666;
+    color: var(--text-3);
     margin: 0 0 4px;
   }
   .mytrades-total .value {
     font-size: 20px;
     font-weight: 600;
     margin: 0;
-    color: #1a1a1a;
+    color: var(--text-1);
   }
   .mytrades-total .value.pos {
-    color: #c0392b;
+    color: var(--up);
   }
   .mytrades-total .value.neg {
-    color: #2a78d6;
+    color: var(--down);
   }
   .half-section {
     margin-bottom: 20px;
@@ -414,7 +531,7 @@
     font-size: 17px;
     font-weight: 600;
     margin: 0 0 12px;
-    color: #333;
+    color: var(--text-2);
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -428,7 +545,7 @@
   }
   .month-block {
     padding: 12px 0;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-weak);
   }
   .month-block:last-child {
     border-bottom: none;
@@ -436,7 +553,7 @@
   .month-block h4 {
     font-size: 13px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-3);
     margin: 0 0 6px;
   }
   .month-block .mytrades-empty {
@@ -452,7 +569,7 @@
   }
   .month-pnl .pnl-label {
     font-size: 12px;
-    color: #666;
+    color: var(--text-3);
     margin: 4px 0 0;
   }
   .month-pnl .pnl-value {
@@ -461,20 +578,20 @@
     margin: 0;
   }
   .month-pnl .pnl-value.pos {
-    color: #c0392b;
+    color: var(--up);
   }
   .month-pnl .pnl-value.neg {
-    color: #2a78d6;
+    color: var(--down);
   }
   .month-note-box {
     flex: 1;
     min-width: 0;
-    background: #f3f4f6;
+    background: var(--bg-muted);
     border-radius: 16px;
     padding: 20px 24px;
     font-size: 13.5px;
     line-height: 1.8;
-    color: #333;
+    color: var(--text-2);
     word-break: keep-all;
     overflow-wrap: break-word;
     white-space: pre-wrap;
@@ -489,8 +606,8 @@
   .note-tag {
     font-size: 12px;
     font-weight: 500;
-    color: #4b5563;
-    background: #e5e7eb;
+    color: var(--text-2);
+    background: var(--bg-muted);
     border-radius: 999px;
     padding: 4px 11px;
     white-space: nowrap;
@@ -504,8 +621,8 @@
   .sidebar {
     width: 500px;
     flex-shrink: 0;
-    background: #f5f5f5;
-    border-right: 1px solid #e5e5e5;
+    background: var(--bg-subtle);
+    border-right: 1px solid var(--border);
     height: calc(100vh - 57px);
     height: calc(100dvh - 57px);
     overflow-y: auto;
@@ -519,25 +636,25 @@
   }
   .day-tab {
     flex: 1;
-    background: #fff;
-    border: 1px solid #e5e5e5;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
     border-radius: 6px;
     padding: 6px 0;
     font-size: 12px;
     font-weight: 400;
-    color: #666;
+    color: var(--text-3);
     cursor: pointer;
   }
   .day-tab.active {
-    border-color: #333;
-    color: #1a1a1a;
-    background: #fafafa;
+    border-color: var(--fill-strong);
+    color: var(--text-1);
+    background: var(--bg-subtle);
   }
   .sidebar h2 {
     font-size: 14px;
     font-weight: 600;
     margin: 0 0 10px;
-    color: #333;
+    color: var(--text-2);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -553,13 +670,13 @@
   .sidebar-section {
     margin-bottom: 24px;
     padding-bottom: 20px;
-    border-bottom: 1px solid #e5e5e5;
+    border-bottom: 1px solid var(--border);
   }
   .sidebar-section:last-child {
     border-bottom: none;
   }
   .year-card {
-    background: #f3f4f6;
+    background: var(--bg-muted);
     border: none;
     border-radius: 8px;
     padding: 10px 12px;
@@ -568,18 +685,18 @@
     transition: background 0.15s ease;
   }
   .year-card:hover {
-    background: #eceef1;
+    background: var(--bg-hover);
   }
   .year-card.active {
-    background: #e6e8ec;
+    background: var(--bg-active);
   }
   .year-card.active .year-label {
-    color: #1a1a1a;
+    color: var(--text-1);
   }
   .year-card .year-label {
     font-size: 12px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-3);
     margin: 0 0 6px;
   }
   .year-card .year-stats {
@@ -593,11 +710,11 @@
     gap: 2px;
     min-width: 0;
   }
-  .year-card .stat .k { font-size: 11px; color: #888; }
+  .year-card .stat .k { font-size: 11px; color: var(--text-4); }
   .year-card .stat .v { font-size: 13px; font-weight: 600; white-space: nowrap; }
   .empty-note {
     font-size: 12px;
-    color: #999;
+    color: var(--text-4);
     padding: 10px 4px;
     line-height: 1.5;
   }
@@ -614,17 +731,17 @@
     width: 100%;
     background: none;
     border: none;
-    border-top: 1px solid #f0f0f0;
+    border-top: 1px solid var(--border-weak);
     margin-top: 4px;
     padding: 10px 10px 8px;
     font-size: 12.5px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-3);
     cursor: pointer;
     text-align: right;   /* 더보기/접기 우측 정렬 */
   }
   .day-more:hover {
-    color: #1a1a1a;
+    color: var(--text-1);
   }
   .day-row {
     display: grid;
@@ -632,21 +749,21 @@
     gap: 8px;
     padding: 8px 10px;
     font-size: 11px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-weak);
     cursor: default;
   }
   .day-row:last-child { border-bottom: none; }
   .day-row.header {
     font-weight: 600;
-    color: #666;
-    background: #fafafa;
+    color: var(--text-3);
+    background: var(--bg-subtle);
     position: sticky;
     top: 0;
   }
   .day-row span { text-align: right; white-space: nowrap; }
-  .day-row span:first-child { text-align: left; color: #666; }
-  .pos { color: #c0392b; }
-  .neg { color: #2a78d6; }
+  .day-row span:first-child { text-align: left; color: var(--text-3); }
+  .pos { color: var(--up); }
+  .neg { color: var(--down); }
   /* 신용공여 잔고 추이: 3컬럼(날짜·신용잔고·증감). .day-row 그리드를 덮기 위해 2클래스 사용 */
   .day-row.credit-row {
     grid-template-columns: 44px repeat(4, minmax(0, 1fr));
@@ -657,7 +774,7 @@
   .credit-empty {
     padding: 14px 10px;
     font-size: 11.5px;
-    color: #999;
+    color: var(--text-4);
     text-align: center;
   }
   /* PC(넓은 화면): 연기금 컬럼 노출, 더보기 없이 전체 표시 */
@@ -667,13 +784,13 @@
     .day-row span { overflow: hidden; text-overflow: ellipsis; }
     .app-header { position: sticky; top: 0; z-index: 100; }
     /* 좌 컬럼: 년도별 + 일별(탭·컬럼헤더=.day-head) 모두 고정, 실데이터만 스크롤 (flex 분리, sticky 안 씀) */
-    #view-domestic .day-row.header { border-bottom: 1px solid #e5e5e5; background: transparent; }
+    #view-domestic .day-row.header { border-bottom: 1px solid var(--border); background: transparent; }
     /* 2025/2026 탭: 라운드·상하 높이 키우고, 선택 시 검정 배경 */
     #view-domestic .day-tab { border-radius: 12px; padding: 12px 0; }
     #view-domestic .day-tab.active {
-      background: #1a1a1a;
-      color: #fff;
-      border-color: #1a1a1a;
+      background: var(--fill-strong);
+      color: var(--text-on-strong);
+      border-color: var(--fill-strong);
     }
     #view-domestic .sidebar {
       display: block;
@@ -700,11 +817,11 @@
     #view-domestic .credit-list.expanded { max-height: 60vh; }
     /* 더보기 이중선 → 단일 구분선: 버튼 자체 보더 제거, 목록 박스 아래 한 줄만 */
     #view-domestic .day-more { border-top: none; margin-top: 0; }
-    #view-domestic .day-more-wrap:not(:empty) { border-top: 1px solid #ececec; }
+    #view-domestic .day-more-wrap:not(:empty) { border-top: 1px solid var(--border); }
     /* 우측 섹션을 카드로 감싸기 (모바일 카드 느낌) */
     #view-domestic .panel-card {
-      background: #fff;
-      border: 1px solid #ececec;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
       border-radius: 16px;
       padding: 22px 24px;
     }
@@ -731,18 +848,18 @@
     #view-domestic .year-card .year-stats { gap: 0; }
     #view-domestic .year-card .stat {
       padding: 0 14px;
-      border-right: 1px solid #dfe0e3;
+      border-right: 1px solid var(--border);
     }
     #view-domestic .year-card .stat:first-child { padding-left: 0; }
     #view-domestic .year-card .stat:last-child { border-right: none; padding-right: 0; }
-    /* 타이틀 텍스트를 매매기록 제목(17px / #1a1a1a)에 맞춤 */
+    /* 타이틀 텍스트를 매매기록 제목(17px / var(--text-1))에 맞춤 */
     #view-domestic h1,
     #view-domestic .sidebar h2,
     #view-domestic .mu-title,
     #view-domestic .mr-title {
       font-size: 17px;
       font-weight: 600;
-      color: #1a1a1a;
+      color: var(--text-1);
     }
     /* 순매수 요약(좌) + 범례(우) 같은 줄 */
     #view-domestic .stats-row {
@@ -793,7 +910,7 @@
   }
   .subtitle {
     font-size: 13px;
-    color: #666;
+    color: var(--text-3);
     margin: 0 0 24px;
   }
   .cards {
@@ -803,13 +920,13 @@
     margin-bottom: 24px;
   }
   .card {
-    background: #f5f5f5;
+    background: var(--bg-subtle);
     border-radius: 8px;
     padding: 16px;
   }
   .card p.label {
     font-size: 13px;
-    color: #666;
+    color: var(--text-3);
     margin: 0 0 4px;
   }
   .card p.value {
@@ -818,14 +935,14 @@
     margin: 0;
     white-space: nowrap;
   }
-  .value.red { color: #c0392b; }
-  .value.blue { color: #2a78d6; }
-  .value.gray { color: #333; }
+  .value.red { color: var(--up); }
+  .value.blue { color: var(--down); }
+  .value.gray { color: var(--text-2); }
   .legend {
     display: flex;
     gap: 20px;
     font-size: 12px;
-    color: #555;
+    color: var(--text-2);
     margin-bottom: 8px;
   }
   .legend span {
@@ -843,7 +960,7 @@
     border-radius: 999px;
     margin: -2px -3px;
   }
-  #investorLegend span[data-ds]:hover { background: #ececec; }
+  #investorLegend span[data-ds]:hover { background: var(--bg-hover); }
   #investorLegend span.legend-off { opacity: 0.3; }
   .dot {
     width: 12px;
@@ -883,17 +1000,17 @@
     text-align: center;
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-1);
     margin: 0;
   }
   .mu-nav {
     flex: 0 0 auto;
     width: 28px;
     height: 28px;
-    border: 1px solid #e5e5e5;
+    border: 1px solid var(--border);
     border-radius: 8px;
-    background: #fff;
-    color: #444;
+    background: var(--bg-surface);
+    color: var(--text-2);
     font-size: 16px;
     line-height: 1;
     cursor: pointer;
@@ -901,14 +1018,14 @@
     align-items: center;
     justify-content: center;
   }
-  .mu-nav:hover { background: #f5f5f5; }
+  .mu-nav:hover { background: var(--bg-subtle); }
   .mu-nav:disabled { opacity: 0.35; cursor: default; }
   .mu-legend {
     display: flex;
     justify-content: center;
     gap: 14px;
     font-size: 12px;
-    color: #666;
+    color: var(--text-3);
     margin-bottom: 14px;
   }
   .mu-legend span {
@@ -922,8 +1039,8 @@
     border-radius: 3px;
     display: inline-block;
   }
-  .mu-swatch.up { background: #e34948; }
-  .mu-swatch.down { background: #2a78d6; }
+  .mu-swatch.up { background: var(--up); }
+  .mu-swatch.down { background: var(--down); }
   .mu-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
@@ -934,7 +1051,7 @@
     text-align: center;
     font-size: 12px;
     font-weight: 600;
-    color: #999;
+    color: var(--text-4);
     padding-bottom: 2px;
   }
   .mu-cell {
@@ -951,7 +1068,7 @@
   .mr-title {
     font-size: 15px;
     font-weight: 600;
-    color: #1a1a1a;
+    color: var(--text-1);
     margin: 0 0 10px;
   }
   .mr-list { display: flex; flex-direction: column; }
@@ -959,21 +1076,21 @@
     display: flex;
     align-items: center;
     padding: 9px 2px;
-    border-bottom: 1px solid #f0f0f0;
+    border-bottom: 1px solid var(--border-weak);
     font-size: 14px;
   }
   .mr-row:last-child { border-bottom: none; }
-  .mr-month { flex: 1; color: #555; }
-  .mr-close { color: #888; font-size: 13px; margin-right: 14px; font-variant-numeric: tabular-nums; }
+  .mr-month { flex: 1; color: var(--text-2); }
+  .mr-close { color: var(--text-4); font-size: 13px; margin-right: 14px; font-variant-numeric: tabular-nums; }
   .mr-val { font-weight: 600; min-width: 62px; text-align: right; font-variant-numeric: tabular-nums; }
-  .mu-cell.up { background: #e34948; color: #fff; }
-  .mu-cell.down { background: #2a78d6; color: #fff; }
-  .mu-cell.flat { background: #b8b8b8; color: #fff; }
-  .mu-cell.none { background: #f3f4f6; color: #c4c4c4; }
-  .mu-cell.empty { background: #f3f4f6; } /* 날짜 없는 칸도 빈 박스로 채움 */
+  .mu-cell.up { background: var(--up); color: #fff; }
+  .mu-cell.down { background: var(--down); color: #fff; }
+  .mu-cell.flat { background: var(--text-5); color: #fff; }
+  .mu-cell.none { background: var(--bg-muted); color: var(--text-5); }
+  .mu-cell.empty { background: var(--bg-muted); } /* 날짜 없는 칸도 빈 박스로 채움 */
   .footer-note {
     font-size: 12px;
-    color: #999;
+    color: var(--text-4);
     margin-top: 16px;
   }
   .title-row {
@@ -991,8 +1108,8 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
-    background: #f5f5f5;
-    border: 1px solid #e5e5e5;
+    background: var(--bg-subtle);
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 3px;
     gap: 2px;
@@ -1004,17 +1121,17 @@
     padding: 7px 14px;
     font-size: 13px;
     font-weight: 600;
-    color: #666;
+    color: var(--text-3);
     cursor: pointer;
     white-space: nowrap;
   }
   .seg-btn:hover {
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--chip-bg);
   }
   .seg-btn.active {
-    background: #fff;
-    color: #1a1a1a;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    background: var(--bg-surface);
+    color: var(--text-1);
+    box-shadow: var(--shadow-sm);
   }
   .month-nav {
     display: flex;
@@ -1037,7 +1154,7 @@
     flex-shrink: 0;
   }
   .month-arrow:hover:not(:disabled) {
-    background: rgba(0, 0, 0, 0.06);
+    background: var(--chip-bg);
   }
   .month-arrow:disabled {
     opacity: 0.3;
@@ -1046,8 +1163,8 @@
   .chevron {
     width: 6px;
     height: 6px;
-    border-right: 1.5px solid #666;
-    border-bottom: 1.5px solid #666;
+    border-right: 1.5px solid var(--text-3);
+    border-bottom: 1.5px solid var(--text-3);
     transition: border-color 0.15s ease;
   }
   .chevron.left {
@@ -1084,7 +1201,7 @@
       overflow: visible;
       border-right: none;
       border-bottom: none;
-      border-top: 1px solid #e5e5e5;
+      border-top: 1px solid var(--border);
     }
     .content {
       height: auto;
@@ -1135,7 +1252,7 @@
       gap: 0;
       margin-top: 26px;
       margin-bottom: 20px;   /* 요약 박스와 아래 범례 사이 간격 */
-      background: #f3f4f6;
+      background: var(--bg-muted);
       border-radius: 12px;
       padding: 4px 4px;
     }
@@ -1153,7 +1270,7 @@
       top: 50%;
       transform: translateY(-50%);
       height: 60%;
-      border-left: 1px solid #dcdcdc;
+      border-left: 1px solid var(--border);
     }
     /* 가로 구분선: 아래 행(3·4번째) 위 */
     .card:nth-child(n + 3)::after {
@@ -1162,7 +1279,7 @@
       top: 0;
       left: 12px;
       right: 12px;
-      border-top: 1px solid #dcdcdc;
+      border-top: 1px solid var(--border);
     }
     .card p.label {
       font-size: 12.5px;
@@ -1179,7 +1296,7 @@
     }
     .mytrades-col.philosophy {
       border-right: none;
-      border-bottom: 1px solid #e5e5e5;
+      border-bottom: 1px solid var(--border);
     }
     .month-block {
       padding: 22px 0;
@@ -1217,7 +1334,7 @@
       padding: 0 20px;
     }
     .app-logo {
-      order: 2;
+      order: 3;
       width: 38px;
       height: 38px;
       margin-right: 0;
@@ -1227,16 +1344,33 @@
       order: 1;
       gap: 20px;
     }
+    .theme-toggle {
+      order: 2;
+      margin-left: auto;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: none;
+      color: var(--text-4);
+    }
+    .theme-toggle:hover {
+      background: none;
+      color: var(--text-4);
+    }
+    .theme-toggle svg {
+      width: 19px;
+      height: 19px;
+    }
     .app-nav button {
       padding: 8px 0;
       font-size: 14px;
       font-weight: 500;
-      color: #999;
+      color: var(--text-4);
       border-radius: 0;
     }
     .app-nav button.active {
       background: none;
-      color: #1a1a1a;
+      color: var(--text-1);
       font-weight: 700;
     }
     .app-nav button:hover {
@@ -1262,19 +1396,19 @@
       background: inherit;
     }
     .seg-btn.active:hover {
-      background: #fff;
+      background: var(--bg-surface);
     }
     .lock-btn:hover {
-      background: #f5f5f5;
+      background: var(--bg-subtle);
     }
     .lock-btn.locked:hover {
-      background: #1a1a1a;
+      background: var(--fill-strong);
     }
     .year-card:hover {
-      border-color: #e5e5e5;
+      border-color: var(--border);
     }
     .year-card.active:hover {
-      border-color: #333;
+      border-color: var(--fill-strong);
     }
     .placeholder-view,
     #view-domestic {
@@ -1293,9 +1427,9 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: #fff;
+      background: var(--bg-surface);
       border: none;
-      border-top: 1px solid #e5e5e5;
+      border-top: 1px solid var(--border);
       border-radius: 0;
       padding: 26px 26px calc(34px + env(safe-area-inset-bottom));
     }
@@ -1351,7 +1485,7 @@
       min-height: 32px;
       padding: 4px 8px;
       font-size: 12px;
-      color: #666;
+      color: var(--text-3);
     }
     .sidebar-section {
       border-bottom: none;
@@ -1374,9 +1508,9 @@
     }
     .day-tab.active,
     .day-tab.active:hover {
-      background: #1a1a1a;
-      border-color: #1a1a1a;
-      color: #fff;
+      background: var(--fill-strong);
+      border-color: var(--fill-strong);
+      color: var(--text-on-strong);
       font-weight: 600;
     }
     .day-row.header {
@@ -1386,7 +1520,7 @@
       border-bottom: none;
       margin-bottom: 4px;
       padding: 2px 6px 12px;
-      color: #a0a0a0;
+      color: var(--text-5);
       font-weight: 600;
     }
     .day-row.header::after {
@@ -1396,7 +1530,7 @@
       right: 0;
       bottom: 0;
       height: 1.5px;
-      background: linear-gradient(to right, rgba(200,200,200,0), rgba(200,200,200,0.85) 22%, rgba(200,200,200,0.85) 78%, rgba(200,200,200,0));
+      background: linear-gradient(to right, transparent, var(--divider-line) 22%, var(--divider-line) 78%, transparent);
     }
     .day-row {
       grid-template-columns: 32px repeat(4, minmax(0, 1fr)) minmax(0, 0.8fr);
@@ -1412,19 +1546,19 @@
       text-overflow: ellipsis;
     }
     .day-row span:first-child {
-      color: #444;
+      color: var(--text-2);
     }
     .subtitle {
-      color: #555;
+      color: var(--text-2);
       font-size: 13.5px;
     }
     .legend {
-      color: #333;
+      color: var(--text-2);
       font-weight: 500;
       font-size: 14px;
     }
     .card p.label {
-      color: #555;
+      color: var(--text-2);
       font-weight: 500;
     }
     .year-card {
@@ -1432,20 +1566,20 @@
       border-radius: 12px;
     }
     .year-card .year-label {
-      color: #333;
+      color: var(--text-2);
       font-size: 13.5px;
       margin-bottom: 8px;
     }
     .year-card .stat .k {
       font-size: 12px;
-      color: #555;
+      color: var(--text-2);
     }
     .year-card .stat .v {
       font-size: 14px;
       font-weight: 600;
     }
     .month-note-box {
-      color: #2b2b2b;
+      color: var(--text-1);
       padding: 18px;
       line-height: 1.9;
       font-size: 14.5px;
@@ -1455,7 +1589,7 @@
     .pw-overlay {
       align-items: center;
       padding-bottom: 34vh;
-      background: rgba(0, 0, 0, 0.55);
+      background: var(--overlay-strong);
     }
     .pw-modal {
       width: 290px;
@@ -1471,14 +1605,14 @@
       font-size: 14px;
     }
     .philosophy-list {
-      color: #2b2b2b;
+      color: var(--text-1);
       font-size: 14.5px;
     }
     .month-block h4.collapsible-header {
       font-size: 16px;
     }
     .footer-note {
-      color: #777;
+      color: var(--text-3);
     }
     .legend {
       flex-wrap: wrap;
@@ -1495,7 +1629,7 @@
     /* Section = card on a light gray page (mobile only) */
     #view-domestic,
     #view-mytrades {
-      background: #eceef1;
+      background: var(--bg-hover);
     }
     .content {
       padding: 10px 10px 0;
@@ -1509,7 +1643,7 @@
       gap: 10px;
     }
     #view-domestic .panel-card {
-      background: #fff;
+      background: var(--bg-surface);
       border-radius: 30px;
       padding: 20px 16px;
     }
@@ -1526,7 +1660,7 @@
       border: none;
     }
     .sidebar-section {
-      background: #fff;
+      background: var(--bg-surface);
       border-radius: 30px;
       padding: 20px 16px;
       margin: 10px 0 0;
@@ -1547,7 +1681,7 @@
       align-self: stretch;
       margin: -20px -16px 16px;
       padding: 20px 16px 12px;
-      background: #fff;
+      background: var(--bg-surface);
       border-radius: 30px 30px 0 0;
     }
     #view-domestic .sidebar-section .section-toggle.collapsed {
@@ -1569,14 +1703,14 @@
       cursor: pointer;
       font-size: 17px;
       font-weight: 600;
-      color: #333;
+      color: var(--text-2);
     }
     #view-domestic .wrap > .sidebar-section h2.section-toggle .arrow {
       display: inline-block;
       width: 6px;
       height: 6px;
-      border-right: 1.5px solid #999;
-      border-bottom: 1.5px solid #999;
+      border-right: 1.5px solid var(--text-4);
+      border-bottom: 1.5px solid var(--text-4);
       border-top: none;
       border-left: none;
       transform: rotate(45deg);
@@ -1591,13 +1725,13 @@
       gap: 10px;
     }
     .mytrades-col {
-      background: #fff;
+      background: var(--bg-surface);
       border-radius: 30px;
       padding: 20px 16px;
     }
     .mytrades-col.philosophy {
       border-bottom: none;
-      background: #fff;
+      background: var(--bg-surface);
     }
     .mytrades-col.philosophy.is-collapsed {
       padding-bottom: 20px;
@@ -1614,6 +1748,16 @@
     }
   }
 </style>
+<script>
+  // 첫 페인트 전에 테마를 확정해 깜빡임 방지 (저장값 > 시스템 설정)
+  (function () {
+    var saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (e) {}
+    var dark = saved ? saved === 'dark'
+      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  })();
+</script>
 </head>
 <body>
 <header class="app-header">
@@ -1623,6 +1767,15 @@
     <button class="nav-btn" data-view="overseas">해외 주식</button>
     <button class="nav-btn" data-view="mytrades">매매 기록</button>
   </nav>
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="테마 전환" title="테마 전환">
+    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+      <circle cx="12" cy="12" r="4.2"></circle>
+      <path d="M12 2.6v2.2M12 19.2v2.2M4.2 12H2M22 12h-2.2M5.9 5.9 4.4 4.4M19.6 19.6l-1.5-1.5M18.1 5.9l1.5-1.5M4.4 19.6l1.5-1.5"></path>
+    </svg>
+    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.5 14.4A8.6 8.6 0 0 1 9.6 3.5a8.6 8.6 0 1 0 10.9 10.9z"></path>
+    </svg>
+  </button>
 </header>
 
 <div class="placeholder-view mytrades-view" id="view-overseas">
@@ -1669,9 +1822,9 @@
           <div class="idx-card">
             <div class="idx-head">
               <div class="idx-legend">
-                <span><span class="dot" style="background:#2a78d6"></span>S&amp;P 500</span>
-                <span><span class="dot" style="background:#7b61ff"></span>나스닥</span>
-                <span><span class="dot" style="background:#e8912d"></span>다우존스</span>
+                <span><span class="dot" style="background:var(--s-sp500)"></span>S&amp;P 500</span>
+                <span><span class="dot" style="background:var(--s-nasdaq)"></span>나스닥</span>
+                <span><span class="dot" style="background:var(--s-dow)"></span>다우존스</span>
               </div>
               <span class="idx-sub">2026 · 시작일=100 기준</span>
             </div>
@@ -1886,11 +2039,11 @@
           </div>
 
           <div class="legend" id="investorLegend">
-            <span data-ds="0"><span class="dot" style="background:#808080"></span>개인</span>
-            <span data-ds="1"><span class="dot" style="background:#e34948"></span>외국인</span>
-            <span data-ds="2"><span class="dot" style="background:#2a78d6"></span>기관</span>
-            <span data-ds="3"><span class="dot" style="background:#e8912d"></span>연기금</span>
-            <span data-ds="4"><span class="dot" style="background:#008300"></span>코스피</span>
+            <span data-ds="0"><span class="dot" style="background:var(--s-individual)"></span>개인</span>
+            <span data-ds="1"><span class="dot" style="background:var(--s-foreign)"></span>외국인</span>
+            <span data-ds="2"><span class="dot" style="background:var(--s-inst)"></span>기관</span>
+            <span data-ds="3"><span class="dot" style="background:var(--s-pension)"></span>연기금</span>
+            <span data-ds="4"><span class="dot" style="background:var(--s-kospi)"></span>코스피</span>
           </div>
         </div>
 
@@ -1926,9 +2079,9 @@
             <p class="subtitle">2026년 · 신용거래융자 (단위: 조원)</p>
           </div>
           <div class="legend">
-            <span><span class="dot" style="background:#7b61ff"></span>전체</span>
-            <span><span class="dot" style="background:#e34948"></span>유가증권</span>
-            <span><span class="dot" style="background:#2a78d6"></span>코스닥</span>
+            <span><span class="dot" style="background:var(--s-total)"></span>전체</span>
+            <span><span class="dot" style="background:var(--s-foreign)"></span>유가증권</span>
+            <span><span class="dot" style="background:var(--s-inst)"></span>코스닥</span>
           </div>
         </div>
         <div class="chart-container">
@@ -1955,6 +2108,11 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
+// CSS 변수 읽기 (차트 색상은 테마에 따라 바뀌므로 그릴 때마다 조회)
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
 const labels2026 = ['01.02','01.05','01.06','01.07','01.08','01.09','01.12','01.13','01.14','01.15','01.16','01.19','01.20','01.21','01.22','01.23','01.26','01.27','01.28','01.29','01.30','02.02','02.03','02.04','02.05','02.06','02.09','02.10','02.11','02.12','02.13','02.19','02.20','02.23','02.24','02.25','02.26','02.27','03.03','03.04','03.05','03.06','03.09','03.10','03.11','03.12','03.13','03.16','03.17','03.18','03.19','03.20','03.23','03.24','03.25','03.26','03.27','03.30','03.31','04.01','04.02','04.03','04.06','04.07','04.08','04.09','04.10','04.13','04.14','04.15','04.16','04.17','04.20','04.21','04.22','04.23','04.24','04.27','04.28','04.29','04.30','05.04','05.06','05.07','05.08','05.11','05.12','05.13','05.14','05.15','05.18','05.19','05.20','05.21','05.22','05.26','05.27','05.28','05.29','06.01','06.02','06.04','06.05','06.08','06.09','06.10','06.11','06.12','06.15','06.16','06.17','06.18','06.19','06.22','06.23','06.24','06.25','06.26','06.29','06.30','07.01','07.02','07.03','07.06','07.07','07.08','07.09','07.10','07.13','07.14','07.15','07.16','07.20','07.21','07.22','07.23','07.24'];
 
 const dailyIndividual2026 = [-4252,-15141,5963,-2944,12540,1339,-1013,-7125,-4377,-18235,-9383,-7513,3524,-9965,1555,-7239,17157,-10197,12131,16173,22979,45874,-29423,-10119,67791,21736,-32947,-8780,-17149,-44547,7141,-8609,-9872,10815,-22861,2307,6498,62496,57974,796,18228,29488,46242,-18340,-5086,22291,24512,7164,-5752,-38717,24116,22338,70029,7270,-13402,30598,22596,8945,24400,-37628,12097,-20952,-10502,-3429,-54161,2950,-12280,7173,-23919,-9400,-18050,14464,-3158,-19204,11984,4514,11832,-19758,-1306,1681,11824,-47936,-5715,59925,39707,28669,66818,18868,18499,72308,22094,56289,17104,-26754,10655,-5745,4064,36146,-14054,3862,63537,50135,42240,17628,-6167,48643,20803,-43174,-15124,-21841,5254,-4156,16478,21506,85910,26312,-24136,81919,45975,8401,17370,62413,-22942,26829,31359,-358,-13278,-7805,38869,-41424,-24666,36647,3490,-16421,-12176,-22077,51782];
@@ -2463,7 +2621,7 @@ function renderChart(yearLabel, displayLabel) {
         ctx.beginPath();
         ctx.setLineDash([4, 4]);
         ctx.lineWidth = 1;
-        ctx.strokeStyle = '#8a8a8a';
+        ctx.strokeStyle = cssVar('--chart-axis');
         ctx.moveTo(x, top);
         ctx.lineTo(x, bottom);
         ctx.stroke();
@@ -2475,11 +2633,11 @@ function renderChart(yearLabel, displayLabel) {
       data: {
         labels,
         datasets: [
-          { label: '개인', data: individual, borderColor: '#808080', backgroundColor: '#808080', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '외국인', data: foreign, borderColor: '#e34948', backgroundColor: '#e34948', borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '기관', data: institution, borderColor: '#2a78d6', backgroundColor: '#2a78d6', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '연기금', data: pension, borderColor: '#e8912d', backgroundColor: '#e8912d', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
-          { label: '코스피', data: kospi, borderColor: '#008300', backgroundColor: '#008300', borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
+          { label: '개인', data: individual, borderColor: cssVar('--s-individual'), backgroundColor: cssVar('--s-individual'), borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '외국인', data: foreign, borderColor: cssVar('--s-foreign'), backgroundColor: cssVar('--s-foreign'), borderWidth: isNarrow() ? 1 : 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '기관', data: institution, borderColor: cssVar('--s-inst'), backgroundColor: cssVar('--s-inst'), borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '연기금', data: pension, borderColor: cssVar('--s-pension'), backgroundColor: cssVar('--s-pension'), borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y' },
+          { label: '코스피', data: kospi, borderColor: cssVar('--s-kospi'), backgroundColor: cssVar('--s-kospi'), borderWidth: isNarrow() ? 1 : 1.5, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4, tension: lineTension(labels.length), borderJoinStyle: 'round', borderCapStyle: 'round', yAxisID: 'y1', spanGaps: true }
         ]
       },
       plugins: [crosshairPlugin],
@@ -2501,14 +2659,14 @@ function renderChart(yearLabel, displayLabel) {
           tooltip: {
             position: 'fixedTop',
             yAlign: 'top',
-            backgroundColor: 'rgba(26, 26, 26, 0.92)',
+            backgroundColor: cssVar('--tooltip-bg'),
             cornerRadius: 12,
             padding: isNarrow() ? 9 : 14,
             boxPadding: isNarrow() ? 3 : 6,
             bodySpacing: isNarrow() ? 4 : 8,
             titleMarginBottom: isNarrow() ? 6 : 10,
-            titleColor: '#fff',
-            bodyColor: '#f0f0f0',
+            titleColor: cssVar('--tooltip-title'),
+            bodyColor: cssVar('--tooltip-body'),
             titleFont: { size: isNarrow() ? 11 : 13, weight: '600' },
             bodyFont: { size: isNarrow() ? 11 : 12 },
             caretPadding: 8,
@@ -2537,29 +2695,29 @@ function renderChart(yearLabel, displayLabel) {
           y: {
             position: 'left',
             grace: isNarrow() ? '6%' : 0,
-            title: { display: !isNarrow(), text: '누적 순매수 (조원)', color: '#8a8a8a', font: { size: 12 } },
+            title: { display: !isNarrow(), text: '누적 순매수 (조원)', color: cssVar('--chart-axis'), font: { size: 12 } },
             ticks: {
-              color: '#8a8a8a',
+              color: cssVar('--chart-axis'),
               font: { size: isNarrow() ? 10 : 11 },
               maxTicksLimit: isNarrow() ? 5 : undefined,
               padding: isNarrow() ? 2 : 3
             },
-            grid: { color: '#e2e2e2' },
-            border: { display: true, color: '#e2e2e2' }
+            grid: { color: cssVar('--chart-grid') },
+            border: { display: true, color: cssVar('--chart-grid') }
           },
           y1: {
             position: 'right',
             display: !isNarrow(),
             // Without headroom the KOSPI line is pinned to the axis line.
             grace: isNarrow() ? '12%' : '4%',
-            title: { display: true, text: '코스피 지수', color: '#008300', font: { size: 12 } },
-            ticks: { color: '#008300', font: { size: 11 }, padding: 3 },
+            title: { display: true, text: '코스피 지수', color: cssVar('--s-kospi'), font: { size: 12 } },
+            ticks: { color: cssVar('--s-kospi'), font: { size: 11 }, padding: 3 },
             grid: { display: false },
-            border: { display: true, color: '#e2e2e2' }
+            border: { display: true, color: cssVar('--chart-grid') }
           },
           x: {
             ticks: {
-              color: '#8a8a8a',
+              color: cssVar('--chart-axis'),
               font: { size: isNarrow() ? 9 : 10 },
               maxRotation: isNarrow() ? 0 : 0,
               minRotation: 0,
@@ -2632,7 +2790,7 @@ Object.keys(yearDatasets).forEach(label => {
   card.className = 'year-card';
   card.dataset.year = label;
   if (data.length === 0) {
-    card.innerHTML = `<p class="year-label">${label}</p><p style="font-size:12px;color:#aaa;margin:0;">데이터 없음</p>`;
+    card.innerHTML = `<p class="year-label">${label}</p><p style="font-size:12px;color:var(--text-5);margin:0;">데이터 없음</p>`;
     card.style.cursor = 'default';
     card.style.opacity = '0.6';
   } else {
@@ -2976,7 +3134,7 @@ function buildCreditChart() {
       ctx.beginPath();
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1;
-      ctx.strokeStyle = '#8a8a8a';
+      ctx.strokeStyle = cssVar('--chart-axis');
       ctx.moveTo(x, top);
       ctx.lineTo(x, bottom);
       ctx.stroke();
@@ -2987,9 +3145,9 @@ function buildCreditChart() {
   creditChartInstance = new Chart(canvas, {
     type: 'line',
     data: { labels, datasets: [
-      mkSet('전체', 'bal', '#7b61ff', isNarrow() ? 1.5 : 2.5),
-      mkSet('유가증권', 'scrs', '#e34948', isNarrow() ? 1 : 1.5),
-      mkSet('코스닥', 'kosdaq', '#2a78d6', isNarrow() ? 1 : 1.5)
+      mkSet('전체', 'bal', cssVar('--s-total'), isNarrow() ? 1.5 : 2.5),
+      mkSet('유가증권', 'scrs', cssVar('--s-foreign'), isNarrow() ? 1 : 1.5),
+      mkSet('코스닥', 'kosdaq', cssVar('--s-inst'), isNarrow() ? 1 : 1.5)
     ] },
     plugins: [creditCrosshair],
     options: {
@@ -3000,9 +3158,9 @@ function buildCreditChart() {
         legend: { display: false },
         tooltip: {
           position: 'fixedTop', yAlign: 'top', caretPadding: 8, caretSize: 0,
-          backgroundColor: 'rgba(26, 26, 26, 0.92)', cornerRadius: 12, padding: 14,
-          boxPadding: 6, bodySpacing: 8, titleMarginBottom: 10, titleColor: '#fff',
-          bodyColor: '#f0f0f0', titleFont: { size: 13, weight: '600' }, bodyFont: { size: 12 },
+          backgroundColor: cssVar('--tooltip-bg'), cornerRadius: 12, padding: 14,
+          boxPadding: 6, bodySpacing: 8, titleMarginBottom: 10, titleColor: cssVar('--tooltip-title'),
+          bodyColor: cssVar('--tooltip-body'), titleFont: { size: 13, weight: '600' }, bodyFont: { size: 12 },
           displayColors: true, usePointStyle: true,
           callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}조원` }
         }
@@ -3010,12 +3168,12 @@ function buildCreditChart() {
       scales: {
         y: {
           position: 'left', grace: '4%',
-          title: { display: !isNarrow(), text: '신용잔고 (조원)', color: '#8a8a8a', font: { size: 12 } },
-          ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 10 : 11 }, padding: 3 },
-          grid: { color: '#e2e2e2' }, border: { display: true, color: '#e2e2e2' }
+          title: { display: !isNarrow(), text: '신용잔고 (조원)', color: cssVar('--chart-axis'), font: { size: 12 } },
+          ticks: { color: cssVar('--chart-axis'), font: { size: isNarrow() ? 10 : 11 }, padding: 3 },
+          grid: { color: cssVar('--chart-grid') }, border: { display: true, color: cssVar('--chart-grid') }
         },
         x: {
-          ticks: { color: '#8a8a8a', font: { size: isNarrow() ? 9 : 10 }, autoSkip: true, maxTicksLimit: isNarrow() ? 5 : 9, padding: 4 },
+          ticks: { color: cssVar('--chart-axis'), font: { size: isNarrow() ? 9 : 10 }, autoSkip: true, maxTicksLimit: isNarrow() ? 5 : 9, padding: 4 },
           grid: { display: false }, border: { display: false }
         }
       }
@@ -3458,6 +3616,7 @@ const idxSP500 = [6941.47,6832.76,6836.17,6843.22,6881.31,6861.89,6909.51,6837.7
 const idxNasdaq = [23066.47,22597.15,22546.67,22578.38,22753.63,22682.73,22886.07,22627.27,22863.68,23152.08,22878.38,22668.21,22748.86,22516.69,22807.48,22748.99,22387.68,22695.95,22697.1,22716.13,22311.98,22105.36,22374.18,22479.53,22152.42,22090.69,21647.61,21946.76,21761.89,21929.83,21408.08,20948.36,20794.64,21590.63,21840.95,21879.18,21996.34,22017.85,22634.99,22822.42,22902.89,23183.74,23639.08,24016.02,24102.7,24468.48,24404.39,24259.96,24657.57,24438.5,24836.6,24887.1,24663.8,24673.24,24892.31,25114.44,25067.8,25326.13,25838.94,25806.2,26247.08,26274.12,26088.2,26402.34,26635.22,26225.15,26090.73,25870.71,26270.36,26293.1,26343.97,26656.18,26674.74,26917.47,26972.62,27086.81,27093.9,26853.98,26830.96,25709.43,25929.66,25678.82,25169.5,25809.66,25888.84,26683.94,26376.34,26021.66,26517.93,26166.6,25587.04,25476.64,25358.6,25297.62,25820.14,26213.72,26040.03,25832.67,26121.16,25818.69,25870.65,26206.89,26281.61,25873.18,26107.01,26269.23,25881.95,25520.24,25508.07,25781.27];
 const idxDow = [50121.4,49451.98,49500.93,49533.19,49662.66,49395.16,49625.97,48804.06,49174.5,49482.15,49499.2,48977.92,48904.78,48501.27,48739.41,47954.74,47501.55,47740.8,47706.51,47417.27,46677.85,46558.47,46946.41,46993.26,46225.15,46021.43,45577.47,46208.47,46124.06,46429.49,45960.11,45166.64,45216.14,46341.51,46565.74,46504.67,46669.88,46584.46,47909.92,48185.8,47916.57,48218.25,48535.99,48463.72,48578.72,49447.43,49442.56,49149.38,49490.03,49310.32,49230.71,49167.79,49141.93,48861.81,49652.14,49499.27,48941.9,49298.25,49910.59,49596.97,49609.16,49704.47,49760.56,49693.2,50063.46,49526.17,49686.12,49363.88,50009.35,50285.66,50579.7,50461.68,50644.28,50668.97,51032.46,51078.88,51307.79,50687.07,51561.93,50866.78,50786.01,50872.11,49918.78,50848.75,51202.26,51671.03,51999.67,51492.55,51564.7,51712.71,51666.84,51848.9,51920.62,51876.11,52182.74,52319.2,52305.24,52900.07,53055.91,52925.15,52348.39,52487.41,52637.01,52498.64,52508.27,52658.64,52552.97,52146.42,51839.26,52101.64];
 let indexChartsBuilt = false;
+let indexChartInstance = null;
 function ensureIndexCharts() {
   if (indexChartsBuilt) return;
   const canvas = document.getElementById('chartIndices');
@@ -3471,12 +3630,12 @@ function ensureIndexCharts() {
       borderWidth: 2, pointRadius: 0, pointHitRadius: 8, pointHoverRadius: 4,
       tension: lineTension(idxLabels.length), borderJoinStyle: 'round', borderCapStyle: 'round'
     });
-    new Chart(canvas, {
+    indexChartInstance = new Chart(canvas, {
       type: 'line',
       data: { labels: idxLabels, datasets: [
-        mk('S&P 500', idxSP500, '#2a78d6'),
-        mk('나스닥', idxNasdaq, '#7b61ff'),
-        mk('다우존스', idxDow, '#e8912d')
+        mk('S&P 500', idxSP500, cssVar('--s-sp500')),
+        mk('나스닥', idxNasdaq, cssVar('--s-nasdaq')),
+        mk('다우존스', idxDow, cssVar('--s-dow'))
       ] },
       options: {
         responsive: true, maintainAspectRatio: false, animation: false,
@@ -3484,7 +3643,7 @@ function ensureIndexCharts() {
         plugins: {
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(26,26,26,0.92)', cornerRadius: 10, padding: 12, boxPadding: 6, bodySpacing: 6,
+            backgroundColor: cssVar('--tooltip-bg'), cornerRadius: 10, padding: 12, boxPadding: 6, bodySpacing: 6,
             titleFont: { size: 12, weight: '600' }, bodyFont: { size: 12 }, usePointStyle: true,
             callbacks: { label: (ctx) => {
               const actual = raw[ctx.dataset.label][ctx.dataIndex];
@@ -3494,8 +3653,8 @@ function ensureIndexCharts() {
           }
         },
         scales: {
-          y: { position: 'right', grace: '3%', title: { display: true, text: '시작일=100', color: '#8a8a8a', font: { size: 11 } }, ticks: { color: '#8a8a8a', font: { size: 10 } }, grid: { color: '#eee' }, border: { display: false } },
-          x: { ticks: { color: '#8a8a8a', font: { size: 9 }, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false }, border: { display: false } }
+          y: { position: 'right', grace: '3%', title: { display: true, text: '시작일=100', color: cssVar('--chart-axis'), font: { size: 11 } }, ticks: { color: cssVar('--chart-axis'), font: { size: 10 } }, grid: { color: cssVar('--chart-grid') }, border: { display: false } },
+          x: { ticks: { color: cssVar('--chart-axis'), font: { size: 9 }, autoSkip: true, maxTicksLimit: 8 }, grid: { display: false }, border: { display: false } }
         }
       }
     });
@@ -3569,6 +3728,52 @@ window.addEventListener('pagehide', saveViewState);
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 restoreViewState();
+
+/* ===== 다크 / 라이트 테마 ===== */
+function redrawChartsForTheme() {
+  // Chart.js는 색을 생성 시점에 굳히므로 테마가 바뀌면 다시 그린다
+  if (chartInstance) {
+    chartInstance.destroy();
+    chartInstance = null;
+    renderChart(activeYearLabel, activeDisplayLabel);
+  }
+  buildCreditChart();
+  if (indexChartInstance) {
+    indexChartInstance.destroy();
+    indexChartInstance = null;
+    indexChartsBuilt = false;
+    ensureIndexCharts();
+  }
+}
+
+function setTheme(mode, remember) {
+  document.documentElement.setAttribute('data-theme', mode);
+  if (remember) {
+    try { localStorage.setItem('theme', mode); } catch (e) {}
+  }
+  redrawChartsForTheme();
+}
+
+const themeToggleBtn = document.getElementById('themeToggle');
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    setTheme(next, true);
+  });
+}
+
+// 직접 고른 적이 없으면 시스템 설정을 따라간다
+if (window.matchMedia) {
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const onSysChange = (e) => {
+    let saved = null;
+    try { saved = localStorage.getItem('theme'); } catch (err) {}
+    if (saved) return;
+    setTheme(e.matches ? 'dark' : 'light', false);
+  };
+  if (sysDark.addEventListener) sysDark.addEventListener('change', onSysChange);
+  else if (sysDark.addListener) sysDark.addListener(onSysChange);
+}
 </script>
 </body>
 </html>
