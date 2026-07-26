@@ -634,7 +634,8 @@
     min-height: calc(100dvh - 57px);
   }
   .sidebar {
-    width: 500px;
+    /* 화면이 넓어지면 같이 넓어지되 500~800px 안에서만 (모바일은 아래서 100%) */
+    width: clamp(500px, 34vw, 800px);
     flex-shrink: 0;
     background: var(--bg-subtle);
     border-right: 1px solid var(--border);
