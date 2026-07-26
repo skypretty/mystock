@@ -3597,20 +3597,35 @@ document.querySelectorAll('.day-tab').forEach(btn => {
 showDayTab('2026'); // 초기 탭: 2025 행 숨김
 
 // 해외주식: 좌측 대카테고리(시나리오 / 지수 동향) 클릭 → 우측 패널 전환
+// 새로고침 때 복원할 수 있도록 선택 로직을 밖에서도 부를 수 있게 노출한다.
+let selectScenario = () => {};
+let currentScenario = () => null;
+
 (function initScenarios() {
   const col = document.querySelector('#view-overseas .mytrades-col.philosophy');
   const panels = document.getElementById('scenarioPanels');
   const titleEl = document.getElementById('scenarioTitle');
   if (!col || !panels) return;
   const allCats = col.querySelectorAll('.scenario-cat');
+
+  selectScenario = (key) => {
+    const cat = [...allCats].find(c => c.dataset.scenario === key);
+    if (!cat) return;
+    allCats.forEach(c => c.classList.toggle('active', c === cat));
+    panels.querySelectorAll('.scenario-panel').forEach(p => { p.hidden = p.dataset.scenario !== key; });
+    if (titleEl) titleEl.textContent = cat.dataset.title || cat.textContent;
+    if (key === 'usindex') ensureIndexCharts();
+    else if (key === 'ratesfx') requestAnimationFrame(() => { buildRateChart(); buildDollarChart(); });
+  };
+  currentScenario = () => {
+    const active = col.querySelector('.scenario-cat.active');
+    return active ? active.dataset.scenario : null;
+  };
+
   allCats.forEach(cat => {
     cat.addEventListener('click', () => {
-      const key = cat.dataset.scenario;
-      allCats.forEach(c => c.classList.toggle('active', c === cat));
-      panels.querySelectorAll('.scenario-panel').forEach(p => { p.hidden = p.dataset.scenario !== key; });
-      if (titleEl) titleEl.textContent = cat.dataset.title || cat.textContent;
-      if (key === 'usindex') ensureIndexCharts();
-      else if (key === 'ratesfx') requestAnimationFrame(() => { buildRateChart(); buildDollarChart(); });
+      selectScenario(cat.dataset.scenario);
+      saveViewState();
     });
   });
 })();
@@ -3826,7 +3841,9 @@ function saveViewState() {
   });
   if (window.scrollY > 0) scroll.window = window.scrollY;
   try {
-    sessionStorage.setItem(VIEW_STATE_KEY, JSON.stringify({ view: currentView(), scroll }));
+    sessionStorage.setItem(VIEW_STATE_KEY, JSON.stringify({
+      view: currentView(), scenario: currentScenario(), scroll
+    }));
   } catch (e) {}
 }
 function restoreViewState() {
@@ -3836,6 +3853,7 @@ function restoreViewState() {
   } catch (e) {}
   if (!state) return;
   if (state.view && views[state.view]) showView(state.view);
+  if (state.scenario) selectScenario(state.scenario);
   requestAnimationFrame(() => {
     Object.entries(state.scroll || {}).forEach(([sel, top]) => {
       if (sel === 'window') window.scrollTo(0, top);
