@@ -11,6 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
+<meta name="theme-color" content="#17171c">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
   :root {
@@ -1358,6 +1359,10 @@
     .app-header {
       justify-content: space-between;
       padding: 0 20px;
+      /* iOS 상태바 영역은 페이지 배경색을 그대로 비추므로, 헤더가 다른 색이면
+         상태바와의 경계에 단차가 보인다. 모바일에선 배경을 맞추고 선을 없앤다. */
+      background: var(--bg-page);
+      border-bottom: none;
     }
     .app-logo {
       order: 3;
@@ -1779,7 +1784,10 @@
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+    var mode = saved === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', mode);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#17171c' : '#ffffff');
   })();
 </script>
 </head>
@@ -3967,6 +3975,9 @@ function redrawChartsForTheme() {
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   try { localStorage.setItem('theme', mode); } catch (e) {}
+  // 브라우저 상단/하단 크롬도 같이 물들여 상태바와의 단차를 없앤다
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-page').trim());
   redrawChartsForTheme();
 }
 
