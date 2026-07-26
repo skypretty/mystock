@@ -150,24 +150,26 @@
   }
   .app-nav {
     display: flex;
-    gap: 4px;
+    gap: 18px;
   }
+  /* 버튼 배경 없이 굵기와 오파시티로만 선택 상태를 구분한다 */
   .app-nav button {
     background: none;
     border: none;
-    padding: 8px 14px;
+    padding: 8px 2px;
     font-size: 13px;
-    font-weight: 600;
-    color: var(--text-3);
+    font-weight: 500;
+    color: var(--text-1);
+    opacity: 0.4;
     cursor: pointer;
-    border-radius: 6px;
+    transition: opacity 0.15s ease;
   }
   .app-nav button:hover {
-    background: var(--bg-hover);
+    opacity: 0.7;
   }
   .app-nav button.active {
-    background: var(--accent);
-    color: #fff;
+    opacity: 1;
+    font-weight: 700;
   }
   .theme-toggle {
     margin-left: auto;
@@ -1378,17 +1380,12 @@
     .app-nav button {
       padding: 8px 0;
       font-size: 14px;
-      font-weight: 500;
-      color: var(--text-4);
-      border-radius: 0;
-    }
-    .app-nav button.active {
-      background: none;
-      color: var(--text-1);
-      font-weight: 700;
     }
     .app-nav button:hover {
-      background: none;
+      opacity: 0.4;   /* 터치 후 hover 가 남아도 비선택 상태 그대로 */
+    }
+    .app-nav button.active:hover {
+      opacity: 1;
     }
     /* Touch devices keep :hover applied after a tap, leaving a stuck highlight. */
     * {
