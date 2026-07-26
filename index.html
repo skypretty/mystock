@@ -1458,7 +1458,9 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      background: var(--bg-surface);
+      /* 아래로는 브라우저 하단 크롬(theme-color = --bg-page)이 이어지므로
+         바 배경도 페이지 배경에 맞춰 경계가 안 보이게 한다 */
+      background: var(--bg-page);
       border: none;
       border-top: 1px solid var(--border);
       border-radius: 0;
