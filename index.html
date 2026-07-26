@@ -1774,13 +1774,12 @@
   }
 </style>
 <script>
-  // 첫 페인트 전에 테마를 확정해 깜빡임 방지 (저장값 > 시스템 설정)
+  // 첫 페인트 전에 테마를 확정해 깜빡임 방지.
+  // 기본은 다크(PC·모바일 공통). 직접 라이트를 고른 적이 있을 때만 라이트로 뜬다.
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    var dark = saved ? saved === 'dark'
-      : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
   })();
 </script>
 </head>
@@ -3965,33 +3964,17 @@ function redrawChartsForTheme() {
   if (dollarChartInstance) buildDollarChart();
 }
 
-function setTheme(mode, remember) {
+function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
-  if (remember) {
-    try { localStorage.setItem('theme', mode); } catch (e) {}
-  }
+  try { localStorage.setItem('theme', mode); } catch (e) {}
   redrawChartsForTheme();
 }
 
 const themeToggleBtn = document.getElementById('themeToggle');
 if (themeToggleBtn) {
   themeToggleBtn.addEventListener('click', () => {
-    const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    setTheme(next, true);
+    setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
   });
-}
-
-// 직접 고른 적이 없으면 시스템 설정을 따라간다
-if (window.matchMedia) {
-  const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
-  const onSysChange = (e) => {
-    let saved = null;
-    try { saved = localStorage.getItem('theme'); } catch (err) {}
-    if (saved) return;
-    setTheme(e.matches ? 'dark' : 'light', false);
-  };
-  if (sysDark.addEventListener) sysDark.addEventListener('change', onSysChange);
-  else if (sysDark.addListener) sysDark.addListener(onSysChange);
 }
 </script>
 </body>
