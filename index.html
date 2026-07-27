@@ -1716,6 +1716,9 @@
       border-radius: 0;
       padding: 0;
       gap: 10px;
+      /* 데스크탑용 900px 캡이 남아 있으면 본문 카드만 가운데로 좁아져서
+         사이드바 섹션(일별·신용공여)과 좌우 폭이 어긋난다 */
+      max-width: none;
     }
     #view-domestic .panel-card {
       background: var(--bg-surface);
@@ -1866,6 +1869,31 @@
     #view-overseas::-webkit-scrollbar,
     #view-mytrades::-webkit-scrollbar {
       display: none;
+    }
+  }
+
+  /* 태블릿·작은 PC (720~1099px): 모바일 세로 스택은 가로 여백이 너무 남는다.
+     달력과 상승 폭을 2컬럼으로 나란히 둔다. */
+  @media (min-width: 720px) and (max-width: 1099px) {
+    #view-domestic .calendar-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      align-items: stretch;   /* 두 카드 높이 동일 */
+    }
+    /* 460px 캡 때문에 칸이 왼쪽에 몰려 있었다. 컬럼 폭을 채우게 한다 */
+    .mu-grid {
+      max-width: none;
+    }
+    /* 12개월이면 다 들어가므로 내부 스크롤을 만들지 않는다. 스크롤 영역이 있으면
+       그 위에서 휠이 페이지로 넘어가지 않아 화면이 안 움직인다. */
+    #view-domestic #monthReturns,
+    #view-domestic #monthReturns .mr-list {
+      display: block;
+      min-height: 0;
+      max-height: none;
+      overflow: visible;
+      overscroll-behavior: auto;
     }
   }
 </style>
