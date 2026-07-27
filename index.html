@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,interactive-widget=resizes-content">
 <title>수상한개미</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
@@ -11,13 +11,13 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
+<meta name="theme-color" content="">
+<meta name="theme-color" content="" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="수상한개미">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="주식왕 한개미">
 <link rel="manifest" href="manifest.json">
-<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
   :root {
@@ -1366,8 +1366,6 @@
        콘텐츠가 그 밑으로 흐른다. 뷰 안에서만 스크롤하면 툴바가 계속 펼쳐진다.
        헤더는 position:fixed 가 아니라 sticky 로 둔다 (fixed 는 iOS 관성
        스크롤 중에 1px 실금이 보였던 원인). */
-    /* 레퍼런스(handonghyun.com)와 동일한 구조: html/body 에 높이·overflow 지정
-       없이 문서가 그냥 흐르고, 헤더만 position:fixed 로 띄운다. */
     html {
       height: auto;
       overflow: visible;
@@ -1387,6 +1385,8 @@
     }
     .app-header {
       justify-content: space-between;
+      /* 홈 화면 앱에서 헤더가 상태바 밑까지 직접 칠하게 해 경계선을 없앤다.
+         일반 Safari 에선 safe-area 가 0 이라 그대로 56px 헤더가 된다. */
       padding: 0 20px;
       height: 56px;
       background: var(--bg-page);
@@ -1479,7 +1479,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      /* 아래 여백·브라우저 크롬과 이어지도록 페이지 배경에 맞춘다 */
+      /* 아래로는 브라우저 하단 크롬(theme-color = --bg-page)이 이어지므로
+         바 배경도 페이지 배경에 맞춰 경계가 안 보이게 한다 */
       background: var(--bg-page);
       border: none;
       border-top: 1px solid var(--border);
@@ -1709,9 +1710,6 @@
       border-radius: 0;
       padding: 0;
       gap: 10px;
-      /* 데스크탑용 900px 캡이 남아 있으면 본문 카드만 가운데로 좁아져서
-         사이드바 섹션(일별·신용공여)과 좌우 폭이 어긋난다 */
-      max-width: none;
     }
     #view-domestic .panel-card {
       background: var(--bg-surface);
@@ -1726,9 +1724,7 @@
     /* 신용공여 카드: 데스크탑용 20px 여백 제거 → 다른 카드와 동일한 10px 간격 */
     #view-domestic .credit-chart-card { margin-top: 0; }
     .sidebar {
-      /* 문서 끝에 배경 여백이 남으면 반투명 툴바 뒤가 비어 어두운 띠로 읽힌다.
-         마지막 카드가 화면 아래끝까지 닿게 하단 여백을 없앤다. */
-      padding: 0 10px 0;
+      padding: 0 10px 14px;
       background: transparent;
       border: none;
     }
@@ -1752,7 +1748,6 @@
     #view-domestic .sidebar-section .section-toggle {
       position: -webkit-sticky;
       position: sticky;
-      /* 스크롤 주체가 문서라 화면 기준으로 붙는다 → 앱 헤더 바로 아래에 park */
       top: 56px;
       z-index: 4;
       align-self: stretch;
@@ -1833,8 +1828,6 @@
     .mytrades-layout {
       padding: 10px 10px 0;
       gap: 10px;
-      /* 마지막 카드가 아래끝까지 이어지도록 */
-      padding-bottom: 0;
     }
     .mytrades-col {
       background: var(--bg-surface);
@@ -1868,31 +1861,6 @@
       display: none;
     }
   }
-
-  /* 태블릿·작은 PC (720~1099px): 모바일 세로 스택은 가로 여백이 너무 남는다.
-     달력과 상승 폭을 2컬럼으로 나란히 둔다. */
-  @media (min-width: 720px) and (max-width: 1099px) {
-    #view-domestic .calendar-row {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      align-items: stretch;   /* 두 카드 높이 동일 */
-    }
-    /* 460px 캡 때문에 칸이 왼쪽에 몰려 있었다. 컬럼 폭을 채우게 한다 */
-    .mu-grid {
-      max-width: none;
-    }
-    /* 12개월이면 다 들어가므로 내부 스크롤을 만들지 않는다. 스크롤 영역이 있으면
-       그 위에서 휠이 페이지로 넘어가지 않아 화면이 안 움직인다. */
-    #view-domestic #monthReturns,
-    #view-domestic #monthReturns .mr-list {
-      display: block;
-      min-height: 0;
-      max-height: none;
-      overflow: visible;
-      overscroll-behavior: auto;
-    }
-  }
 </style>
 <script>
   // 첫 페인트 전에 테마를 확정해 깜빡임 방지.
@@ -1900,7 +1868,8 @@
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+    var mode = saved === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', mode);
   })();
 </script>
 </head>
@@ -4012,8 +3981,7 @@ function showView(view) {
   // 이미 맞으면 건드리지 않는다.
   if (isNarrow() && prev !== view) {
     const top = viewScrollTop[view] || 0;
-    // 위로 되돌리는 것만 허용(툴바를 펼치지 않는 방향). 아래로 밀어내리지 않는다.
-    if (top === 0 && window.scrollY > 0) window.scrollTo(0, 0);
+    if (Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
   }
   // 숨어 있는 동안 창 크기가 바뀌면 캔버스가 옛 너비를 그대로 들고 있어
   // 카드보다 좁게 그려진다. 보이는 순간 다시 재도록 한다.
@@ -4065,13 +4033,10 @@ function restoreViewState() {
   if (state.scenario) selectScenario(state.scenario);
   requestAnimationFrame(() => {
     Object.entries(state.scroll || {}).forEach(([sel, top]) => {
-      if (sel === 'window') {
-        // 모바일에서는 복원을 건너뛴다. 로드 직후의 프로그램적 스크롤이
-        // Safari 하단 툴바를 다시 펼치는 계기가 된다.
-        if (!isNarrow() && top > 0) window.scrollTo(0, top);
-      } else {
+      if (sel === 'window') window.scrollTo(0, top);
+      else {
         const el = document.querySelector(sel);
-        if (el && el.scrollTop !== top) el.scrollTop = top;
+        if (el) el.scrollTop = top;
       }
     });
   });
