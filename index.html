@@ -11,6 +11,7 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
+<meta name="theme-color" content="#17171c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
@@ -1900,7 +1901,10 @@
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
+    var mode = saved === 'light' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', mode);
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', mode === 'dark' ? '#17171c' : '#ffffff');
   })();
 </script>
 </head>
@@ -4115,6 +4119,8 @@ function redrawChartsForTheme() {
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   try { localStorage.setItem('theme', mode); } catch (e) {}
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-page').trim());
   redrawChartsForTheme();
 }
 
