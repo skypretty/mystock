@@ -11,10 +11,9 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
-<meta name="theme-color" content="#17171c">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="수상한개미">
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -1727,7 +1726,9 @@
     /* 신용공여 카드: 데스크탑용 20px 여백 제거 → 다른 카드와 동일한 10px 간격 */
     #view-domestic .credit-chart-card { margin-top: 0; }
     .sidebar {
-      padding: 0 10px 14px;
+      /* 문서 끝에 배경 여백이 남으면 반투명 툴바 뒤가 비어 어두운 띠로 읽힌다.
+         마지막 카드가 화면 아래끝까지 닿게 하단 여백을 없앤다. */
+      padding: 0 10px 0;
       background: transparent;
       border: none;
     }
@@ -1832,6 +1833,8 @@
     .mytrades-layout {
       padding: 10px 10px 0;
       gap: 10px;
+      /* 마지막 카드가 아래끝까지 이어지도록 */
+      padding-bottom: 0;
     }
     .mytrades-col {
       background: var(--bg-surface);
@@ -1897,10 +1900,7 @@
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    var mode = saved === 'light' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', mode);
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', mode === 'dark' ? '#17171c' : '#ffffff');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
   })();
 </script>
 </head>
@@ -4115,8 +4115,6 @@ function redrawChartsForTheme() {
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   try { localStorage.setItem('theme', mode); } catch (e) {}
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-page').trim());
   redrawChartsForTheme();
 }
 
