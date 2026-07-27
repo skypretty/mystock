@@ -2,6 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
+<meta name="color-scheme" content="dark light">
 <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,interactive-widget=resizes-content">
 <title>수상한개미</title>
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
@@ -1745,10 +1746,11 @@
     }
     /* 긴 목록을 읽을 때도 제목과 자세히 보기/간단히 버튼은 카드 상단에
        남긴다. 카드의 끝에 도달하면 sticky도 함께 풀린다. */
+    /* sticky 는 스크롤마다 재배치되며 Safari 하단 바를 계속 되살렸다(검증됨).
+       고정은 IntersectionObserver 가 경계에서 .is-pinned 를 토글하는 fixed 로 한다.
+       앱 헤더(fixed)가 있는 해외 탭이 조용한 것으로 fixed 는 무해함이 확인됐다. */
     #view-domestic .sidebar-section .section-toggle {
-      position: -webkit-sticky;
-      position: sticky;
-      top: 56px;
+      position: static;
       z-index: 4;
       align-self: stretch;
       margin: -20px -16px 16px;
@@ -1787,6 +1789,27 @@
     #view-domestic .sidebar-section .section-toggle.collapsed::after {
       border-radius: 30px;
     }
+    #view-domestic .sidebar-section .section-toggle.is-pinned {
+      position: fixed;
+      top: 56px;
+      margin: 0;
+      z-index: 40;
+      /* 배경은 기존 두 겹(::before 바탕색 / ::after 카드색+위 라운드)을 그대로 쓴다.
+         ::after 의 둥근 모서리로 바탕색이 드러나 고정 중에도 카드 라운드가 유지된다.
+         ::before 가 위로 40px 삐져나가는 부분은 앱 헤더(z-index 100)가 덮는다. */
+      padding-top: 14px;
+      /* IO 는 경계를 넘고 한두 프레임 뒤에 발동해 제목이 튀어 보인다.
+         헤더 밑에서 미끄러져 나오는 짧은 전환으로 그 순간을 감싼다. */
+      animation: pin-in 0.13s ease-out;
+    }
+    @keyframes pin-in {
+      from { transform: translateY(-8px); opacity: 0.3; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    #view-domestic .sidebar-section .section-toggle.is-pinned::after {
+      box-shadow: 0 6px 14px -8px rgba(0, 0, 0, 0.35);
+    }
+
     /* 접었을 때: 헤더가 카드 전체가 되도록 카드의 아래 패딩(20px)까지 상쇄한다.
        상쇄하지 않으면 제목 아래에 빈 띠가 남아 카드가 아래로 늘어져 보인다. */
     #view-domestic .sidebar-section .section-toggle.collapsed {
@@ -2795,6 +2818,7 @@ function renderChart(yearLabel, displayLabel) {
       plugins: [crosshairPlugin],
       options: {
         responsive: true,
+        resizeDelay: 200,   // 바 펼침/접힘의 뷰포트 변화에 스크롤 중 리렌더 방지
         maintainAspectRatio: false,
         // The built-in grow-from-baseline animation reads as a flash of a flat
         // line; the canvas cross-fade handles the transition instead.
@@ -3303,7 +3327,7 @@ function buildCreditChart() {
     ] },
     plugins: [creditCrosshair],
     options: {
-      responsive: true, maintainAspectRatio: false, animation: false,
+      responsive: true, resizeDelay: 200, maintainAspectRatio: false, animation: false,
       interaction: { mode: 'index', intersect: false },
       hover: { mode: 'index', intersect: false },
       plugins: {
@@ -3804,7 +3828,7 @@ function ensureIndexCharts() {
         mk('다우존스', idxDow, cssVar('--s-dow'))
       ] },
       options: {
-        responsive: true, maintainAspectRatio: false, animation: false,
+        responsive: true, resizeDelay: 200, maintainAspectRatio: false, animation: false,
         interaction: { mode: 'index', intersect: false }, hover: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },
@@ -3843,7 +3867,7 @@ let dollarChartInstance = null;
 // 두 차트가 공유하는 옵션 뼈대 (미국 지수 차트와 동일한 톤)
 function trendChartOptions(fmt, scales) {
   return {
-    responsive: true, maintainAspectRatio: false, animation: false,
+    responsive: true, resizeDelay: 200, maintainAspectRatio: false, animation: false,
     interaction: { mode: 'index', intersect: false }, hover: { mode: 'index', intersect: false },
     plugins: {
       legend: { display: false },
@@ -4023,6 +4047,10 @@ function saveViewState() {
   } catch (e) {}
 }
 function restoreViewState() {
+  // 모바일: 복원 없이 항상 국내 주식 ATF(맨 위)에서 시작한다.
+  // 첫 화면에서는 하단 바가 보이지만(모든 사이트 공통), 아래로 내려가는 순간
+  // 접히고 둘러보는 동안 유지된다 — toss.im 과 같은 패턴.
+  if (isNarrow()) return;
   let state;
   try {
     state = JSON.parse(sessionStorage.getItem(VIEW_STATE_KEY) || 'null');
@@ -4033,6 +4061,8 @@ function restoreViewState() {
   if (state.scenario) selectScenario(state.scenario);
   requestAnimationFrame(() => {
     Object.entries(state.scroll || {}).forEach(([sel, top]) => {
+      // 스크롤 복원은 모바일에서도 유지한다. 중간 위치로 착지하면 Safari 가
+      // 하단 바를 접은 채로 두므로, 오히려 바를 숨기는 경로다.
       if (sel === 'window') window.scrollTo(0, top);
       else {
         const el = document.querySelector(sel);
@@ -4056,6 +4086,87 @@ window.addEventListener('pagehide', saveViewState);
 
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
 restoreViewState();
+
+/* 섹션 제목 고정 (모바일): 원본 제목은 문서 흐름에 그대로 두고,
+   fixed 복제본을 경계에서 보이기/숨기기만 한다. 자리채움 삽입/제거가 없어
+   고정/해제 순간에 레이아웃이 전혀 흔들리지 않는다. */
+if (isNarrow() && 'IntersectionObserver' in window) {
+  const HEADER_H = 56;
+  document.querySelectorAll('#view-domestic .sidebar-section').forEach(section => {
+    const toggle = section.querySelector('h2.section-toggle');
+    if (!toggle) return;
+    const toggleH = toggle.offsetHeight || 60;
+
+    const topS = document.createElement('div');
+    const botS = document.createElement('div');
+    topS.style.cssText = botS.style.cssText = 'height:1px;margin-bottom:-1px;visibility:hidden;';
+    section.insertBefore(topS, section.firstChild);
+    section.appendChild(botS);
+
+    const clone = toggle.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.removeAttribute('role');
+    clone.removeAttribute('tabindex');
+    clone.setAttribute('aria-hidden', 'true');
+    clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+    clone.style.display = 'none';
+    section.appendChild(clone);
+
+    const syncClone = () => {
+      clone.innerHTML = toggle.innerHTML;
+      clone.querySelectorAll('[id]').forEach(el => el.removeAttribute('id'));
+      clone.className = toggle.className + ' is-pinned';
+    };
+    // 복제본 클릭은 원본으로 위임한다 ('자세히 보기' 포함)
+    clone.addEventListener('click', e => {
+      const more = e.target.closest('.list-more');
+      const origMore = toggle.querySelector('.list-more');
+      if (more && origMore) origMore.click();
+      else toggle.click();
+      requestAnimationFrame(() => { syncClone(); evalPin(true); });
+    });
+    // 원본 조작(접기/자세히 보기) 후에도 복제본 내용을 맞춘다
+    toggle.addEventListener('click', () => requestAnimationFrame(() => { syncClone(); evalPin(true); }));
+
+    let pinned = false, topAbove = false, botAbove = false;
+    const setPin = on => {
+      if (on === pinned) return;
+      pinned = on;
+      if (on) {
+        syncClone();
+        const r = section.getBoundingClientRect();
+        clone.style.left = r.left + 'px';
+        clone.style.width = r.width + 'px';
+        clone.style.display = '';
+      } else {
+        clone.style.display = 'none';
+      }
+    };
+    const evalPin = (force) => {
+      const want = topAbove && !botAbove && !toggle.classList.contains('collapsed');
+      if (force && want === pinned) { pinned = !want; }
+      setPin(want);
+    };
+
+    new IntersectionObserver(([e]) => {
+      topAbove = !e.isIntersecting && e.boundingClientRect.top < HEADER_H;
+      evalPin();
+    }, { rootMargin: `-${HEADER_H}px 0px 0px 0px` }).observe(topS);
+
+    new IntersectionObserver(([e]) => {
+      botAbove = !e.isIntersecting && e.boundingClientRect.top < HEADER_H + toggleH;
+      evalPin();
+    }, { rootMargin: `-${HEADER_H + toggleH}px 0px 0px 0px` }).observe(botS);
+  });
+
+  addEventListener('resize', () => {
+    document.querySelectorAll('#view-domestic .section-toggle.is-pinned').forEach(t => {
+      const r = t.closest('.sidebar-section').getBoundingClientRect();
+      t.style.left = r.left + 'px';
+      t.style.width = r.width + 'px';
+    });
+  });
+}
 
 /* ===== 다크 / 라이트 테마 ===== */
 function redrawChartsForTheme() {
