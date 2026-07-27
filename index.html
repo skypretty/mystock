@@ -1911,6 +1911,43 @@
       overflow: visible;
       overscroll-behavior: auto;
     }
+    /* 투자자 요약(개인/외국인/기관/연기금): 이 폭이면 2×2 대신 한 줄 4칸.
+       라벨 위 / 값 아래 쌓임은 유지하고 패딩만 살짝 줄인다. */
+    .cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+    .card {
+      padding: 12px 14px;
+    }
+    /* 2×2 용 구분선 규칙을 한 줄 기준으로 재구성: 첫 칸 빼고 전부 왼쪽 세로선 */
+    .card:nth-child(n + 3)::after {
+      display: none;
+    }
+    .card:nth-child(2n)::before {
+      content: none;
+    }
+    .card + .card::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      border-left: 1px solid var(--border);
+    }
+    /* 일별 데이터 / 신용공여: 이 폭이면 나란히 2컬럼.
+       폰(≈390px)에서도 쓰는 컬럼 구성이라 절반 폭(≈540px)이면 넉넉하다. */
+    #view-domestic .sidebar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      /* 본문 카드 간격(.wrap gap)·좌우 여백과 같은 10px 리듬으로 통일 */
+      gap: 10px;
+      align-items: start;
+      padding: 10px 10px 14px;
+    }
+    #view-domestic .sidebar > .sidebar-section {
+      margin: 0;
+    }
   }
 </style>
 <script>
