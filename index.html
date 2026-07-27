@@ -11,12 +11,6 @@
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://skypretty.github.io/mystock/">
 <meta property="og:image" content="https://skypretty.github.io/mystock/apple-touch-icon.png">
-<meta name="theme-color" content="#17171c">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="주식왕 한개미">
-<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
@@ -1367,22 +1361,23 @@
        콘텐츠가 그 밑으로 흐른다. 뷰 안에서만 스크롤하면 툴바가 계속 펼쳐진다.
        헤더는 position:fixed 가 아니라 sticky 로 둔다 (fixed 는 iOS 관성
        스크롤 중에 1px 실금이 보였던 원인). */
+    /* 레퍼런스(handonghyun.com)와 동일한 구조: html/body 에 높이·overflow 지정
+       없이 문서가 그냥 흐르고, 헤더만 position:fixed 로 띄운다. */
     html {
       height: auto;
       overflow: visible;
     }
     body {
-      min-height: 100%;
       max-width: 100%;
-      display: flex;
-      flex-direction: column;
+      display: block;
       overflow: visible;
+      padding-top: 56px;   /* fixed 헤더 자리 */
     }
     .app-header {
-      flex: 0 0 auto;
-      position: -webkit-sticky;
-      position: sticky;
+      position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
       z-index: 100;
     }
     .app-header {
@@ -1462,12 +1457,6 @@
     }
     .placeholder-view,
     #view-domestic {
-      flex: 0 0 auto;
-      /* 내용이 한 화면보다 짧으면 문서가 스크롤되지 않아 Safari 가 하단 툴바를
-         접지 않는다. 섹션을 다 접었을 때처럼 짧은 화면에서도 동작이 같도록
-         항상 스크롤할 여지를 조금 남긴다. */
-      min-height: calc(100vh + 40px);
-      min-height: calc(100svh + 40px);
       height: auto;
       /* clip 은 스크롤 컨테이너를 만들지 않으므로 세로 스크롤은 문서에 남는다
          (overflow-x: hidden 은 세로도 auto 로 만들어 버린다) */
@@ -1476,7 +1465,6 @@
     }
     .mytrades-total.mobile-bar {
       display: none;
-      flex: 0 0 auto;
       position: -webkit-sticky;
       position: sticky;
       bottom: 0;
@@ -1903,10 +1891,7 @@
   (function () {
     var saved = null;
     try { saved = localStorage.getItem('theme'); } catch (e) {}
-    var mode = saved === 'light' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', mode);
-    var meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', mode === 'dark' ? '#17171c' : '#ffffff');
+    document.documentElement.setAttribute('data-theme', saved === 'light' ? 'light' : 'dark');
   })();
 </script>
 </head>
@@ -4018,7 +4003,8 @@ function showView(view) {
   // 이미 맞으면 건드리지 않는다.
   if (isNarrow() && prev !== view) {
     const top = viewScrollTop[view] || 0;
-    if (Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
+    // 위로 되돌리는 것만 허용(툴바를 펼치지 않는 방향). 아래로 밀어내리지 않는다.
+    if (top === 0 && window.scrollY > 0) window.scrollTo(0, 0);
   }
   // 숨어 있는 동안 창 크기가 바뀌면 캔버스가 옛 너비를 그대로 들고 있어
   // 카드보다 좁게 그려진다. 보이는 순간 다시 재도록 한다.
@@ -4071,9 +4057,9 @@ function restoreViewState() {
   requestAnimationFrame(() => {
     Object.entries(state.scroll || {}).forEach(([sel, top]) => {
       if (sel === 'window') {
-        // 로드 직후의 프로그램적 스크롤은 Safari 가 하단 툴바를 펼치는 계기가
-        // 된다. 되돌릴 위치가 없으면(맨 위) 아예 건드리지 않는다.
-        if (top > 0 && Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
+        // 모바일에서는 복원을 건너뛴다. 로드 직후의 프로그램적 스크롤이
+        // Safari 하단 툴바를 다시 펼치는 계기가 된다.
+        if (!isNarrow() && top > 0) window.scrollTo(0, top);
       } else {
         const el = document.querySelector(sel);
         if (el && el.scrollTop !== top) el.scrollTop = top;
@@ -4120,9 +4106,6 @@ function redrawChartsForTheme() {
 function setTheme(mode) {
   document.documentElement.setAttribute('data-theme', mode);
   try { localStorage.setItem('theme', mode); } catch (e) {}
-  // 브라우저 크롬 색도 테마를 따라가게 (툴바 접힘 동작과는 무관하다)
-  const meta = document.querySelector('meta[name="theme-color"]');
-  if (meta) meta.setAttribute('content', getComputedStyle(document.documentElement).getPropertyValue('--bg-page').trim());
   redrawChartsForTheme();
 }
 
