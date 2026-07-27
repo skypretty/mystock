@@ -16,6 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="주식왕 한개미">
+<link rel="manifest" href="manifest.json">
 <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css" />
 <style>
   :root {
@@ -124,6 +125,12 @@
   html {
     background: var(--bg-page);
   }
+  /* iOS: 문서 위/아래 고무줄 바운스가 Safari 하단 툴바를 다시 펼치는 계기가
+     된다. 바운스를 꺼서 접힌 상태가 유지되게 한다. */
+  html,
+  body {
+    overscroll-behavior-y: none;
+  }
   body {
     font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
     background: var(--bg-page);
@@ -148,15 +155,18 @@
     border-bottom: 1px solid var(--border);
     background: var(--bg-surface);
   }
+  /* 모바일과 같은 배치: 왼쪽 탭 / 오른쪽에 테마 토글 + 프로필 */
   .app-logo {
-    width: 30px;
-    height: 30px;
+    order: 3;
+    width: 34px;
+    height: 34px;
     border-radius: 50%;
     object-fit: cover;
-    margin-right: 12px;
+    margin-left: 10px;
     flex-shrink: 0;
   }
   .app-nav {
+    order: 1;
     display: flex;
     gap: 18px;
   }
@@ -179,7 +189,9 @@
     opacity: 1;
     font-weight: 700;
   }
+  /* 프로필과 같은 지름의 원형 버튼 (모바일과 동일) */
   .theme-toggle {
+    order: 2;
     margin-left: auto;
     flex-shrink: 0;
     width: 34px;
@@ -188,14 +200,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--bg-surface);
-    color: var(--text-3);
+    border: none;
+    border-radius: 50%;
+    background: var(--bg-muted);
+    color: var(--text-2);
     cursor: pointer;
   }
   .theme-toggle:hover {
-    background: var(--bg-hover);
+    background: var(--bg-active);
     color: var(--text-1);
   }
   .theme-toggle svg {
@@ -1349,19 +1361,27 @@
     .month-pnl {
       flex: 0 0 auto;
     }
+    /* 문서 자체가 스크롤돼야 iOS Safari 가 하단 툴바를 반투명하게 접고
+       콘텐츠가 그 밑으로 흐른다. 뷰 안에서만 스크롤하면 툴바가 계속 펼쳐진다.
+       헤더는 position:fixed 가 아니라 sticky 로 둔다 (fixed 는 iOS 관성
+       스크롤 중에 1px 실금이 보였던 원인). */
     html {
-      height: 100%;
-      overflow: hidden;
+      height: auto;
+      overflow: visible;
     }
     body {
-      height: 100%;
+      min-height: 100%;
       max-width: 100%;
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      overflow: visible;
     }
     .app-header {
       flex: 0 0 auto;
+      position: -webkit-sticky;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     .app-header {
       justify-content: space-between;
@@ -1383,18 +1403,14 @@
       order: 1;
       gap: 20px;
     }
+    /* 프로필 사진과 같은 지름의 원형 버튼 */
     .theme-toggle {
-      order: 2;
-      margin-left: auto;
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: none;
-      color: var(--text-4);
+      width: 38px;
+      height: 38px;
     }
     .theme-toggle:hover {
-      background: none;
-      color: var(--text-4);
+      background: var(--bg-muted);
+      color: var(--text-2);
     }
     .theme-toggle svg {
       width: 19px;
@@ -1446,16 +1462,24 @@
     }
     .placeholder-view,
     #view-domestic {
-      flex: 1 1 auto;
-      min-height: 0;
+      flex: 0 0 auto;
+      /* 내용이 한 화면보다 짧으면 문서가 스크롤되지 않아 Safari 가 하단 툴바를
+         접지 않는다. 섹션을 다 접었을 때처럼 짧은 화면에서도 동작이 같도록
+         항상 스크롤할 여지를 조금 남긴다. */
+      min-height: calc(100dvh + 40px);
       height: auto;
-      overflow-y: auto;
-      overflow-x: hidden;
-      -webkit-overflow-scrolling: touch;
+      /* clip 은 스크롤 컨테이너를 만들지 않으므로 세로 스크롤은 문서에 남는다
+         (overflow-x: hidden 은 세로도 auto 로 만들어 버린다) */
+      overflow: visible;
+      overflow-x: clip;
     }
     .mytrades-total.mobile-bar {
       display: none;
       flex: 0 0 auto;
+      position: -webkit-sticky;
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
       width: 100%;
       margin: 0;
       align-items: center;
@@ -1467,10 +1491,19 @@
       border: none;
       border-top: 1px solid var(--border);
       border-radius: 0;
-      padding: 26px 26px calc(34px + env(safe-area-inset-bottom));
+      padding: 26px 26px 34px;
     }
     body.view-mytrades .mytrades-total.mobile-bar {
       display: flex;
+    }
+    @media (display-mode: standalone) {
+      .mytrades-total.mobile-bar {
+        padding-bottom: calc(34px + env(safe-area-inset-bottom));
+      }
+    }
+    /* 바가 화면 하단에 붙어 있으므로 마지막 내용이 그 밑에 깔리지 않게 비워준다 */
+    body.view-mytrades #view-mytrades {
+      padding-bottom: calc(92px + env(safe-area-inset-bottom));
     }
     .mytrades-total .label {
       margin: 0;
@@ -1708,7 +1741,10 @@
       margin: 10px 0 0;
       border: none;
       position: relative;
-      overflow: visible;
+      /* sticky 헤더의 둥근 모서리로 뒤의 내용이 비쳐 좌우에 밝은 조각이 보였다.
+         clip 은 스크롤 컨테이너를 만들지 않으므로(hidden 과 다름) 헤더 sticky 를
+         유지한 채 카드의 라운드 모양대로 내용을 잘라낸다. */
+      overflow: clip;
     }
     .sidebar-section + .sidebar-section {
       margin-top: 10px;
@@ -1718,13 +1754,45 @@
     #view-domestic .sidebar-section .section-toggle {
       position: -webkit-sticky;
       position: sticky;
-      top: 0;
+      /* 스크롤 주체가 문서라 화면 기준으로 붙는다 → 앱 헤더 바로 아래에 park */
+      top: calc(56px + env(safe-area-inset-top));
       z-index: 4;
       align-self: stretch;
       margin: -20px -16px 16px;
       padding: 20px 16px 12px;
       background: var(--bg-surface);
       border-radius: 30px 30px 0 0;
+    }
+    /* 스크롤로 헤더가 상단에 고정됐을 때도 카드 위쪽 라운드가 살아 있어야 한다.
+       헤더 배경을 두 겹의 의사요소로 그린다.
+         ::before  헤더 위쪽까지 덮는 바탕색 판 (관성 스크롤 중 비치는 틈도 함께 가림)
+         ::after   그 위에 얹히는 카드색 판, 위 모서리만 라운드
+       ::after 의 둥근 모서리로 ::before 의 바탕색이 드러나 라운드가 보인다. */
+    #view-domestic .sidebar-section .section-toggle {
+      background: transparent;
+    }
+    #view-domestic .sidebar-section .section-toggle::before,
+    #view-domestic .sidebar-section .section-toggle::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+    #view-domestic .sidebar-section .section-toggle::before {
+      top: -40px;
+      bottom: 0;
+      background: var(--bg-canvas);
+    }
+    #view-domestic .sidebar-section .section-toggle::after {
+      top: 0;
+      bottom: 0;
+      background: var(--bg-surface);
+      border-radius: 30px 30px 0 0;
+    }
+    #view-domestic .sidebar-section .section-toggle.collapsed::after {
+      border-radius: 30px;
     }
     /* 접었을 때: 헤더가 카드 전체가 되도록 카드의 아래 패딩(20px)까지 상쇄한다.
        상쇄하지 않으면 제목 아래에 빈 띠가 남아 카드가 아래로 늘어져 보인다. */
@@ -1784,8 +1852,15 @@
     #view-overseas,
     #view-mytrades {
       scrollbar-width: none;
-      /* 홈 화면 앱: 마지막 내용이 홈 인디케이터에 가리지 않게 */
-      padding-bottom: env(safe-area-inset-bottom);
+    }
+    /* 홈 인디케이터 여백은 홈 화면 앱일 때만. 브라우저에서는 그 영역을 이미
+       Safari 툴바가 덮고 있어서, 넣으면 툴바 위에 빈 띠만 하나 더 생긴다. */
+    @media (display-mode: standalone) {
+      #view-domestic,
+      #view-overseas,
+      #view-mytrades {
+        padding-bottom: env(safe-area-inset-bottom);
+      }
     }
     #view-domestic::-webkit-scrollbar,
     #view-overseas::-webkit-scrollbar,
@@ -3548,13 +3623,11 @@ function snapshotScroll() {
 }
 function restoreScrollKeepingSnapshot() {
   if (!pwScrollSnapshot) return;
-  const { el, top } = pwScrollSnapshot;
+  const { el, top, win } = pwScrollSnapshot;
   if (el) el.scrollTop = top;
-  // iOS scrolls the page itself to reveal a focused input, which drags the
-  // fixed header out of place; the shell never scrolls, so force it back.
-  window.scrollTo(0, 0);
-  document.body.scrollTop = 0;
-  document.documentElement.scrollTop = 0;
+  // iOS 는 포커스된 입력을 보이려고 페이지를 밀어올린다. 모바일에서는 문서가
+  // 스크롤 주체이므로 0 이 아니라 열기 직전 위치로 되돌린다.
+  window.scrollTo(0, win || 0);
 }
 function restoreScroll() {
   restoreScrollKeepingSnapshot();
@@ -3897,7 +3970,14 @@ function buildGapChart() {
   });
 }
 
+// 모바일은 뷰 안이 아니라 문서가 스크롤되므로 탭마다 위치를 따로 들고 있어야
+// 이전(뷰별 scrollTop)과 같은 감각이 유지된다. PC 는 뷰가 각자 스크롤하므로 무관.
+const viewScrollTop = {};
+
 function showView(view) {
+  const prev = currentView();
+  if (isNarrow() && prev && prev !== view) viewScrollTop[prev] = window.scrollY;
+
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.view === view);
   });
@@ -3905,6 +3985,22 @@ function showView(view) {
   Object.entries(views).forEach(([key, el]) => {
     el.style.display = key === view ? 'flex' : 'none';
   });
+
+  // 프로그램적 스크롤은 Safari 가 툴바를 다시 펼치는 계기가 되므로, 위치가
+  // 이미 맞으면 건드리지 않는다.
+  if (isNarrow() && prev !== view) {
+    const top = viewScrollTop[view] || 0;
+    if (Math.abs(window.scrollY - top) > 1) window.scrollTo(0, top);
+  }
+  // 숨어 있는 동안 창 크기가 바뀌면 캔버스가 옛 너비를 그대로 들고 있어
+  // 카드보다 좁게 그려진다. 보이는 순간 다시 재도록 한다.
+  requestAnimationFrame(resizeAllCharts);
+}
+
+function resizeAllCharts() {
+  [chartInstance, creditChartInstance, indexChartInstance,
+   rateChartInstance, dollarChartInstance, gapChartInstance]
+    .forEach(c => { if (c) c.resize(); });
 }
 
 document.querySelectorAll('.nav-btn').forEach(btn => {
@@ -3928,9 +4024,10 @@ function saveViewState() {
     if (el && el.scrollTop > 0) scroll[sel] = el.scrollTop;
   });
   if (window.scrollY > 0) scroll.window = window.scrollY;
+  if (isNarrow()) viewScrollTop[currentView()] = window.scrollY;
   try {
     sessionStorage.setItem(VIEW_STATE_KEY, JSON.stringify({
-      view: currentView(), scenario: currentScenario(), scroll
+      view: currentView(), scenario: currentScenario(), scroll, viewScrollTop
     }));
   } catch (e) {}
 }
@@ -3940,6 +4037,7 @@ function restoreViewState() {
     state = JSON.parse(sessionStorage.getItem(VIEW_STATE_KEY) || 'null');
   } catch (e) {}
   if (!state) return;
+  Object.assign(viewScrollTop, state.viewScrollTop || {});
   if (state.view && views[state.view]) showView(state.view);
   if (state.scenario) selectScenario(state.scenario);
   requestAnimationFrame(() => {
