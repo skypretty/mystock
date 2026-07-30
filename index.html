@@ -905,6 +905,9 @@
     }
     /* 선택 영역 여유 있게 + 지표 사이 세로 컬럼 디바이더 */
     #view-domestic .year-card { padding: 22px 14px; margin-bottom: 0; border-radius: 16px; }
+    /* 카드끼리 딱 붙으면 선택/호버 배경이 한 덩어리로 보인다. 살짝만 띄운다.
+       margin-bottom 대신 인접 형제로 줘서 마지막 카드 아래에는 여백이 안 남게. */
+    #view-domestic .year-card + .year-card { margin-top: 6px; }
     #view-domestic .year-card .year-stats { gap: 0; }
     #view-domestic .year-card .stat {
       padding: 0 14px;
