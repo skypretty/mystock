@@ -1073,6 +1073,16 @@
     gap: 6px;
   }
   .mu-titles .mu-title { flex: 0 0 auto; }
+  /* 제목 + 지수명을 한 줄 베이스라인으로 묶는 래퍼.
+     사이드바 섹션 헤더(누적/일별)와 차트 카드 제목에서 같이 쓴다.
+     사이드바 섹션은 모바일에서 .wrap 아래로 옮겨지므로 스코프 없이 둔다. */
+  .sec-title,
+  .title-block h1 {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    min-width: 0;
+  }
   .mu-sub {
     font-size: 11px;
     font-weight: 500;
@@ -2245,12 +2255,12 @@
 
   <aside class="sidebar" id="sidebarPanel">
     <div class="sidebar-section">
-      <h2 class="section-toggle" id="yearlyToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="yearlySummary">누적 데이터 <span class="arrow"></span></h2>
+      <h2 class="section-toggle" id="yearlyToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="yearlySummary"><span class="sec-title">누적 데이터<span class="mu-sub">코스피</span></span><span class="arrow"></span></h2>
       <div id="yearlySummary" class="collapsible-content"></div>
     </div>
 
     <div class="sidebar-section day-section">
-      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection">일별 데이터 <span class="arrow"></span><button type="button" class="list-more" id="dayListMore">자세히 보기</button></h2>
+      <h2 class="section-toggle" id="dayListToggle" role="button" tabindex="0" aria-expanded="true" aria-controls="dayListSection"><span class="sec-title">일별 데이터<span class="mu-sub">코스피</span></span><span class="arrow"></span><button type="button" class="list-more" id="dayListMore">자세히 보기</button></h2>
       <div id="dayListSection" class="collapsible-content">
         <div class="day-head">
           <div class="day-tabs">
@@ -2281,7 +2291,7 @@
       <section class="panel-card">
         <div class="title-row">
           <div class="title-block">
-            <h1>투자자별 누적 순매매 동향</h1>
+            <h1>투자자별 누적 순매매 동향<span class="mu-sub">코스피</span></h1>
             <p class="subtitle" id="pageSubtitle">2026.01.02 ~ 2026.07.30 (KOSPI, 단위: 조원)</p>
           </div>
           <div class="period-buttons" id="periodButtons"></div>
